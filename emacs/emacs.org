@@ -137,6 +137,14 @@
    #+END_SRC
 
 * Org Mode
+** LaTeX hooks
+   #+name: org-config
+   #+begin_src emacs-lisp
+   (defun vct-org-hooks ()
+       (plist-put org-format-latex-options :scale 1.4)
+    )
+   (add-hook 'org-mode-hook 'vct-org-hooks)
+   #+end_src
 ** Org-Babel
 *** Fontifying source blocks
 

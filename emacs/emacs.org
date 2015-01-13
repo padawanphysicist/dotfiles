@@ -193,6 +193,16 @@
    #+END_SRC
 
 * Org Mode
+** General Configuration
+*** Clean view of files
+    #+name: org-config
+    #+begin_src emacs-lisp
+    (defun vct-org-visual-line ()
+      (setq visual-line-fringe-indicators '(nil right-curly-arrow))
+      (turn-on-visual-line-mode)
+    )
+    (add-hook 'org-mode-hook 'vct-org-visual-line)
+    #+end_src
 ** LaTeX hooks
    #+name: org-config
    #+begin_src emacs-lisp

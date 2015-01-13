@@ -30,6 +30,17 @@
   (setq auto-save-file-name-transforms
         `((".*" ,temporary-file-directory t)))
   #+end_src
+* General Configuration
+  Here I store configuration common to all files
+** Save cursor position across sessions
+   Next time you open a file, the cursor will be at the position you last opened it.
+   #+name: general-configuration
+   #+begin_src emacs-lisp
+   (require 'saveplace)
+   (setq-default save-place t)
+   ;(setq save-place-file "~/.emacs.d/saveplace") ; use standard emacs dir
+   ;(setq-default save-place t)
+   #+end_src
 * Package Management
 
   For installing packages using ELPA, MELPA, Marmalade.
@@ -212,8 +223,8 @@
     ;;;; information.
 
     <<startup>>
-    <<general>>
     <<package-management>>
+    <<general-configuration>>
     <<environment>>
     <<tools>>
     <<customize-config>>

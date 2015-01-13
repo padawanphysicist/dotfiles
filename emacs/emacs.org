@@ -16,31 +16,36 @@
   #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-message t)
   #+END_SRC
+
+* General configuration
+  Here I store configuration common to all files.
 ** CUA mode
-  #+NAME: startup
-  #+BEGIN_SRC emacs-lisp
-  (cua-mode t)
-  #+END_SRC
+   #+NAME: general-configuration
+   #+BEGIN_SRC emacs-lisp
+   (cua-mode t)
+   #+END_SRC
 ** Backup files
-  #+name: startup
-  #+begin_src emacs-lisp
-  ;; store all backup and autosave files in the tmp dir
-  (setq backup-directory-alist
-        `((".*" . ,temporary-file-directory)))
-  (setq auto-save-file-name-transforms
-        `((".*" ,temporary-file-directory t)))
-  #+end_src
-* General Configuration
-  Here I store configuration common to all files
+   Store all backup and autosave files in the tmp dir
+   #+name: general-configuration
+   #+begin_src emacs-lisp
+   (setq backup-directory-alist
+     `((".*" . ,temporary-file-directory)))
+   (setq auto-save-file-name-transforms
+     `((".*" ,temporary-file-directory t)))
+   #+end_src
 ** Save cursor position across sessions
    Next time you open a file, the cursor will be at the position you last opened it.
    #+name: general-configuration
    #+begin_src emacs-lisp
    (require 'saveplace)
    (setq-default save-place t)
-   ;(setq save-place-file "~/.emacs.d/saveplace") ; use standard emacs dir
-   ;(setq-default save-place t)
    #+end_src
+** Change "yes or no" to "y or n"
+   Thanks to [[http://pages.sachachua.com/.emacs.d/Sacha.html#unnumbered-16][Sacha Chua]] for this =)
+   #+NAME: general-configuration
+   #+BEGIN_SRC emacs-lisp
+   (fset 'yes-or-no-p 'y-or-n-p)
+   #+END_SRC
 * Package Management
 
   For installing packages using ELPA, MELPA, Marmalade.

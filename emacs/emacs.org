@@ -222,6 +222,13 @@
     (add-hook 'org-mode-hook 'vct-org-visual-line)
     #+end_src
 ** LaTeX hooks
+*** Use CDLaTeX to enter math
+   #+name: org-config
+   #+begin_src emacs-lisp
+   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+   #+end_src
+
+*** Scale LaTeX previews
    #+name: org-config
    #+begin_src emacs-lisp
    (defun vct-org-hooks ()

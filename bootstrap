@@ -3,6 +3,8 @@
 # bootstrap files to its places.
 #
 
+source script/tangle
+
 DOTFILES_ROOT="`pwd`"
 
 set -e
@@ -27,7 +29,7 @@ tangle_orgfiles () {
     # Now we can tangle only the correct list
     for file in ${orgfiles[@]}
     do
-        emacs $file --batch --eval="(org-babel-tangle)"
+        emacs-tangle ${file}
     done
 }
 

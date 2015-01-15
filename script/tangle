@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# tangle and org-mode file using emacs
+#
+function emacs-tangle () {
+  file=$1
+  emacs ${file} --batch --eval="(org-babel-tangle)"
+}

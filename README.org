@@ -2,14 +2,15 @@
 
 * dotfiles
 
-  This is my dotfiles repo. I hope you find something useful here!
+This is my dotfiles repo. I hope you find something useful here!
 
 ** Literate programming
 
-   [[file:img/org-mode-logo.png]]
-   Literate programming is a concept in which you write prose and embed in it source code. It has the benefit of being written for humans in the first place. I haven't spent enough time with it to know if this is true, but I suspect it also makes updating the documentation with a given change a little easier as well. 
+[[file:img/org-mode-logo.png]]
 
-   This is another attempt of mine for creating a readable and maintainable dotfiles configuration. I'm hopeful that using Org-Babel and a literate programming style will help tame the (dis)organization.
+Literate programming is a concept in which you write prose and embed in it source code. It has the benefit of being written for humans in the first place. I haven't spent enough time with it to know if this is true, but I suspect it also makes updating the documentation with a given change a little easier as well.
+
+This is another attempt of mine for creating a readable and maintainable dotfiles configuration. I'm hopeful that using Org-Babel and a literate programming style will help tame the (dis)organization.
 
 ** Instructions
 Clone the repository in a folder of your preference (here I will clone as =.dotfiles=), either from [[https://github.com][GitHub]],

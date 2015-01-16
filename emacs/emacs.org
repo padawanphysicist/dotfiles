@@ -237,6 +237,32 @@
     )
    (add-hook 'org-mode-hook 'vct-org-hooks)
    #+end_src
+*** Font colors for LaTeX environments
+    I find really useful to identify by eye LaTeX blocks.
+    #+name: org-config
+    #+begin_src emacs-lisp
+    (defun vct-org-color-hooks ()
+      (font-lock-add-keywords 'org-mode
+        '(
+           (
+             "\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+             (1 'font-lock-keyword-face)
+             (2 'font-lock-function-name-face)
+           )
+         )
+      )   
+      (font-lock-add-keywords 'org-mode
+        '(
+           (
+             "\\(\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+             (1 'font-lock-keyword-face)
+             (2 'font-lock-constant-face)
+           )
+         )
+       )
+    )
+    (add-hook 'org-mode-hook 'vct-org-color-hooks)
+    #+end_src
 ** Org-Babel
 *** Fontifying source blocks
 

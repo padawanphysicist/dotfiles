@@ -35,6 +35,8 @@ First we add a small function for clean PATH inclusion:
 
 and then we include some directories:
 
+    add_to_path "${HOME}/.cabal/bin" 
+    add_to_path "${HOME}/.local/bin" 
     add_to_path "${HOME}/opt/nodejs/bin"
     add_to_path "${HOME}/opt/julia"
 

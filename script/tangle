@@ -1,8 +1,0 @@
-#!/bin/bash
-#
-# tangle markdown literate-programming files
-#
-function tangle () {
-  file=$1
-  ./mdlp.awk ${file} > ${file%.md}.symlink
-}

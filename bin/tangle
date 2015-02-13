@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# tangle markdown literate-programming files
+#
+# awk snippet taken from
+#
+# https://gist.github.com/trauber/4955706
+
+function tangle () {
+    FILE=$1
+    gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${FILE} > ${FILE%.md}.symlink
+}

@@ -3,7 +3,7 @@
 # bootstrap files to its places.
 #
 
-source script/tangle
+source bin/tangle
 
 DOTFILES_ROOT="`pwd`"
 

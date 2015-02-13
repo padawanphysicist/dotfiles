@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# tangle and org-mode file using emacs
+# tangle markdown literate-programming files
 #
-function emacs-tangle () {
+function tangle () {
   file=$1
-  emacs ${file} --batch --eval="(org-babel-tangle)"
+  ./mdlp.awk ${file} > ${file%.md}.symlink
 }

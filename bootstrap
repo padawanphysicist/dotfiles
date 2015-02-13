@@ -12,13 +12,13 @@ set -e
 echo ''
 
 tangle_orgfiles () {
-    printf "\033[0;33mtangling org-mode files\033[0m \n"
+    printf "\033[0;33mtangling markdown files\033[0m \n"
 
     # Store path from all org files in a bash array
-    orgfiles=( $(find $DOTFILES_ROOT -maxdepth 2 -name '*.org') )
+    orgfiles=( $(find $DOTFILES_ROOT -maxdepth 2 -name '*.md') )
 
     # Files which must not be tangled
-    orgignore=(${DOTFILES_ROOT}/README.org)
+    orgignore=(${DOTFILES_ROOT}/README.md)
 
     # Remove files to be ignored from org-files list
     for delete in ${orgignore[@]}
@@ -29,7 +29,7 @@ tangle_orgfiles () {
     # Now we can tangle only the correct list
     for file in ${orgfiles[@]}
     do
-        emacs-tangle ${file}
+        tangle ${file}
     done
 }
 

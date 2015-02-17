@@ -6,7 +6,21 @@
 #
 # https://gist.github.com/trauber/4955706
 
+
 function tangle () {
-    FILE=$1
-    gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${FILE} > ${FILE%.md}.symlink
+    MDFILE=$1
+
+    # Get line containing tangle filename
+    FOUT=`gawk 'match($0, /^\[\:tangle (.*)\]/, a) {print a[1]}' ${MDFILE}`
+
+    echo $FOUT
+
+    echo ""
+    printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
+
+    # tangle file
+    gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > ${FOUT}
 }
+
+
+tangle spacemacs.md

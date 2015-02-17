@@ -22,5 +22,3 @@ function tangle () {
     gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > ${FOUT}
 }
 
-
-tangle spacemacs.md

@@ -13,12 +13,14 @@ function tangle () {
     # Get line containing tangle filename
     FOUT=`gawk 'match($0, /^\[\:tangle (.*)\]/, a) {print a[1]}' ${MDFILE}`
 
-    echo $FOUT
+    if [ -z "${FOUT}" ] 
+    then
+        echo "No tangle for ${MDFILE}"
+    else
+        printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
 
-    echo ""
-    printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
-
-    # tangle file
-    gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > ${FOUT}
+        # tangle file
+        gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > ${FOUT}
+    fi
 }
 

@@ -1,5 +1,7 @@
-# tmux.conf
+# Tmux
 Configuration for [tmux](http://tmux.sourceforge.net/).
+
+[:tangle tmux.conf.symlink]
 
 ## Changing  prefix
 The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. Following GNU Screen prefix, we change the default prefix to `C-a`.

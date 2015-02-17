@@ -1,4 +1,6 @@
-# Vim configuration
+# Vim
+[:tangle vimrc.symlink]
+
 Because I was a vimmer sometime ago, and I keep using it when I forget to change the appropiate environment variable.
 
 # Environment

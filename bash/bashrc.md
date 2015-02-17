@@ -1,5 +1,8 @@
-# bashrc
+# Bash
+
 Configuration for [bash](http://www.gnu.org/software/bash/).
+
+[:tangle bashrc.symlink]
 
 ## Configuration
 If not running interactively, don't do anything
@@ -11,7 +14,6 @@ esac
 ```
 
 ## Path
-
 First I define some custom folders:
 
 - `0.sandbox`: Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from `0.sandbox` to `1.docs`. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.    
@@ -60,6 +62,7 @@ add_to_path "${OPT}/julia"
 alias ls='ls --color=auto'
 eval `dircolors /home/santos/.dircolors-solarized/dircolors.256dark`
 ```
+
 ### Bash colors
 ```sh
 # Reset
@@ -143,6 +146,7 @@ PathFull="\W"
 NewLine="\n"
 Jobs="\j"
 ```
+
 ### Simple archiver
 ```sh
 alias ae='aunpack' # Must have atools installed!
@@ -152,6 +156,7 @@ alias ae='aunpack' # Must have atools installed!
 ```sh
 alias glog="git log --graph --oneline --decorate --date-order --color --boundary"
 ```
+
 ### Prompt
 #### Git in bash
 ##### Command completion
@@ -186,6 +191,7 @@ else \
     echo " '$Yellow$PathShort$Color_Off' >> "; \
 fi)'
 ```
+
 ## Misc
 ### Colored `man`
 ```sh
@@ -201,4 +207,3 @@ man() {
             man "$@"
 }
 ```
-

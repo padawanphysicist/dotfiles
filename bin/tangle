@@ -9,6 +9,7 @@
 
 function tangle () {
     MDFILE=$1
+    FULLPATH=`dirname $(readlink -f $1)`
 
     # Get line containing tangle filename
     FOUT=`gawk 'match($0, /^\[\:tangle (.*)\]/, a) {print a[1]}' ${MDFILE}`
@@ -20,7 +21,7 @@ function tangle () {
         printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
 
         # tangle file
-        gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > ${FOUT}
+        gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > $FULLPATH/${FOUT}
     fi
 }
 

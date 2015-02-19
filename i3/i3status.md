@@ -4,7 +4,7 @@ The following line should contain a sharp s:
 ß
 If the above line is not correctly displayed, fix your editor first!
 
-[:tangle i3status.symlink]
+[:tangle i3status.conf.symlink]
 
 ```
 general {

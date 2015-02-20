@@ -46,7 +46,7 @@ banner with the corresponding index is used, if the value is `random'
 then the banner is chosen randomly among the available banners, if
 the value is nil then no banner is displayed.
 ```lisp
-  dotspacemacs-startup-banner nil
+dotspacemacs-startup-banner nil
 ```
 
 Default theme applied at startup
@@ -149,7 +149,11 @@ I don't like Adobe pro fonts :P
 ```lisp
 dotspacemacs-default-font '("Inconsolata" :size 14)
 ```
+
+Finally, we finish the `setq-default` block:
+```lisp
 )
+```
 
 # Initialization Hooks
 User initialization for Spacemacs. This function is called at the very startup.

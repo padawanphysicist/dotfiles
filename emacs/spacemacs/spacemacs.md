@@ -51,7 +51,7 @@ dotspacemacs-startup-banner nil
 
 Default theme applied at startup
 ```lisp
-dotspacemacs-default-theme 'monokai
+dotspacemacs-themes '(monokai)
 ```
 
 The leader key

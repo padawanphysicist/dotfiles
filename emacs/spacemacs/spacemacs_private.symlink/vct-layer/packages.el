@@ -4,6 +4,7 @@
   '(
     org
     markdown-mode
+    minimap
    )
 )
 (defvar vct-layer-excluded-packages '()
@@ -74,6 +75,16 @@
 )
 (defun vct-layer/init-markdown-mode ()
   (use-package markdown-mode
+    :init (progn
+    )
+    :config (
+      message "vct-layer loaded successfully!"
+    )
+  )
+)
+
+(defun vct-layer/init-minimap ()
+  (use-package minimap
     :init (progn
     )
     :config (

@@ -48,7 +48,7 @@
       (set-face-attribute 'italic nil
                           ;;:family "DejaVu Sans Mono"
                           :family "Inconsolata Italic"
-                          :height 120
+                          :height 100
                           :weight 'normal
                           :width 'normal)
       ;(set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono-11" :weight 'bold)

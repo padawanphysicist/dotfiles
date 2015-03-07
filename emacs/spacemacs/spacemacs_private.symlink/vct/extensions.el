@@ -96,6 +96,71 @@
           (set-face-attribute face nil :inherit 'fixed-pitch)
       )
       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-11")
+
+  ;; Make RefTeX faster
+  ;; See http://kieranhealy.org/esk/starter-kit-latex.html
+  (setq reftex-enable-partial-scans t)
+  (setq reftex-save-parse-info t)
+  (setq reftex-use-multiple-selection-buffers t)
+  (setq reftex-plug-into-AUCTeX t)
+
+  ;; Make RefTeX work with Org-Mode
+  ;; use 'C-c c' instead of 'C-c [' because the latter is already
+  ;; defined in orgmode to the add-to-agenda command.
+  ;; See http://kieranhealy.org/esk/starter-kit-latex.html
+  (defun org-mode-reftex-setup ()
+    (load-library "reftex")
+    (and (buffer-file-name)
+         (file-exists-p (buffer-file-name))
+         (reftex-parse-all))
+    (define-key org-mode-map (kbd "C-c c") 'reftex-citation))
+
+  (add-hook 'org-mode-hook 'org-mode-reftex-setup)
+
+  ;; See https://github.com/vikasrawal/orgpaper
+  ;; * Citations and Bibliographies using Org-mode
+  ;; ** Using biblatex with Org
+  ;; *** Setup
+  (setq org-latex-to-pdf-process
+        '("pdflatex %f" "biber %b" "pdflatex %f" "pdflatex %f"))
+
+  ;; RefTeX formats for biblatex (not natbib)
+  ;; See BibLaTeX Manual
+  ;; See http://kieranhealy.org/esk/starter-kit-latex.html
+  (setq reftex-cite-format
+        '(
+          (?\C-m . "\\cite[][]{%l}")
+          (?\C-M . "\\cite[][]{%l}")
+          (?p . "\\parencite[][]{%l}")
+          (?P . "\\Parencite[][]{%l}")
+          (?f . "\\footcite[][]{%l}")
+          (?F . "\\Footcite[][]{%l}")
+          (?t . "\\textcite[][]{%l}")
+          (?T . "\\Textcite[][]{%l}")
+          (?a . "\\autocite[][]{%l}")
+          (?A . "\\Autocite[][]{%l}")
+          (?F . "\\fullcite[][]{%l}")
+          (?x . "[]{%l}")
+          (?X . "{%l}")
+          ))
+
+  (setq font-latex-match-reference-keywords
+        '(("cite" "[{")
+          ("cites" "[{}]")
+          ("footcite" "[{")
+          ("footcites" "[{")
+          ("parencite" "[{")
+          ("textcite" "[{")
+          ("fullcite" "[{")
+          ("citetitle" "[{")
+          ("citetitles" "[{")
+          ("headlessfullcite" "[{")))
+
+  (setq reftex-cite-prompt-optional-args t)
+  (setq reftex-cite-cleanup-optional-args t)
+
+
+
     )
   )
 )

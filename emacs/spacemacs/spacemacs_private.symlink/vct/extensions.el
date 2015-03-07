@@ -56,12 +56,22 @@
         (font-lock-add-keywords 'org-mode
           '(
              (
+               "\\(\\\\eqref\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+               (1 'font-lock-keyword-face)
+               (2 'font-lock-constant-face)
+             )
+           )
+         )
+        (font-lock-add-keywords 'org-mode
+          '(
+             (
                "\\(\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
                (1 'font-lock-keyword-face)
                (2 'font-lock-constant-face)
              )
            )
          )
+
       )
       (add-hook 'org-mode-hook 'vct-org-color-hooks)
 

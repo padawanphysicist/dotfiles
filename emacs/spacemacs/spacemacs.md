@@ -23,7 +23,9 @@ List of configuration layers to load.
 ```lisp
   dotspacemacs-configuration-layers '(
                                       themes-megapack
-                                      vct-layer
+                                      auctex
+                                      git
+                                      vct
                                      )
 ```
 A list of packages and/or extensions that will not be install and loaded.
@@ -46,7 +48,8 @@ banner with the corresponding index is used, if the value is `random'
 then the banner is chosen randomly among the available banners, if
 the value is nil then no banner is displayed.
 ```lisp
-dotspacemacs-startup-banner nil
+;dotspacemacs-startup-banner nil
+dotspacemacs-startup-banner 1
 ```
 
 Default theme applied at startup

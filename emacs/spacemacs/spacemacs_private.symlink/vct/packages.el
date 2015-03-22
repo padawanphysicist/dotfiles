@@ -2,6 +2,7 @@
   '(
      markdown-mode
      cdlatex
+     ox-reveal
    )
 )
 
@@ -29,4 +30,13 @@
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   )
 )
+
+(defun vct/init-ox-reveal ()
+  :defer t
+  :init
+  (progn
+    ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+)
+
 

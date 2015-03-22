@@ -97,6 +97,10 @@
       )
       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-11")
 
+    (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((python . t)))
+
   ;; Make RefTeX faster
   ;; See http://kieranhealy.org/esk/starter-kit-latex.html
   (setq reftex-enable-partial-scans t)

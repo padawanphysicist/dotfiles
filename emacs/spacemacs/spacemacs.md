@@ -241,8 +241,31 @@ This is were you can ultimately override default Spacemacs configuration.  This 
     )
   )
 
-
+    (setq org-src-fontify-natively t)
+  ;; Configure modeline powerline markers size
   (setq powerline-default-separator 'arrow)
   (setq-default powerline-height 24)
+  
+  ;; Configuration for org-ref
+  (setq reftex-default-bibliography '("~/Dropbox/santos/2.documents/references/index.bib"))
+  ;; see org-ref for use of these variables
+  (setq org-ref-bibliography-notes "~/Dropbox/santos/2.documents/references/index.org"
+        org-ref-default-bibliography '("~/Dropbox/santos/2.documents/references/index.bib")
+        org-ref-pdf-directory "~/Dropbox/santos/2.documents/references/")
+  (global-set-key [f10] 'org-ref-open-bibtex-notes)
+  (global-set-key [f11] 'org-ref-open-bibtex-pdf)
+  (global-set-key [f12] 'org-ref-open-in-browser)
+
+  (add-to-list 'load-path "/home/santos/1.docs/org-ref")
+  ;; make sure you have dash, helm, helm-bibtex, ebib, s, f, hydra and key-chord
+  ;; in your load-path
+  (require 'org-ref)
+  
+  ;; optional but very useful libraries in org-ref
+  (require 'doi-utils)
+  (require 'jmax-bibtex)
+  (require 'pubmed)
+  (require 'arxiv)
+  (require 'sci-id)
 )
 ```

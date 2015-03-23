@@ -3,6 +3,9 @@
      markdown-mode
      cdlatex
      ox-reveal
+     helm-bibtex
+     hydra
+     key-chord
    )
 )
 
@@ -47,4 +50,39 @@
   )
 )
 
+(defun vct/init-helm-bibtex ()
+  :defer t
+  :init
+  (progn
+    ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+  :config
+  (
+    message "helm-bibtex loaded successfully!"
+  )
+)
+
+(defun vct/init-hydra ()
+  :defer t
+  :init
+  (progn
+    ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+  :config
+  (
+    message "hydra loaded successfully!"
+  )
+)
+
+(defun vct/init-key-chord ()
+  :defer t
+  :init
+  (progn
+    ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+  :config
+  (
+    message "key-chord loaded successfully!"
+  )
+)
 

@@ -240,5 +240,9 @@ This is were you can ultimately override default Spacemacs configuration.  This 
           '((python . t)))
     )
   )
+
+
+  (setq powerline-default-separator 'arrow)
+  (setq-default powerline-height 24)
 )
 ```

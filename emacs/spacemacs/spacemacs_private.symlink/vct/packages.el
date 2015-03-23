@@ -29,6 +29,10 @@
   (progn
     (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
   )
+  :config
+  (
+    message "cdlatex loaded successfully!"
+  )
 )
 
 (defun vct/init-ox-reveal ()
@@ -36,6 +40,10 @@
   :init
   (progn
     ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+  :config
+  (
+    message "ox-reveal loaded successfully!"
   )
 )
 

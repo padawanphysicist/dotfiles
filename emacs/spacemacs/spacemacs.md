@@ -168,5 +168,77 @@ User initialization for Spacemacs. This function is called at the very startup.
 This is were you can ultimately override default Spacemacs configuration.  This function is called at the very end of Spacemacs initialization.
 ```lisp
 (defun dotspacemacs/config ()
+  (eval-after-load 'org
+    '(progn
+       (defun vct-org-visual-line ()
+         (setq visual-line-fringe-indicators '(nil right-curly-arrow))
+         (turn-on-visual-line-mode)
+       )
+       (add-hook 'org-mode-hook 'vct-org-visual-line)
+       
+       (defun vct-org-hooks ()
+         (plist-put org-format-latex-options :scale 1.4)
+       )
+       (add-hook 'org-mode-hook 'vct-org-hooks)
+       
+       (defun vct-org-color-hooks ()
+         (font-lock-add-keywords 'org-mode
+           '(
+              (
+                "\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+                (1 'font-lock-keyword-face)
+                (2 'font-lock-function-name-face)
+              )
+            )
+         )
+         (font-lock-add-keywords 'org-mode
+           '(
+              (
+                "\\(\\\\eqref\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+                (1 'font-lock-keyword-face)
+                (2 'font-lock-constant-face)
+              )
+            )
+          )
+         (font-lock-add-keywords 'org-mode
+           '(
+              (
+                "\\(\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+                (1 'font-lock-keyword-face)
+                (2 'font-lock-constant-face)
+              )
+            )
+          )
+       )
+       (add-hook 'org-mode-hook 'vct-org-color-hooks)
+       
+       (set-face-attribute 'italic nil
+                           ;;:family "DejaVu Sans Mono"
+                           :family "Inconsolata Italic"
+                           :height 100
+                           :weight 'normal
+                           :width 'normal
+       )
+       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono-11" :weight 'bold)
+       (dolist (face '(
+                       ;org-block-begin-line
+                       ;org-block-end-line
+                       org-verbatim
+                       org-block-background
+                       org-level-1
+                       org-level-2
+                       org-level-3
+                       org-level-4
+                      )
+               )
+           (set-face-attribute face nil :inherit 'fixed-pitch)
+       )
+       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-10")
+       
+       (org-babel-do-load-languages
+          'org-babel-load-languages
+          '((python . t)))
+    )
+  )
 )
 ```

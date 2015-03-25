@@ -267,5 +267,38 @@ This is were you can ultimately override default Spacemacs configuration.  This 
   (require 'pubmed)
   (require 'arxiv)
   (require 'sci-id)
+
+
+  ;(defface org-block-begin-line
+  ;  '((t (:underline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ;  "Face used for the line delimiting the begin of source blocks.")
+  ;
+  ;(defface org-block-background
+  ;  '((t (:background "#FFFFEA")))
+  ;  "Face used for the source block background.")
+  ;
+  ;(defface org-block-end-line
+  ;  '((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
+  ;  "Face used for the line delimiting the end of source blocks.")
+
+  (add-to-list 'org-latex-packages-alist '("" "minted"))
+
+    (setq org-latex-listings 'minted)
+     (setq org-latex-custom-lang-environments
+           '(
+            (emacs-lisp "common-lispcode")
+             ))
+     (setq org-latex-minted-options
+           '(("frame" "lines")
+             ("fontsize" "\\scriptsize")
+             ("linenos" "")))
+     (setq org-latex-pdf-process
+           '(
+              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            ))
+
+
 )
 ```

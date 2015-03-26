@@ -300,7 +300,7 @@ This is were you can ultimately override default Spacemacs configuration.  This 
               "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
               "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             ))
-
+   (setq org-latex-preview-ltxpng-directory "/home/santos/0.inbox/ltxpng/")
 
 )
 ```

@@ -281,6 +281,8 @@ This is were you can ultimately override default Spacemacs configuration.  This 
   ;  '((t (:overline "#A7A6AA" :foreground "#008ED1" :background "#EAEAFF")))
   ;  "Face used for the line delimiting the end of source blocks.")
 
+  (setq org-latex-create-formula-image-program 'imagemagick)
+
   (add-to-list 'org-latex-packages-alist '("" "minted"))
 
     (setq org-latex-listings 'minted)

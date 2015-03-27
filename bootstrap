@@ -3,7 +3,29 @@
 # bootstrap files to its places.
 #
 
-source bin/tangle
+#####################################################
+# tangle markdown literate-programming files
+#
+# awk snippet taken from
+#
+# https://gist.github.com/trauber/4955706
+function tangle () {
+    MDFILE=$1
+    FULLPATH=`dirname $(readlink -f $1)`
+
+    # Get line containing tangle filename
+    FOUT=`gawk 'match($0, /^\[\:tangle (.*)\]/, a) {print a[1]}' ${MDFILE}`
+
+    if [ -z "${FOUT}" ]
+    then
+        echo "No tangle for ${MDFILE}"
+    else
+        printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
+
+        # tangle file
+        gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > $FULLPATH/${FOUT}
+    fi
+}
 
 DOTFILES_ROOT="`pwd`"
 

@@ -150,7 +150,7 @@ dotspacemacs-default-package-repository nil
 
 I don't like Adobe pro fonts :P
 ```lisp
-dotspacemacs-default-font '("Inconsolata" :size 14)
+dotspacemacs-default-font '("Inconsolata" :size 16)
 ```
 
 Finally, we finish the `setq-default` block:
@@ -215,11 +215,11 @@ This is were you can ultimately override default Spacemacs configuration.  This 
        (set-face-attribute 'italic nil
                            ;;:family "DejaVu Sans Mono"
                            :family "Inconsolata Italic"
-                           :height 100
+                           :height 120
                            :weight 'normal
                            :width 'normal
        )
-       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono-11" :weight 'bold)
+       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans Mono-12" :weight 'bold)
        (dolist (face '(
                        ;org-block-begin-line
                        ;org-block-end-line
@@ -233,7 +233,7 @@ This is were you can ultimately override default Spacemacs configuration.  This 
                )
            (set-face-attribute face nil :inherit 'fixed-pitch)
        )
-       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-10")
+       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-12")
        
        (org-babel-do-load-languages
           'org-babel-load-languages
@@ -244,7 +244,7 @@ This is were you can ultimately override default Spacemacs configuration.  This 
     (setq org-src-fontify-natively t)
   ;; Configure modeline powerline markers size
   (setq powerline-default-separator 'arrow)
-  (setq-default powerline-height 24)
+  (setq-default powerline-height 26)
   
   ;; Configuration for org-ref
   (setq reftex-default-bibliography '("~/Dropbox/santos/2.documents/references/index.bib"))

@@ -53,6 +53,7 @@ ARCHIVE=$HOME/2.archive/
 OPT=$HOME/opt
 
 pathdirs=(
+$HOME/.bin
 $OPT/julia
 $OPT/nodejs/bin
 $OPT/atom-editor/bin

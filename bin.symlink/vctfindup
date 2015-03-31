@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# File to look for duplicates
+FNAME=$1
+# Folder to search for duplicates
+DEST=$2
+
+for file in $(find ${DEST} -type f); do
+    vctcmp ${FNAME} ${file}
+done

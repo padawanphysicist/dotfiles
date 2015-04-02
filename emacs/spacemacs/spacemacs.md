@@ -238,6 +238,13 @@ This is were you can ultimately override default Spacemacs configuration.  This 
        (org-babel-do-load-languages
           'org-babel-load-languages
           '((python . t)))
+       (org-babel-do-load-languages
+          'org-babel-load-languages
+          '((maxima . t))) ; this line activates maxima
+       (org-babel-do-load-languages
+          'org-babel-load-languages
+          '((C . t))) ; this line activates maxima
+
     )
   )
 

@@ -290,24 +290,57 @@ This is were you can ultimately override default Spacemacs configuration.  This 
 
   (setq org-latex-create-formula-image-program 'imagemagick)
 
-  (add-to-list 'org-latex-packages-alist '("" "minted"))
-
-    (setq org-latex-listings 'minted)
-     (setq org-latex-custom-lang-environments
-           '(
-            (emacs-lisp "common-lispcode")
-             ))
-     (setq org-latex-minted-options
-           '(("frame" "lines")
-             ("fontsize" "\\scriptsize")
-             ("linenos" "")))
      (setq org-latex-pdf-process
            '(
-              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
-              "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+              "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+              "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+              "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             ))
    (setq org-latex-preview-ltxpng-directory "/home/santos/0.inbox/ltxpng/")
-
+   
+  (require 'ox-latex)
+   (add-to-list 'org-latex-classes
+         '("org-article"
+"\\documentclass{article}
+[NO-DEFAULT-PACKAGES]
+\\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsopn,amstext,amsthm}
+\\usepackage{unicode-math}
+\\setmainfont[Ligatures=TeX]{Adobe Caslon Pro}
+\\setmathfont{Asana Math}
+\\usepackage[dvipsnames]{xcolor}
+\\usepackage[xetex,colorlinks=true]{hyperref}
+\\newcommand\\myshade{85}
+\\colorlet{mylinkcolor}{violet}
+\\colorlet{mycitecolor}{YellowOrange}
+\\colorlet{myurlcolor}{Aquamarine}
+\\hypersetup{
+    linkcolor  = mylinkcolor!\\myshade!black,
+    citecolor  = mycitecolor!\\myshade!black,
+    urlcolor   = myurlcolor!\\myshade!black,
+    colorlinks = true
+}
+\\usepackage{graphicx}
+\\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\\usepackage{listings}
+\\lstdefinelanguage{maxima}{keywords={addrow,addcol,zeromatrix,ident,augcoefmatrix,ratsubst,diff,ev,tex,with_stdout,nouns,express,depends,load,submatrix,div,grad,curl,rootscontract,solve,part,assume,sqrt,integrate,abs,inf,exp},sensitive=true, comment=[n][\\itshape]{/*}{*/}}
+\\definecolor{mygreen}{rgb}{0,0.6,0}
+\\definecolor{mygray}{rgb}{0.8,0.8,0.8}
+\\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\\lstset{ %
+basicstyle=\\footnotesize\\ttfamily,        % the size of the fonts that are used for the code
+columns=fixed,        % the size of the fonts that are used for the code
+numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+numberstyle=\\footnotesize\\ttfamily,                    % where to put the line-numbers; possible values are (none, left, right)
+numbersep=5pt,                    % where to put the line-numbers; possible values are (none, left, right)
+stepnumber=1,                    % where to put the line-numbers; possible values are (none, left, right)
+firstnumber=1,                    % where to put the line-numbers; possible values are (none, left, right)
+numberfirstline=true                    % where to put the line-numbers; possible values are (none, left, right)
+}
+[NO-EXTRA]"
+            ("\\section{%s}" . "\\section*{%s}")
+            ("\\subsection{%s}" . "\\subsection*{%s}")
+            ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 )
 ```

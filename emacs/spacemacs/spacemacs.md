@@ -303,6 +303,7 @@ This is were you can ultimately override default Spacemacs configuration.  This 
          '("org-article"
 "\\documentclass{article}
 [NO-DEFAULT-PACKAGES]
+\\usepackage[parfill]{parskip}
 \\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsopn,amstext,amsthm}
 \\usepackage{unicode-math}
 \\setmainfont[Ligatures=TeX]{Adobe Caslon Pro}

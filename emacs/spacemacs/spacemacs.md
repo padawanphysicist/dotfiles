@@ -289,6 +289,20 @@ This is were you can ultimately override default Spacemacs configuration.  This 
   ;  "Face used for the line delimiting the end of source blocks.")
 
   (setq org-latex-create-formula-image-program 'imagemagick)
+  (setq org-latex-listings 'listings) 
+(setq org-latex-listings-options
+        '(
+          ("basicstyle" "\\color{foreground}\\footnotesize\\ttfamily")
+          ("columns" "fixed")
+          ("frame" "lines")
+          ("numbers" "left")
+          ("numberstyle" "\\tiny\\ttfamily")
+          ("backgroundcolor" "\\color{background}")
+          ("keywordstyle" "\\color{keyword}\\bfseries")
+          ("commentstyle" "\\color{comment}\\ttfamily")
+          ("identifierstyle" "\\color{identifier}")
+          ("stringstyle" "\\color{string}")
+         ))
 
      (setq org-latex-pdf-process
            '(
@@ -322,21 +336,20 @@ This is were you can ultimately override default Spacemacs configuration.  This 
 }
 \\usepackage{graphicx}
 \\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
-\\usepackage{listings}
-\\lstdefinelanguage{maxima}{keywords={addrow,addcol,zeromatrix,ident,augcoefmatrix,ratsubst,diff,ev,tex,with_stdout,nouns,express,depends,load,submatrix,div,grad,curl,rootscontract,solve,part,assume,sqrt,integrate,abs,inf,exp},sensitive=true, comment=[n][\\itshape]{/*}{*/}}
 \\definecolor{mygreen}{rgb}{0,0.6,0}
 \\definecolor{mygray}{rgb}{0.8,0.8,0.8}
 \\definecolor{mymauve}{rgb}{0.58,0,0.82}
-\\lstset{ %
-basicstyle=\\footnotesize\\ttfamily,        % the size of the fonts that are used for the code
-columns=fixed,        % the size of the fonts that are used for the code
-numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
-numberstyle=\\footnotesize\\ttfamily,                    % where to put the line-numbers; possible values are (none, left, right)
-numbersep=5pt,                    % where to put the line-numbers; possible values are (none, left, right)
-stepnumber=1,                    % where to put the line-numbers; possible values are (none, left, right)
-firstnumber=1,                    % where to put the line-numbers; possible values are (none, left, right)
-numberfirstline=true                    % where to put the line-numbers; possible values are (none, left, right)
-}
+\\definecolor{foreground}{HTML}{F8F8F2}
+\\definecolor{background}{HTML}{272822}
+\\definecolor{comment}{HTML}{525F58}
+\\definecolor{keyword}{HTML}{F92672}
+\\definecolor{string}{HTML}{E6DB74}
+\\definecolor{constant}{HTML}{4E9A06}
+\\definecolor{identifier}{HTML}{FD971F}
+\\usepackage{listings}
+\\lstloadlanguages{C++,Python}
+\\lstdefinelanguage{maxima}{keywords={addrow,addcol,zeromatrix,ident,augcoefmatrix,ratsubst,diff,ev,tex,with_stdout,nouns,express,depends,load,submatrix,div,grad,curl,rootscontract,solve,print,part,assume,sqrt,facts,integrate,abs,inf,exp},sensitive=true, comment=[n][\\color{comment}\\ttfamily]{/*}{*/}}
+\\lstdefinelanguage{C++}{morekeywords={diff,subs,ex,symbol,cout}}
 [NO-EXTRA]"
             ("\\section{%s}" . "\\section*{%s}")
             ("\\subsection{%s}" . "\\subsection*{%s}")

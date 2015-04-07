@@ -1,0 +1,10 @@
+Classical and Quantum Gravity = Class. Quantum Grav.
+Communications in Mathematical Physics = Comm. Math. Phys.
+Europhysics Letters = Europhys. Lett.
+International Journal of Modern Physics A = Int. J. Mod. Phys. A
+International Journal of Modern Physics D = Int. J. Mod. Phys. D
+Journal of High Energy Physics = JHEP
+Journal of Physics A: General Physics = J. Phys. A
+Physical Review = Phys. Rev.
+Physical Review D = Phys. Rev. D
+Physical Review Letters = Phys. Rev. Lett.

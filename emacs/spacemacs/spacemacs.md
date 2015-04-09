@@ -150,7 +150,7 @@ dotspacemacs-default-package-repository nil
 
 I don't like Adobe pro fonts :P
 ```lisp
-dotspacemacs-default-font '("Inconsolata" :size 16)
+dotspacemacs-default-font '("Inconsolata-dz for Powerline" :size 14)
 ```
 
 Finally, we finish the `setq-default` block:
@@ -213,9 +213,9 @@ This is were you can ultimately override default Spacemacs configuration.  This 
        (add-hook 'org-mode-hook 'vct-org-color-hooks)
        
        (set-face-attribute 'italic nil
-                           ;;:family "DejaVu Sans Mono"
-                           :family "Inconsolata Italic"
-                           :height 120
+                           :family "DejaVu Sans Mono"
+                           ;:family "Inconsolata Italic"
+                           :height 110
                            :weight 'normal
                            :width 'normal
        )
@@ -233,7 +233,7 @@ This is were you can ultimately override default Spacemacs configuration.  This 
                )
            (set-face-attribute face nil :inherit 'fixed-pitch)
        )
-       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-12")
+       (set-face-attribute 'fixed-pitch nil :font "Inconsolata-dz for Powerline")
        
        (org-babel-do-load-languages
           'org-babel-load-languages

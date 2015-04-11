@@ -1,9 +1,0 @@
-868cd71710a48e8ec8acffeabd1eebfb10812c77		branch 'master' of https://github.com/Lokaltog/vim-easymotion
-4fb1af83b8ac349e9c74a72cdc2581d9a466f26e	not-for-merge	branch 'develop' of https://github.com/Lokaltog/vim-easymotion
-18785fd178a986085ff45a2ec32d19e2ec46c0fe	not-for-merge	branch 'feature-flash-motions' of https://github.com/Lokaltog/vim-easymotion
-857bd03914e522011fd35fe61e29eaa52815561c	not-for-merge	branch 'feature/conceal' of https://github.com/Lokaltog/vim-easymotion
-3df6a761f42fba588302c2c6873c263b7c3be0ab	not-for-merge	branch 'feature/unicode-keys' of https://github.com/Lokaltog/vim-easymotion
-7c0ecabee02eb9c694ed5106aa253d0664e77792	not-for-merge	branch 'feature/user-dictionary' of https://github.com/Lokaltog/vim-easymotion
-8a7872bd399a952ffe7239109f56157f52a522d5	not-for-merge	branch 'fix/expr-folding' of https://github.com/Lokaltog/vim-easymotion
-361d3fb8abbf1578af2df60591f439895af3e2ed	not-for-merge	branch 'fix/wildcignore_on_windows' of https://github.com/Lokaltog/vim-easymotion
-e88fc45d6e5cbd58ef3c23ead5ef5339c439ea4e	not-for-merge	branch 'preload' of https://github.com/Lokaltog/vim-easymotion

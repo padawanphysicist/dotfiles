@@ -1,0 +1,178 @@
+#!/bin/python
+import os
+import re
+import sys
+
+# For this script to work make sure that you:
+#
+#   1 - Have latex, dvi2gr (version 0.3) and grep in your $PATH;
+#   2 - Have the named pipe "~/.grace_pipe" (to use the pipe feature);
+#   3 - Start xmgrace with -npipe ~/.grace_pipe (to use the pipe feature);
+#   4 - Have the appropriate fonts installed with grace;
+#   5 - Read the README file (for all the above and more)!
+#
+ltxpkgs = 'amsmath,amssymb'
+ltxcmd = os.popen('which latex',  'r').readline().replace('\n', ' ')
+dvi2gr = os.popen('which dvi2gr', 'r').readline().replace('\n', ' ')
+tmp_path = '/tmp/'
+grace_npipe=os.environ['HOME'] + "/.grace_pipe"
+grace_home = "/usr/share/grace/"
+t1_font_path = grace_home + "fonts/type1/"
+user=os.environ['USER']
+
+# Returns the complete LaTeX code (i.e. wraps the 'userCode' in
+# a meaningfull LaTeX document).
+def ltxcode(eq):
+    ltxstr = '\scrollmode\n' + \
+           '\documentclass{article}\n' + \
+           '\\usepackage{' + ltxpkgs + '}\n' + \
+           '\\begin{document}\n' + \
+           '\\noindent\n\\begin{displaymath}' + \
+           str(eq).replace("\n"," ") + '\\end{displaymath}\n' + \
+           '\end{document}'
+    return ltxstr
+
+#print(ltxcode('\\frac{1}{2}'))
+
+###
+#### Returns the grace string obtained by running dvi2gr on the output of
+#### the procedure LatexCode().
+def gracestr (eq):
+     # Let's work in the TEMP directory
+     os.chdir(tmp_path)
+     # Run latex on the complete code
+     #print(ltxcmd)
+     latex_status = os.system("echo '" + ltxcode(eq) + "' > article.tex")
+     #latex_status = os.system(ltxcmd + "'" + ltxcode(eq) + "' > /dev/null")
+     latex_status = os.system(ltxcmd + " 'article.tex' > /dev/null")
+     # Catch any latex problems:
+     # Run dvi2gr on the generated dvi
+     dvi2gr_output = os.popen(dvi2gr + ' ' + t1_font_path + " article.dvi" , 'r').readline().replace("\n","")
+     # Clean up
+     #print(dvi2gr_output)
+     #exit
+     #os.system('rm article.dvi article.aux article.log')
+     return dvi2gr_output
+
+print(gracestr(sys.argv[1]))
+###
+###
+#### Show the grace string using a simple dialog window:
+###
+###def ShowGraceString ():
+###     Message = GraceString()
+###     ResultWin = resultWindow(Message)
+###     ResultWin.show()
+###     ResultWin.exec_loop()
+###
+###
+#### Send the grace string directly to xmgrace via grace_pipe:
+###
+###def PipeGraceString ():
+###     # If xmgrace is not running abort.
+###     if IsGraceRunning() :
+###          text = 'with string \n\
+###  string on \n\
+###  string loctype view \n\
+###  string 0.05, 0.8 \n\
+###  string color 1 \n\
+###  string rot 0 \n\
+###  string font 0 \n\
+###  string just 12 \n\
+###  string char size 1.0'
+###          os.system("echo \"" + text + "\" > " + GRACE_NPIPE)
+###          os.system("echo \"  string def\" '\"" + GraceString() + "\"' >> " + GRACE_NPIPE)
+###          os.system("echo redraw >> " + GRACE_NPIPE)
+###     else:
+###          messageDialog("PipeGraceString Error", \
+###                        "There should be exactly 1 instance of xmgrace running!\n"
+###                        "Aborting.")
+###          sys.exit(2)
+###
+###
+#### For now 'pipe' works only if there is exactly one instance of xmgrace
+#### running. This procedure just checks that.
+###
+###def IsGraceRunning() :
+###     instances = os.popen( 'ps -U' + USER + '| grep -c xmgrace', 'r').readline().replace("\n","")
+###     if instances != "1" :
+###          return 0 # False
+###     else :
+###          return 1 # True
+###
+###
+#### Copy the generated grace string to the clipboard.
+###
+###def CopyGraceString () :
+###     string = GraceString()
+###     app.clipboard().setText( string, QClipboard.Selection )
+###
+###
+#### Basic information:
+###
+###def ShowBasicInfo():
+###     aboutWin = aboutWindow()
+###     aboutWin.show()
+###     aboutWin.exec_loop()
+###
+###
+#### Prints a message in a simple dialog window:
+###
+###def messageDialog(title, string):
+###     messageWin = myDialog(title, string)
+###     messageWin.show()
+###     messageWin.exec_loop()
+###
+###
+#### Fetches the user defined portion of the LaTeX code from the Input Window:
+###
+###def UserLatexCode ():
+###     return  str( InputWin.textEdit1.text().utf8() ).replace("\n", " ")
+###
+###
+#### Wrappers for the actions to perform with the generated strings:
+###
+###def pipe():
+###     PipeGraceString ()
+###
+###def clipboard():
+###     CopyGraceString ()
+###
+###def show():
+###     ShowGraceString ()
+###
+###def close():
+###     InputWin.close()
+###
+###def about():
+###     ShowBasicInfo()
+###
+###
+#### *------------------------------------------------------------------*
+#### |----< SCRIPT EXECUTION STARTS HERE >------------------------------|
+#### *------------------------------------------------------------------*
+###
+###
+#### -----<| Custom Modules |>-------------------------------------------
+###
+#### Instantiate our main QApplication:
+###
+###app = QApplication(sys.argv)
+###InputWin = latexWindow()
+###
+###
+#### Establish the Connections for the Input Window:
+###
+###InputWin.connect(InputWin.pushButton1,SIGNAL("clicked()"),pipe)
+###InputWin.connect(InputWin.pushButton2,SIGNAL("clicked()"),show)
+###InputWin.connect(InputWin.pushButton3,SIGNAL("clicked()"),clipboard)
+###InputWin.connect(InputWin.pushButton4,SIGNAL("clicked()"),close)
+###InputWin.connect(InputWin.pushButton5,SIGNAL("clicked()"),about)
+###
+###
+#### Launch the Input Window:
+###
+###InputWin.show()
+###app.setMainWidget(InputWin)
+###app.exec_loop()
+

@@ -6,6 +6,7 @@
      helm-bibtex
      hydra
      key-chord
+     julia-mode
    )
 )
 
@@ -85,4 +86,17 @@
     message "key-chord loaded successfully!"
   )
 )
+
+(defun vct/julia-mode ()
+  :defer t
+  :init
+  (progn
+    ;(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  )
+  :config
+  (
+    message "julia-mode loaded successfully!"
+  )
+)
+
 

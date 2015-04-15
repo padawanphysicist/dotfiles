@@ -87,7 +87,7 @@
   )
 )
 
-(defun vct/julia-mode ()
+(defun vct/init-julia-mode ()
   :defer t
   :init
   (progn

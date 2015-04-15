@@ -23,6 +23,8 @@ List of configuration layers to load.
 ```lisp
   dotspacemacs-configuration-layers '(
                                       themes-megapack
+                                      org
+                                      syntax-checking
                                       auctex
                                       git
                                       vct

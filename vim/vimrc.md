@@ -1,11 +1,13 @@
 # Vim
-[:tangle vimrc.local.symlink]
+[:tangle nvimrc.symlink]
 
 Because I was a vimmer sometime ago, and I keep using it when I forget to change the appropiate environment variable.
 
 # Environment
 ```
 set t_Co=256        " Enable 256 colors
+set number
+sy on
 colorscheme jellybeans " Choose colorscheme
 set mouse=a " Enable mouse on all modes
 set history=1000   " Sets how many lines of history VIM has to remember
@@ -23,7 +25,7 @@ set incsearch     " Incremental search
 ## Text formatting
 ```
 set wrap linebreak nolist " do soft word wrap
-set encoding=utf8 " Set utf8 as standard encoding and en_US as the standard language
+"set encoding=utf8 " Set utf8 as standard encoding and en_US as the standard language
 ```
 
 # Misc settings

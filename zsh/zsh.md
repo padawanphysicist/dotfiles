@@ -58,6 +58,7 @@ $OPT/julia
 $OPT/nodejs/bin
 $OPT/atom-editor/bin
 $OPT/tw5
+$OPT/bin
 )
 path=($path $pathdirs)
 ```

@@ -313,6 +313,13 @@ This is were you can ultimately override default Spacemacs configuration.  This 
               "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
             ))
    (setq org-latex-preview-ltxpng-directory "/home/santos/0.inbox/ltxpng/")
+
+  (add-to-list 'load-path "/home/santos/Dropbox/santos/2.documents/config/emacs/")
+(setq inferior-julia-program-name
+      "/home/santos/opt/julia/julia")
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t) (julia . t)))
    
   (require 'ox-latex)
    (add-to-list 'org-latex-classes
@@ -358,5 +365,6 @@ This is were you can ultimately override default Spacemacs configuration.  This 
             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
             ("\\paragraph{%s}" . "\\paragraph*{%s}")
             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 )
 ```

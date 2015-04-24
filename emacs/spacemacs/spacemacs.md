@@ -56,7 +56,7 @@ dotspacemacs-startup-banner 1
 
 Default theme applied at startup
 ```lisp
-dotspacemacs-themes '(monokai)
+dotspacemacs-themes '(ujelly)
 ```
 
 The leader key

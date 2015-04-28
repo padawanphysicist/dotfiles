@@ -1,6 +1,6 @@
 vimrc.symlink
 nvimrc.symlink
-nvimrc.symlink/bundle
+nvimrc.symlink/bundle/
 vimrc.local.symlink
 vimrc.bundles.local.symlink
 .netrwhist

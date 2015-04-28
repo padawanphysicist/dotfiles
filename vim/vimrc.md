@@ -1,7 +1,28 @@
 # Vim
-[:tangle nvimrc.symlink]
+[:tangle vimrc.symlink]
 
 Because I was a vimmer sometime ago, and I keep using it when I forget to change the appropiate environment variable.
+
+# Vundle
+```
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+Plugin 'JuliaLang/julia-vim'
+Plugin 'tpope/vim-markdown'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+```
 
 # Environment
 ```
@@ -38,8 +59,6 @@ set wrap linebreak nolist " do soft word wrap
 set autoread       " Set to auto read when a file is changed from the outside
 
 au BufNewFile,BufRead *.jl,*.julia set filetype=julia
-filetype plugin on " Enable filetype plugin
-filetype indent on
 ```
 
 # Statusline

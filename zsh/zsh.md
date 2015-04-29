@@ -144,6 +144,7 @@ setopt HIST_IGNORE_DUPS
 TeXlive does not allow me to run bibtex
 on /tmp; to avoid this, set this variable
 ```sh
+export TEXMFHOME=~/texmf
 export openout_any=a
 ```
 

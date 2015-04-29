@@ -365,6 +365,19 @@ This is were you can ultimately override default Spacemacs configuration.  This 
             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
             ("\\paragraph{%s}" . "\\paragraph*{%s}")
             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+   (add-to-list 'org-latex-classes
+         '("org-jcap"
+"\\documentclass[11pt,a4paper]{article}
+[NO-DEFAULT-PACKAGES]
+\\usepackage{jcappub}
+\\usepackage{amsfonts,amsopn,amstext,amsthm}
+[NO-EXTRA]"
+            ("\\section{%s}" . "\\section*{%s}")
+            ("\\subsection{%s}" . "\\subsection*{%s}")
+            ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
 
 )
 ```

@@ -371,6 +371,8 @@ This is were you can ultimately override default Spacemacs configuration.  This 
 [NO-DEFAULT-PACKAGES]
 \\usepackage{jcappub}
 \\usepackage{amsfonts,amsopn,amstext,amsthm}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
 [NO-EXTRA]"
             ("\\section{%s}" . "\\section*{%s}")
             ("\\subsection{%s}" . "\\subsection*{%s}")

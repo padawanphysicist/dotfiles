@@ -44,6 +44,12 @@ set viminfo='10,\"30,:20,%,n~/.viminfo
 " file
 au BufReadPost * if line("'\"")|execute("normal `\"")|endif
 
+" Show useless whitespaces in the end of the lines
+au BufNewFile,BufRead * match Error '\s\+$'
+
+" Show hidden characters
+" set list
+
 " These are very handy command-line abbreviations
 cab W  w
 cab Wq wq
@@ -62,6 +68,11 @@ fu! CommOnOff()
 endfu
 map <F12> :call CommOnOff()<cr>
 
+" Remove espaços redundantes no fim das linhas fiz uma adição ao comando
+" depois do <esc> mz cria uma marca para voltar ao ponto em que se está e 'z
+" retorna a este ponto ao final do comando
+map <F7> <esc>mz:%s/\s\+$//g<cr>`z
+
 set t_Co=256           " Enable 256 colors
 syntax enable          " Turn on syntax highlighting
 colorscheme jellybeans " Choose colorscheme
@@ -69,7 +80,12 @@ colorscheme jellybeans " Choose colorscheme
 set number  " Show line numbers
 set mouse=a " Enable mouse on all modes
 
+set cursorline " Highlight current line
 set history=10000 " Sets how many lines of history VIM has to remember
+
+set nobk          " Turn backup off, since most stuff is in git anyway...
+set nowb          " Prevents automatic backup
+set wildignore=*.o,*.obj,*.bak,*.exe,*.x " These files must be ignored by VIM
 
 " Textual search options {
 set ignorecase    " Case-insensitive search
@@ -108,11 +124,71 @@ if !has('gui_running')
 endif
 " }
 
+" Moving between screen lines {
+" To use in line wrapping; when you do soft line breaking, moving the cursor
+" up and down will jump from one physical line to another; to move between
+" displayed lines, you must press gj and gk, and this is really annoying!
+"
+" Although one can do the simple mapping
+"
+"    imap <silent> <Down> <C-o>gj
+"    imap <silent> <Up> <C-o>gk
+"    nmap <silent> <Down> gj
+"    nmap <silent> <Up> gk
+"
+" this actually breaks VIM's omnicompletion. The function below was found in
+"
+" <http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping>
+"
+" to be a nice solution for this problem.
+function! NoremapNormalCmd(key, preserve_omni, ...)
+  let cmd = ''
+  let icmd = ''
+  for x in a:000
+    let cmd .= x
+    let icmd .= "<C-\\><C-O>" . x
+  endfor
+  execute ":nnoremap <silent> " . a:key . " " . cmd
+  execute ":vnoremap <silent> " . a:key . " " . cmd
+  if a:preserve_omni
+    execute ":inoremap <silent> <expr> " . a:key . " pumvisible() ? \"" . a:key . "\" : \"" . icmd . "\""
+  else
+    execute ":inoremap <silent> " . a:key . " " . icmd
+  endif
+endfunction
+
+" Cursor moves by screen lines
+call NoremapNormalCmd("<Up>", 1, "gk")
+call NoremapNormalCmd("<Down>", 1, "gj")
+call NoremapNormalCmd("<Home>", 0, "g<Home>")
+call NoremapNormalCmd("<End>", 0, "g<End>")
+" }
+
+" Clear last search pattern by hitting return
+nnoremap <CR> :noh<CR><CR>
+
+" Text formatting {
+    set wrap linebreak nolist " do soft word wrap
+    set shiftwidth=4 " Adjust the number of columns shifted by commands < or >
+    " Space vs TAB {
+        set expandtab " Use spaces instead of TABs
+        set tabstop=4 " Each TAB has four spaces
+        set softtabstop=4 " Let backspace delete indent
+    " }
+    set encoding=utf8 " Set utf8 as standard encoding and en_US as the standard language
+" }
+
 " }
 " Specific Filetype Configuration {
 
 " Makes Vim recognize Julia language files
 au BufNewFile,BufRead *.jl,*.julia set filetype=julia
+
+" .tex, .sty and .cls files are always LaTeX files
+au BufNewFile,BufRead *.tex,*.sty,*.cls set filetype=tex 
+
+" Bash files
+au BufNewFile,BufRead *.sh,*.bash set filetype=sh 
 
 " }
 

@@ -6,4 +6,4 @@
     cmd = ldiff "$LOCAL" "$REMOTE" "$MERGED"
 [user]
 	email = victor.phb@gmail.com
-	name = Victor Santos
+	name = Victor Santos (vct)

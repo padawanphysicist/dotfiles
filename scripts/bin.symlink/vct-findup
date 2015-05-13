@@ -6,5 +6,5 @@ FNAME=$1
 DEST=$2
 
 for file in $(find ${DEST} -type f); do
-    vctcmp ${FNAME} ${file}
+    vct-cmp ${FNAME} ${file}
 done

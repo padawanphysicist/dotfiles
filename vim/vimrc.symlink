@@ -1,0 +1,119 @@
+"
+" vct's dotfiles: https://gitlab.com/padawanphysicist/dotfiles
+"
+" vim configuration
+"
+
+" Vundle Configuration { 
+"
+" Vundle is a very nice plug-in manager for Vim. It has the same principles as
+" Pathogen (https://github.com/tpope/vim-pathogen/) but with a
+" Git-GitHub-aware management system. Vundle is available at
+"
+" https://github.com/gmarik/Vundle.vim
+"
+set nocompatible                  " Be iMproved (required)
+filetype off                      " Required
+
+set rtp+=~/.vim/bundle/Vundle.vim " Set the runtime path to include Vundle
+call vundle#begin()               " Initialize Vundle
+
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+Plugin 'gmarik/Vundle.vim'   " let Vundle manage Vundle (required)
+Plugin 'JuliaLang/julia-vim' " Vim support for Julia language
+Plugin 'tpope/vim-markdown'  
+Plugin 'nanotech/jellybeans.vim' " Colorful, dark scheme
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " Required
+filetype plugin indent on    " Required
+
+" }
+" General Settings {
+
+" To sharpen Vim's memory and smartness, we can keep a ~/.viminfo file. This
+" file keeps some useful data, like history searches (/), commands (:), tags
+" (`), registers, etc. With this file it's also possible to to copy a line (yy), 
+" quit the file, open a new one and then paste (p) that line you previously
+" copied.
+set viminfo='10,\"30,:20,%,n~/.viminfo
+
+" This set the cursor at the position it was since the last time you opened the 
+" file
+au BufReadPost * if line("'\"")|execute("normal `\"")|endif
+
+" These are very handy command-line abbreviations
+cab W  w
+cab Wq wq
+cab wQ wq
+cab WQ wq
+cab Q  q
+cab E  e
+
+" Show/Hide comments
+fu! CommOnOff()
+    if !exists('g:hiddcomm')
+        let g:hiddcomm=1 | hi Comment ctermfg=black guifg=black
+    else
+        unlet g:hiddcomm | hi Comment ctermfg=cyan  guifg=cyan term=bold
+    endif
+endfu
+map <F12> :call CommOnOff()<cr>
+
+set t_Co=256           " Enable 256 colors
+syntax enable          " Turn on syntax highlighting
+colorscheme jellybeans " Choose colorscheme
+
+set number  " Show line numbers
+set mouse=a " Enable mouse on all modes
+
+set history=10000 " Sets how many lines of history VIM has to remember
+
+" Textual search options {
+set ignorecase    " Case-insensitive search
+set smartcase     " With this option, a search is case-insensitive if
+                  " you enter the search string in ALL lower case
+set hlsearch      " Highlight search
+set incsearch     " Incremental search
+" }
+
+" Set utf8 as standard encoding and en_US as the standard language
+set encoding=utf8 
+
+" No noise from VIM! {
+    set noerrorbells " No beeping!
+    set hidden       " Hides buffers instead of close them
+" }
+
+set autoread " Set to auto read when a file is changed from the outside
+
+set laststatus=2 " Always display the statusline
+
+" Fixing the delay in exiting visual/insert mode {
+set timeout " Do time out on mappings and others
+set timeoutlen=2000 " Wait {num} ms before timing out a mapping
+" When you’re pressing Escape to leave insert mode in the terminal, it will by
+" default take a second or another keystroke to leave insert mode completely
+" and update the statusline. This fixes that. I got this from:
+" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
+if !has('gui_running')
+    set ttimeoutlen=10
+    augroup FastEscape
+        autocmd!
+        au InsertEnter * set timeoutlen=0
+        au InsertLeave * set timeoutlen=1000
+    augroup END
+endif
+" }
+
+" }
+" Specific Filetype Configuration {
+
+" Makes Vim recognize Julia language files
+au BufNewFile,BufRead *.jl,*.julia set filetype=julia
+
+" }
+
+" vim: set fdm=marker fmr={,}:

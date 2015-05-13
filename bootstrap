@@ -1,61 +1,25 @@
 #!/bin/bash
 #
+# vct's dotfiles: https://gitlab.com/padawanphysicist/dotfiles
+#
 # bootstrap files to its places.
 #
 
-#####################################################
-# tangle markdown literate-programming files
-#
-# awk snippet taken from
-#
-# https://gist.github.com/trauber/4955706
-function tangle () {
-    MDFILE=$1
-    FULLPATH=`dirname $(readlink -f $1)`
-
-    # Get line containing tangle filename
-    FOUT=`gawk 'match($0, /^\[\:tangle (.*)\]/, a) {print a[1]}' ${MDFILE}`
-
-    if [ -z "${FOUT}" ]
-    then
-        echo "No tangle for ${MDFILE}"
-    else
-        printf "\033[0;33mtangling ${MDFILE} -> ${FOUT}...\033[0m \n"
-
-        # tangle file
-        gawk '{ if (/^```/) { i++; next } if ( i % 2 == 1) { print } }' ${MDFILE} > $FULLPATH/${FOUT}
-    fi
-}
-
-DOTFILES_ROOT="`pwd`"
-
+DOTFILES="`pwd`"
 MAX_DEPTH=3
 
-set -e
-
-echo ''
-
-tangle_orgfiles () {
-    printf "\033[0;33mtangling markdown files\033[0m \n"
-
-    # Store path from all org files in a bash array
-    orgfiles=( $(find $DOTFILES_ROOT -maxdepth $MAX_DEPTH -name '*.md') )
-
-    # Files which must not be tangled
-    orgignore=(${DOTFILES_ROOT}/README.md)
-
-    # Remove files to be ignored from org-files list
-    for delete in ${orgignore[@]}
-    do
-        orgfiles=(${orgfiles[@]/$delete})
-    done
-
-    # Now we can tangle only the correct list
-    for file in ${orgfiles[@]}
-    do
-        tangle ${file}
-    done
+# Remove broken links from HOME directory {{{
+removebrokenlinks()
+{
+  if [[ "$VERBOSE" == True ]]; then
+    echo "*** Removing broken symlinks from $HOME ***"
+  fi
+  find $HOME -maxdepth 1 -name ".*" -type l | while read f; do if [ ! -e "$f"  ]; then rm -f "$f"; fi; done
 }
+# }}}
+
+set -e
+echo ''
 
 info () {
     printf "\r\033[0;34m$1\033[0m\n"
@@ -87,7 +51,7 @@ install_dotfiles () {
     backup_all=false
     skip_all=false
 
-    for source in `find $DOTFILES_ROOT -maxdepth $MAX_DEPTH -name \*.symlink`
+    for source in `find $DOTFILES -maxdepth $MAX_DEPTH -name \*.symlink`
     do
         dest="$HOME/.`basename \"${source%.*}\"`"
 
@@ -144,8 +108,9 @@ install_dotfiles () {
     done
 }
 
-tangle_orgfiles
 install_dotfiles
 
 echo ''
 printf "\033[0;31mDone!\033[0m \n"
+
+# vim: set fdm=marker fmr={{{,}}} ft=sh:

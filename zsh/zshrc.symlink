@@ -55,7 +55,7 @@ OPT=$HOME/opt
 
 pathdirs=(
 $HOME/.bin
-$OPT/julia
+$OPT/julia/usr/bin
 $OPT/nodejs/bin
 $OPT/atom-editor/bin
 $OPT/tw5

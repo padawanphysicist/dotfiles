@@ -55,13 +55,11 @@ OPT=$HOME/opt
 
 pathdirs=(
 $HOME/.bin
-$OPT/julia/usr/bin
+$OPT/julia/bin
 $OPT/nodejs/bin
 $OPT/atom-editor/bin
 $OPT/tw5
 $OPT/bin
-$DOCS/vcsh
-$DOCS/myrepos
 )
 path=($path $pathdirs)
 # }

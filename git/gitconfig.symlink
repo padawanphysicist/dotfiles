@@ -7,3 +7,5 @@
 [user]
 	email = victor.phb@gmail.com
 	name = Victor Santos (vct)
+[color]
+        ui = true

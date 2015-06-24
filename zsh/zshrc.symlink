@@ -66,7 +66,8 @@ path=($path $pathdirs)
 # Oh-my-zsh configuration {
 
 ZSH=$HOME/.oh-my-zsh # Path to oh-my-zsh configuration
-ZSH_THEME="agnoster" # Theme
+ZSH_CUSTOM=$HOME/.zsh_customizations
+ZSH_THEME="vct-agnoster" # Theme
 
 plugins=(git archlinux tmux) # Plugins
 

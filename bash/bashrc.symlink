@@ -82,6 +82,9 @@ else
    export EDITOR='vim'
 fi
 
+# Editor for editing data in xmgrace
+export GRACE_EDITOR='vim'
+
 # TeXlive does not allow me to run bibtex on /tmp; to avoid this, set this 
 # variable
 export openout_any=a

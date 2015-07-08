@@ -124,6 +124,7 @@ if [[ -n $SSH_CONNECTION ]]; then
 else
    export EDITOR='vim'
 fi
+export GRACE_EDITOR='xterm -geometry 50x30 -fs 10 -fa "Source Code Pro for Powerline" -e vim'
 
 export ARCHFLAGS="-arch x86_64"
 setopt HIST_IGNORE_DUPS

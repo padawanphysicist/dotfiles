@@ -95,7 +95,7 @@ before layers configuration."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Inconsolata"
+   dotspacemacs-default-font '("Inconsolatazi4"
                                :size 15
                                :weight normal
                                :width normal
@@ -186,15 +186,36 @@ layers configuration."
   (define-key evil-visual-state-map "j" 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
 
+  ;; Add elisp script folder to emacs' PATH
   (add-to-list 'load-path "~/.elisp/")
+
+  ;; Set up tabbar in all modes
   (add-to-list 'load-path "~/.elisp/tabbar/")
   (load "aquamacs-tabbar.el")
   (tabbar-mode t)
 
+  ;; org-mode configuration
+  ;(eval-after-load 'org
+  ;  '(setf org-highlight-latex-and-related '(latex)))
+
+  (add-hook 'org-mode-hook
+    (lambda ()
+      (font-lock-add-keywords 'org-mode
+        '(
+          (
+            "\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+            (1 'font-lock-keyword-face)
+            (2 'font-lock-function-name-face)
+          )
+          (
+            "\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+            (1 'font-lock-keyword-face)
+            (2 'font-lock-constant-face)
+          )
+          ("\\(\\\\textrm\\|\\\\frac\\)" (1 'font-lock-keyword-face))
+        )
+      )
+    )
+  )
 )
-
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-
-
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

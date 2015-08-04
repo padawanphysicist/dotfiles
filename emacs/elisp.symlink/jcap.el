@@ -7,8 +7,8 @@
 \\usepackage{jcappub}
 \\usepackage{float} % Useful for right positioning of figures and tables
 [NO-DEFAULT-PACKAGES]
-[NO-PACKAGES]
-[NO-EXTRA]"
+[PACKAGES]
+[EXTRA]"
                ("\\section{%s}" . "\\section*{%s}")
 	       ("\\subsection{%s}" . "\\subsection*{%s}")
 	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))

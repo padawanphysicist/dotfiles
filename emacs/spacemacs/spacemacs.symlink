@@ -217,5 +217,7 @@ layers configuration."
       )
     )
   )
+  ;; Bigger LaTeX previews
+  (add-hook 'org-mode-hook (lambda()(plist-put org-format-latex-options :scale 1.4)))
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

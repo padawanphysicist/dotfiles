@@ -219,5 +219,8 @@ layers configuration."
   )
   ;; Bigger LaTeX previews
   (add-hook 'org-mode-hook (lambda()(plist-put org-format-latex-options :scale 1.4)))
+
+  ;; Change ltxpng folder location for LaTeX previews
+  (add-hook 'org-mode-hook (lambda()(setq org-latex-preview-ltxpng-directory "~/.ltxpng/")))
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

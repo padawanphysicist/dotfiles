@@ -194,12 +194,10 @@ layers configuration."
   (load "aquamacs-tabbar.el")
   (tabbar-mode t)
 
-  ;; org-mode configuration
-  ;(eval-after-load 'org
-  ;  '(setf org-highlight-latex-and-related '(latex)))
-
+  ;; Org mode hooks
   (add-hook 'org-mode-hook
     (lambda ()
+      ;; LaTeX math highlighting in org buffers
       (font-lock-add-keywords 'org-mode
         '(
           (
@@ -215,12 +213,14 @@ layers configuration."
           ("\\(\\\\textrm\\|\\\\frac\\)" (1 'font-lock-keyword-face))
         )
       )
+      ;; Bigger LaTeX previews
+      (plist-put org-format-latex-options :scale 1.4)
+      ;; Change ltxpng folder location for LaTeX previews
+      (setq org-latex-preview-ltxpng-directory "~/.ltxpng/")
+      ;; Change default org mode faces for bold and emphasis
+      (add-to-list 'org-emphasis-alist '("*" (:foreground "#EEEEEE" :weight bold)))
+      (add-to-list 'org-emphasis-alist '("/" (:family "DejaVu Sans Mono" :size 12 :slant oblique)))
     )
   )
-  ;; Bigger LaTeX previews
-  (add-hook 'org-mode-hook (lambda()(plist-put org-format-latex-options :scale 1.4)))
-
-  ;; Change ltxpng folder location for LaTeX previews
-  (add-hook 'org-mode-hook (lambda()(setq org-latex-preview-ltxpng-directory "~/.ltxpng/")))
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

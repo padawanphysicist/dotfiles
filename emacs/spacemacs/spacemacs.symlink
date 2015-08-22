@@ -39,7 +39,7 @@
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '(julia-mode web-mode tabbar remember)
+   dotspacemacs-additional-packages '(tabbar remember)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -96,7 +96,7 @@ before layers configuration."
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Inconsolatazi4"
-                               :size 15
+                               :size 17
                                :weight normal
                                :width normal
                                :powerline-scale 1.3)
@@ -179,6 +179,9 @@ before layers configuration."
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
 
+  ;; Disable line highlighting
+  (global-hl-line-mode -1)
+
   ;; Add elisp script folder to emacs' PATH
   (add-to-list 'load-path "~/.elisp/")
   (let ((default-directory "~/.elisp/"))
@@ -204,5 +207,7 @@ layers configuration."
 
   ;; Org mode hooks
   (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
+  ;; Force Inconsolata in org mode
+  (add-hook 'org-mode-hook (lambda () (face-remap-add-relative 'default :family "Inconsolatazi4")))
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

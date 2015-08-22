@@ -190,7 +190,7 @@ layers configuration."
 
   ; GTD configuration {{{
   ;; I keep almost everything in one big org file.
-  (defvar org-gtd-file "~/1.documents/0.annotations/0.gtd.org")
+  (defvar org-gtd-file "~/1.documents/0.annotations/0.organizer.org")
 
   ;; I open my gtd file when I hit C-c g
   (defun gtd ()

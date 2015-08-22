@@ -39,7 +39,7 @@
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '(julia-mode web-mode tabbar)
+   dotspacemacs-additional-packages '(julia-mode web-mode tabbar remember)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -53,7 +53,7 @@ This function is called at the very startup of Spacemacs initialization
 before layers configuration."
 
   (add-to-list 'auto-mode-alist '("\\`*.tex\\'" . LaTeX-mode))
-  (defun vct-msg() 
+  (defun vct-msg()
     (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
     (visual-line-mode 1)
   )
@@ -178,49 +178,31 @@ before layers configuration."
   "Configuration function.
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
-  ;; from https://github.com/syl20bnr/spacemacs/pull/1446
-  ;; Make evil-mode up/down operate in screen lines instead of logical lines
-  (define-key evil-normal-state-map "j" 'evil-next-visual-line)
-  (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
-  ;; Also in visual mode
-  (define-key evil-visual-state-map "j" 'evil-next-visual-line)
-  (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
 
   ;; Add elisp script folder to emacs' PATH
   (add-to-list 'load-path "~/.elisp/")
+  (let ((default-directory "~/.elisp/"))
+    (normal-top-level-add-subdirs-to-load-path))
 
   ;; Set up tabbar in all modes
-  (add-to-list 'load-path "~/.elisp/tabbar/")
   (load "aquamacs-tabbar.el")
   (tabbar-mode t)
 
+  ; GTD configuration {{{
+  ;; I keep almost everything in one big org file.
+  (defvar org-gtd-file "~/1.documents/0.annotations/0.gtd.org")
+
+  ;; I open my gtd file when I hit C-c g
+  (defun gtd ()
+    "Open the GTD file."
+    (interactive)
+    (find-file org-gtd-file))
+
+  ;; Open GTD file hitting SPC c g
+  (evil-leader/set-key "cg" 'gtd)
+  ;; }}}
+
   ;; Org mode hooks
-  (add-hook 'org-mode-hook
-    (lambda ()
-      ;; LaTeX math highlighting in org buffers
-      (font-lock-add-keywords 'org-mode
-        '(
-          (
-            "\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
-            (1 'font-lock-keyword-face)
-            (2 'font-lock-function-name-face)
-          )
-          (
-            "\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
-            (1 'font-lock-keyword-face)
-            (2 'font-lock-constant-face)
-          )
-          ("\\(\\\\textrm\\|\\\\frac\\)" (1 'font-lock-keyword-face))
-        )
-      )
-      ;; Bigger LaTeX previews
-      (plist-put org-format-latex-options :scale 1.4)
-      ;; Change ltxpng folder location for LaTeX previews
-      (setq org-latex-preview-ltxpng-directory "~/.ltxpng/")
-      ;; Change default org mode faces for bold and emphasis
-      (add-to-list 'org-emphasis-alist '("*" (:foreground "#EEEEEE" :weight bold)))
-      (add-to-list 'org-emphasis-alist '("/" (:family "DejaVu Sans Mono" :size 12 :slant oblique)))
-    )
-  )
+  (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

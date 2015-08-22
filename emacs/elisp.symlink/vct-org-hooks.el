@@ -1,5 +1,8 @@
 ;; vct-org-hooks.el --- vct's org-mode configuration
 
+;; Use this at your risk! I am pretty conservative with local file variables
+(setq enable-local-variables :all)
+
 ;; Different bullets for headers
 (setq org-bullets-bullet-list '("■" "◆" "▲" "▶"))
 
@@ -51,7 +54,6 @@
 (setf org-todo-keyword-faces '(
     ("TODO" . (:foreground "red" :bold t :weight bold))
     ("CANCELED" . (:foreground "blue" :bold t :weight bold))
-    ("WAITING" . (:foreground "yellow" :background "magenta2" :bold t :weight bold))
     ("DONE" . (:foreground "green"))
   )
 )

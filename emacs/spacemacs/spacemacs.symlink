@@ -182,10 +182,15 @@ layers configuration."
   ;; Disable line highlighting
   (global-hl-line-mode -1)
 
+
   ;; Add elisp script folder to emacs' PATH
   (add-to-list 'load-path "~/.elisp/")
   (let ((default-directory "~/.elisp/"))
     (normal-top-level-add-subdirs-to-load-path))
+
+  ;; Enable heartbeat-cursor mode
+  (load "heartbeat-cursor.el")
+  (heartbeat-cursor-mode t)
 
   ;; Set up tabbar in all modes
   (load "aquamacs-tabbar.el")

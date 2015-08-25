@@ -39,7 +39,7 @@
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '(tabbar remember)
+   dotspacemacs-additional-packages '(tabbar remember sage-shell-mode)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -209,5 +209,15 @@ layers configuration."
   (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
   ;; Force Inconsolata in org mode
   (add-hook 'org-mode-hook (lambda () (face-remap-add-relative 'default :family "Inconsolatazi4")))
+
+  ; Configuration for sagemath {{{
+  ;; Add sagemath root folder
+  (setq sage-shell:sage-root "/home/santos/opt/sage")
+  ;; Run sage using SPC s g instead of M-x sage-shell:run-sage
+  (evil-leader/set-key "sg" 'sage-shell:run-sage)
+  ;; Turn on eldoc-mode
+  (add-hook 'sage-shell-mode-hook #'eldoc-mode)
+  (add-hook 'sage-shell:sage-mode-hook #'eldoc-mode)
+;}}}
 )
 ; vim: set fdm=marker fmr={{{,}}} ft=lisp:

@@ -52,16 +52,10 @@
 This function is called at the very startup of Spacemacs initialization
 before layers configuration."
 
-  (add-to-list 'auto-mode-alist '("\\`*.tex\\'" . LaTeX-mode))
-  (defun vct-msg()
+  (defun vct/set-visual-mode-fringe-indicators ()
     (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
     (visual-line-mode 1)
   )
-  (add-hook 'LaTeX-mode-hook 'vct-msg)
-  ;; Makes AucTeX using pdflatex instead of latex
-  (setq-default TeX-PDF-mode t)
-  ;; Titles with normal size in LaTeX, and less bizarre colors
-  (setq font-latex-fontify-sectioning 'color)
 
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
@@ -209,12 +203,24 @@ layers configuration."
   ;; Open GTD file hitting SPC c g
   (evil-leader/set-key "cg" 'gtd)
   ;; }}}
-
-  ;; Org mode hooks
+  ; Org mode hooks {{{
+  ;; General configuration
   (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
   ;; Force Inconsolata in org mode
   (add-hook 'org-mode-hook (lambda () (face-remap-add-relative 'default :family "Inconsolatazi4")))
-
+  ;; All org files are better visualized with long lines!
+  (add-hook 'org-mode-hook 'vct/set-visual-mode-fringe-indicators)
+  ;}}}
+  ; LaTeX hooks {{{
+  ;; All .tex files are LaTeX
+  (add-to-list 'auto-mode-alist '("\\`*.tex\\'" . LaTeX-mode))
+  ;; Enable long lines
+  (add-hook 'LaTeX-mode-hook 'vct/set-visual-mode-fringe-indicators)
+  ;; Makes AucTeX using pdflatex instead of latex
+  (setq-default TeX-PDF-mode t)
+  ;; Titles with normal size in LaTeX, and less bizarre colors
+  (setq font-latex-fontify-sectioning 'color)
+  ;}}}
   ; Configuration for sagemath {{{
   ;; Add sagemath root folder
   (setq sage-shell:sage-root "/home/santos/opt/sage")

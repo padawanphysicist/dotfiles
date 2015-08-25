@@ -21,7 +21,7 @@ typeset -gU path
 SANDBOX=$HOME/0.sandbox/
 
 #=============
-# '1.docs'
+# '1.documents'
 #
 # Is the big kahuna(*) of all the six folders. It's the place where all the
 # working files for your currently in-progress tasks, projects and clients
@@ -34,7 +34,7 @@ SANDBOX=$HOME/0.sandbox/
 # sorcerer, magician, wizard, minister, expert in any profession". (See also
 # Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the
 # Night Rainbow.
-DOCS=$HOME/1.docs/
+DOCS=$HOME/1.documents/
 
 #=============
 # '2.archive'
@@ -60,6 +60,7 @@ $OPT/nodejs/bin
 $OPT/atom-editor/bin
 $OPT/tw5
 $OPT/bin
+$OPT/sage
 )
 path=($path $pathdirs)
 # }
@@ -128,6 +129,9 @@ export GRACE_EDITOR='xterm -geometry 50x30 -fs 10 -fa "Source Code Pro for Power
 
 export ARCHFLAGS="-arch x86_64"
 setopt HIST_IGNORE_DUPS
+
+# For sagemath
+alias sagenb="env SAGE_BROWSER=firefox sage -notebook"
 
 # TeXlive does not allow me to run bibtex on /tmp; to avoid this, set this 
 # variable

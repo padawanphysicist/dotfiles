@@ -26,8 +26,8 @@
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
 CURRENT_BG='black'
-#SEGMENT_SEPARATOR=''
-SEGMENT_SEPARATOR=''
+SEGMENT_SEPARATOR=''
+#SEGMENT_SEPARATOR=''
 
 # Begin a segment
 # Takes two arguments, background and foreground. Both can be omitted,

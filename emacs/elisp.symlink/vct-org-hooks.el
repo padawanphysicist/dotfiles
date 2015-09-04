@@ -39,3 +39,11 @@
 (custom-set-faces
   '(org-tag ((t (:foreground "DarkOrange3" :background "gray13" :box t))))
 )
+
+;; Set google translate interface
+(require 'google-translate)
+(require 'google-translate-default-ui)
+(global-set-key "\C-ct" 'google-translate-at-point)
+(global-set-key "\C-cT" 'google-translate-query-translate)
+(setq google-translate-default-target-language "pt")
+(setq google-translate-default-source-language "en")

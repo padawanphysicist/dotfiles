@@ -1,0 +1,6 @@
+;; For pretty emails =)
+(load "org-mime.el")
+
+(require 'gnus-desktop-notify)
+(gnus-desktop-notify-mode)
+(gnus-demon-add-scanmail)

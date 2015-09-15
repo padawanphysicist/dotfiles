@@ -4,3 +4,15 @@
 (require 'gnus-desktop-notify)
 (gnus-desktop-notify-mode)
 (gnus-demon-add-scanmail)
+(setq gnus-show-threads t)
+(setq gnus-save-newsrc-file nil)
+
+(setq group-name-map '(
+  ("nnimap+gmail:INBOX" . "Inbox")
+  ("nnimap+gmail:[Gmail]/Starred" . "Starred")
+  ("nnimap+gmail:[Gmail]/Trash" . "Trash")
+  ("nnimap+gmail:[Gmail]/All Mail" . "All Mail")
+  ("nnimap+gmail:[Gmail]/Sent Mail" . "Sent")
+  ("nnimap+gmail:order receipts" . "Order Receipts")
+ )
+)

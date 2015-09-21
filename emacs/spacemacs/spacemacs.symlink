@@ -208,6 +208,9 @@ layers configuration."
   ;; For ipython usage
   (require 'ob-ipython)
 
+  ;; Mail configuration
+  (load "mu4e-config.el")
+
   ; GNUs configuration {{{
   ;; Get email, and store in nnml
   (setq gnus-secondary-select-methods

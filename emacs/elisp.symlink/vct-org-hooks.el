@@ -47,3 +47,11 @@
 (global-set-key "\C-cT" 'google-translate-query-translate)
 (setq google-translate-default-target-language "pt")
 (setq google-translate-default-source-language "en")
+
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (haskell . t)
+  )
+)

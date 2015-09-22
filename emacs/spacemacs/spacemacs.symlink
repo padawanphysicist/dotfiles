@@ -191,6 +191,12 @@ layers configuration."
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
   (define-key evil-normal-state-map (kbd "<up>") 'evil-previous-visual-line)
   ;}}}
+  ; Command-line abbreviations {{{
+  (eval-after-load 'evil-ex '(evil-ex-define-cmd "W[rite]" 'save-buffer))
+  (eval-after-load 'evil-ex '(evil-ex-define-cmd "Wq" 'evil-save-and-close))
+  (eval-after-load 'evil-ex '(evil-ex-define-cmd "wQ" 'evil-save-and-close))
+  (eval-after-load 'evil-ex '(evil-ex-define-cmd "WQ" 'evil-save-and-close))
+  ;}}}
 
   ;; Add elisp script folder to emacs' PATH
   (add-to-list 'load-path "~/.elisp/")

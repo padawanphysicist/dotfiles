@@ -91,8 +91,8 @@ before layers configuration."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Inconsolatazi4"
-                               :size 17
+   dotspacemacs-default-font '("DejaVu Sans Mono"
+                               :size 15
                                :weight normal
                                :width normal
                                :powerline-scale 1.3)
@@ -273,8 +273,6 @@ layers configuration."
   ; Org mode hooks {{{
   ;; General configuration
   (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
-  ;; Force Inconsolata in org mode
-  (add-hook 'org-mode-hook (lambda () (face-remap-add-relative 'default :family "Inconsolatazi4")))
   ;; All org files are better visualized with long lines!
   (add-hook 'org-mode-hook 'vct/set-visual-mode-fringe-indicators)
   ;; Speedup insertion of LaTeX environments

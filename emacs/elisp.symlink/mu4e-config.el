@@ -43,3 +43,31 @@
 (setq mu4e-headers-passed-mark '("P" . "⇉")) ;passed
 (setq mu4e-headers-encrypted-mark '("x" . "⚷")) ;encrypted
 (setq mu4e-headers-signed-mark '("s" . "✍")) ;signed
+
+(add-hook 'mu4e-compose-mode-hook
+   (defun vct-compose ()
+      "My settings for message composition."
+      (flyspell-mode)))
+
+(defun insert-emails-from-tags (tag-expression)
+  "insert emails from org-contacts that match the tags expression. For example:
+group-phd will match entries tagged with group but not with phd."
+  (interactive "sTags: ")
+  (insert
+   (mapconcat 'identity
+	      (loop for contact in (org-contacts-filter)
+		    for contact-name = (car contact)
+		    for email = (org-contacts-strip-link (car (org-contacts-split-property
+							       (or
+								(cdr (assoc-string org-contacts-email-property
+										   (caddr contact)))
+								""))))
+		    for tags = (cdr (assoc "TAGS" (nth 2 contact)))
+		    for tags-list = (if tags
+					(split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
+				      '())
+		    if (let ((todo-only nil))
+			 (eval (cdr (org-make-tags-matcher tag-expression))))
+		    
+		    collect (org-contacts-format-email contact-name email))
+	      ",")))

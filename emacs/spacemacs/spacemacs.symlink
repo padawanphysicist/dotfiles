@@ -27,7 +27,7 @@
      emacs-lisp
      git
      github
-     markdown
+     ;markdown
      org
      latex
      ;; (shell :variables
@@ -35,13 +35,13 @@
      ;;        shell-default-position 'bottom)
      ;; syntax-checking
      version-control
-     gnus
+     ;haskell
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '(tabbar remember sage-shell-mode cdlatex gnus-desktop-notify google-translate ob-ipython web-mode)
+   dotspacemacs-additional-packages '(tabbar remember cdlatex google-translate ob-ipython web-mode)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -214,49 +214,6 @@ layers configuration."
   ;; For ipython usage
   (require 'ob-ipython)
 
-  ;; Mail configuration
-  (load "mu4e-config.el")
-
-  ; GNUs configuration {{{
-  ;; Get email, and store in nnml
-  (setq gnus-secondary-select-methods
-    '(
-      (nnimap "gmail"
-        (nnimap-address "imap.gmail.com")
-        (nnimap-server-port 993)
-        (nnimap-stream ssl)
-      )
-    )
-  )
-
-  ;; Contacts in org mode =D
-  (load "org-contacts.el")
-  (setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
-
-  (add-hook 'message-mode-hook 'turn-off-auto-fill)
-  (add-hook 'message-mode-hook 'vct/set-visual-mode-fringe-indicators)
-
-  ;; Send email via Gmail:
-  (setq message-send-mail-function 'smtpmail-send-it
-    smtpmail-default-smtp-server "smtp.gmail.com")
-
-  ;; Archive outgoing email in Sent folder on imap.gmail.com:
-  (setq gnus-message-archive-method '(nnimap "imap.gmail.com")
-      gnus-message-archive-group "[Gmail]/Sent Mail")
-
-  ;; set return email address based on incoming email address
-  (setq gnus-posting-styles
-    '(
-       ((header "to" "victor.phb@gmail.com")(address "victor.phb@gmail.com"))
-       ((header "to" "victor_santos@fisica.ufc.br")(address "victor_santos@fisica.ufc.br"))
-       ((header "to" "vsantos@gravity.psu.edu")(address "vsantos@gravity.psu.edu"))
-    )
-  )
-
-  ;; store email in ~/gmail directory
-  (setq nnml-directory "~/.Gmail")
-  (setq message-directory "~/.Gmail")
-  ;}}}
   ; GTD configuration {{{
   ;; I keep almost everything in one big org file.
   (defvar org-gtd-file "~/1.documents/0.annotations/0.organizer.org")

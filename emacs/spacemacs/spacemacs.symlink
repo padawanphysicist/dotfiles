@@ -22,7 +22,7 @@
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     auto-completion
+     ;auto-completion
      better-defaults
      emacs-lisp
      git
@@ -41,7 +41,7 @@
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
-   dotspacemacs-additional-packages '(tabbar remember cdlatex google-translate ob-ipython web-mode)
+   dotspacemacs-additional-packages '(tabbar remember cdlatex google-translate ob-ipython web-mode vimish-fold)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -214,6 +214,29 @@ layers configuration."
   ;; For ipython usage
   (require 'ob-ipython)
 
+  ; Web mode configuration {{{
+  ;; Use web-mode for editing plain HTML, CSS and JavaScript
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.css?\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.js?\\'" . web-mode))
+  ;; Hooks
+  (defun my-web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-script-padding 2)
+    (setq web-mode-enable-auto-pairing t)
+    (setq web-mode-enable-css-colorization t)
+    (setq web-mode-enable-current-element-highlight t)
+    (setq web-mode-enable-current-column-highlight t)
+    (setq web-mode-ac-sources-alist
+          '(("css" . (ac-source-css-property))
+            ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
+  )
+  (add-hook 'web-mode-hook  'my-web-mode-hook)
+  (add-hook 'web-mode-hook (lambda ()(vimish-fold-mode t)))
+  ; }}}
   ; GTD configuration {{{
   ;; I keep almost everything in one big org file.
   (defvar org-gtd-file "~/1.documents/0.annotations/0.organizer.org")

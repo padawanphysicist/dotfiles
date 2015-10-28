@@ -54,6 +54,7 @@ ARCHIVE=$HOME/2.archive/
 OPT=$HOME/opt
 
 pathdirs=(
+$HOME/.npm/bin
 $HOME/.bin
 $OPT/julia/bin
 $OPT/nodejs/bin

@@ -84,10 +84,10 @@ bind-key v split-window -h
 bind-key ^V split-window -h
 
 # Mouse mode
-set -g mode-mouse off
-set -g mouse-resize-pane on
-set -g mouse-select-pane on
-set -g mouse-select-window on
+#set -g mode-mouse off
+#set -g mouse-resize-pane on
+#set -g mouse-select-pane on
+#set -g mouse-select-window on
 
 # Toggle mouse on
 bind m \

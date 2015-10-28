@@ -3,7 +3,7 @@
   (setq org-latex-classes nil))
 (add-to-list 'org-latex-classes
   '("org-article-draft"
-    "\\documentclass[12pt,a4paper]{article}
+"\\documentclass[12pt,a4paper]{article}
 % Language and geometry
 \\usepackage[english]{babel}
 \\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}

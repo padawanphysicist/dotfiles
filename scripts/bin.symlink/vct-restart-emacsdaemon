@@ -1,0 +1,2 @@
+systemctl --user stop emacs
+systemctl --user start emacs

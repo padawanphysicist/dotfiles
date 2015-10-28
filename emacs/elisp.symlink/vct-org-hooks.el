@@ -6,7 +6,7 @@
 (setq org-tags-column 5)
 
 ;; Different bullets for headers
-(setq org-bullets-bullet-list '("■" "◆" "▲" "▶"))
+;(setq org-bullets-bullet-list '("■" "◆" "▲" "▶"))
 
 ;; LaTeX math highlighting in org buffers
 (font-lock-add-keywords 'org-mode
@@ -41,17 +41,17 @@
 )
 
 ;; Set google translate interface
-(require 'google-translate)
-(require 'google-translate-default-ui)
-(global-set-key "\C-ct" 'google-translate-at-point)
-(global-set-key "\C-cT" 'google-translate-query-translate)
-(setq google-translate-default-target-language "pt")
-(setq google-translate-default-source-language "en")
+;(require 'google-translate)
+;(require 'google-translate-default-ui)
+;(global-set-key "\C-ct" 'google-translate-at-point)
+;(global-set-key "\C-cT" 'google-translate-query-translate)
+;(setq google-translate-default-target-language "pt")
+;(setq google-translate-default-source-language "en")
 
 ;; active Babel languages
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (haskell . t)
-  )
-)
+;(org-babel-do-load-languages
+; 'org-babel-load-languages
+; '(
+;   (haskell . t)
+;  )
+;)

@@ -22,7 +22,6 @@ call vundle#begin()               " Initialize Vundle
 "call vundle#begin('~/some/path/here')
 
 Plugin 'gmarik/Vundle.vim'   " let Vundle manage Vundle (required)
-Plugin 'JuliaLang/julia-vim' " Vim support for Julia language
 Plugin 'tpope/vim-markdown'  
 Plugin 'nanotech/jellybeans.vim' " Colorful, dark scheme
 

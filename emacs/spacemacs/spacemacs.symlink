@@ -36,7 +36,7 @@
      ;; syntax-checking
      version-control
      python
-     haskell
+     ;haskell
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -92,7 +92,7 @@ before layers configuration."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro for Powerline"
+   dotspacemacs-default-font '("Inconsolata for Powerline"
                                :size 15
                                :weight normal
                                :width normal
@@ -171,7 +171,7 @@ before layers configuration."
   ;; User initialization goes here
   )
 
-(defun dotspacemacs/config ()
+(defun dotspacemacs/user-config ()
   "Configuration function.
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
@@ -209,8 +209,8 @@ layers configuration."
   (heartbeat-cursor-mode t)
 
   ;; Set up tabbar in all modes
-  (load "aquamacs-tabbar.el")
-  (tabbar-mode t)
+  ;(load "aquamacs-tabbar.el")
+  ;(tabbar-mode t)
 
   ;; For ipython usage
   (require 'ob-ipython)
@@ -255,12 +255,16 @@ layers configuration."
   (evil-leader/set-key "cg" 'gtd)
   ;; }}}
   ; Org mode hooks {{{
-  ;; General configuration
-  (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
   ;; All org files are better visualized with long lines!
   (add-hook 'org-mode-hook 'vct/set-visual-mode-fringe-indicators)
   ;; Speedup insertion of LaTeX environments
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+
+  (defun org-dblock-write:inc-file (params) (let ((file (plist-get params :file))) (insert (concat "#+INCLUDE: " (get-path-dynamically)))))
+  (add-hook 'org-export-before-processing-hook (lambda (backend) (org-update-all-dblocks)))
+
+  ;; General configuration
+  (add-hook 'org-mode-hook (lambda () (load "vct-org-hooks.el")))
   ;}}}
   ; LaTeX hooks {{{
   ;; All .tex files are LaTeX

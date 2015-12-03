@@ -26,6 +26,7 @@
 \\usepackage{float} % Useful for right positioning of figures and tables
 % Math packages
 \\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\\usepackage{mathrsfs}
 % For include figures
 \\usepackage{graphicx}
 % For proper hyphenation

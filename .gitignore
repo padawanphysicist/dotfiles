@@ -1,0 +1,8 @@
+zsh/zshrc.symlink
+vim/vimrc.symlink
+tmux/tmux.conf.symlink
+emacs/spacemacs.symlink
+emacs/emacs.d.symlink/elpa
+emacs/emacs.d.symlink/auto-save-list
+emacs/emacs.d.symlink/places
+emacs/emacs.d.symlink/savehist

@@ -104,30 +104,63 @@ bind-key v split-window -h
 bind-key ^V split-window -h
 #+end_src
 
-Mouse mode
+Mouse mode on by default
 #+begin_src sh :tangle tmux.conf.symlink
-set -g mode-mouse off
-set -g mouse-resize-pane on
-set -g mouse-select-pane on
-set -g mouse-select-window on
+set -g -q mouse on
 #+end_src
 
-Toggle mouse on
+Toggle mouse on/off
 #+begin_src sh :tangle tmux.conf.symlink
 bind m \
-    set -g mode-mouse on \;\
-    set -g mouse-resize-pane on \;\
-    set -g mouse-select-pane on \;\
-    set -g mouse-select-window on \;\
+    set -g -q mouse on \;\
     display 'Mouse: ON'
-
 bind M \
-    set -g mode-mouse off \;\
-    set -g mouse-resize-pane off \;\
-    set -g mouse-select-pane off \;\
-    set -g mouse-select-window off \;\
+    set -g -q mouse off \;\
     display 'Mouse: OFF'
 #+end_src
+
+copy-mode -e: This allows you to press page up in normal mode and have it scroll back into the history. If you page down back to the bottom of the history, it automatically exits copy mode. If there is an alternate screen (i.e. a full screen app like vim, less, mutt, etc) then it does not enter copy mode, but passes through the key press. This is because alternate screen apps usually handle page up/down itself and also will have no scroll back.
+#+begin_src sh :tangle tmux.conf.symlink
+bind-key -T root PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -e; send-keys PPage"
+bind-key -t vi-copy PPage page-up
+bind-key -t vi-copy NPage page-down
+#+end_src
+
+Behaviour very similar to page up, except for the mouse wheel. i.e. I just scroll back and forward and if I scroll to the end of the history, copy mode automatically exits. Again, just pass through the click for alternate screens - they often handle the mouse themselves.
+#+begin_src sh :tangle tmux.conf.symlink
+bind -n WheelUpPane   select-pane -t= \; copy-mode -e \; send-keys -M
+bind -n WheelDownPane select-pane -t= \;                 send-keys -M
+#bind-key -T root WheelUpPane if-shell -F -t = "#{alternate_on}" "send-keys -M" "select-pane -t =; copy-mode -e; send-keys -M"
+#bind-key -T root WheelDownPane if-shell -F -t = "#{alternate_on}" "send-keys -M" "select-pane -t =; send-keys -M"
+#bind-key -t vi-copy WheelUpPane halfpage-up
+#bind-key -t vi-copy WheelDownPane halfpage-down
+#+end_src
+
+Left click on a window name in status bar to select it
+#+begin_src sh :tangle tmux.conf.symlink
+bind -T root MouseDown1Status select-window -t= # default 
+#+end_src
+
+Left click on a pane selects it
+#+begin_src sh :tangle tmux.conf.symlink
+bind -T root MouseDown1Pane select-pane -t= 
+#+end_src
+
+Draging on border resizes pane
+#+begin_src sh :tangle tmux.conf.symlink
+bind -T root MouseDrag1Border resize-pane -M 
+#+end_src
+
+Middle click on a window name in status bar to kill it
+#+begin_src sh :tangle tmux.conf.symlink
+bind -T root MouseDown2Status kill-window 
+#+end_src
+
+Middle click in a pane to paste
+#+begin_src sh :tangle tmux.conf.symlink
+bind -T root MouseDown2Pane run -b "exec </dev/null; xclip -o | awk 1 ORS=' ' | tmux load-buffer - ; tmux paste-buffer"
+#+end_src
+
 
 *** Colors
 
@@ -149,6 +182,14 @@ Active window title colors
 set-window-option -g window-status-current-fg colour166 #orange
 set-window-option -g window-status-current-bg default
 #+end_src
+
+Active window style
+#+begin_src sh :tangle tmux.conf.symlink
+set-window-option -g window-style 'bg=#181818'
+set-window-option -g window-active-style 'bg=black'
+set-window-option -g pane-active-border-style ''
+#+end_src
+
 
 Pane border
 #+begin_src sh :tangle tmux.conf.symlink

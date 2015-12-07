@@ -45,6 +45,13 @@ Use vi keybindings in copy and choice modes
 setw -g mode-keys vi
 #+end_src
 
+Setup 'v' to begin selection as in Vim
+#+begin_src sh :tangle tmux.conf.symlink
+bind-key -t vi-copy v begin-selection
+bind-key -t vi-copy y copy-pipe "xclip"
+bind -n M-p run "tmux set-buffer \"$(xclip -o)\"; tmux paste-buffer"
+#+end_src
+
 Status bar
 #+begin_src sh :tangle tmux.conf.symlink
 set-option -g status-utf8 on

@@ -1,11 +1,10 @@
 * vim configuration
 
-
 ** Vundle Configuration
 
 [[https://github.com/gmarik/Vundle.vim][Vundle]] is a very nice plug-in manager for Vim. It has the same principles as [[https://github.com/tpope/vim-pathogen/][Pathogen]] but with a Git-GitHub-aware management system.
 
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set nocompatible                  " Be iMproved (required)
 filetype off                      " Required
 
@@ -27,27 +26,27 @@ filetype plugin indent on    " Required
 ** General Settings
 
 To sharpen Vim's memory and smartness, we can keep a ~/.viminfo file. This file keeps some useful data, like history searches (/), commands (:), tags (`), registers, etc. With this file it's also possible to to copy a line (yy), quit the file, open a new one and then paste (p) that line you previously copied.
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set viminfo='10,\"30,:20,%,n~/.viminfo
 #+end_src
 
 This set the cursor at the position it was since the last time you opened the file
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 au BufReadPost * if line("'\"")|execute("normal `\"")|endif
 #+end_src
 
 Show useless whitespaces in the end of the lines
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 au BufNewFile,BufRead * match Error '\s\+$'
 #+end_src
 
 Show hidden characters
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set list
 #+end_src
 
 These are very handy command-line abbreviations
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 cab W  w
 cab Wq wq
 cab wQ wq
@@ -57,121 +56,121 @@ cab E  e
 #+end_src
 
 Remove espaços redundantes no fim das linhas fiz uma adição ao comando depois do <esc> mz cria uma marca para voltar ao ponto em que se está e 'z retorna a este ponto ao final do comando
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 map <F7> <esc>mz:%s/\s\+$//g<cr>`z
 #+end_src
 
 Enable 256 colors
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set t_Co=256
 #+end_src
 
 Turn on syntax highlighting
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 syntax enable
 #+end_src
 
 Choose colorscheme
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 colorscheme jellybeans
 #+end_src
 
 Show line numbers
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set number
 #+end_src
 
 Enable mouse on all modes
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set mouse=a
 #+end_src
 
 Highlight current line
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set cursorline
 #+end_src
 
 Sets how many lines of history VIM has to remember
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set history=10000
 #+end_src
 
 Turn backup off, since most stuff is in git anyway...
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set nobk
 #+end_src
 
 Prevents automatic backup
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set nowb
 #+end_src
 
 These files must be ignored by VIM
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set wildignore=*.o,*.obj,*.bak,*.exe,*.x
 #+end_src
 
 *** Textual search options
 
 Case-insensitive search
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set ignorecase
 #+end_src
 
 With this option, a search is case-insensitive if you enter the search string in ALL lower case
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set smartcase 
 #+end_src
 
 Highlight search
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set hlsearch
 #+end_src
 
 Incremental search
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set incsearch
 #+end_src
 
 Set utf8 as standard encoding and en_US as the standard language
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set encoding=utf8 
 #+end_src
 
 No noise from VIM:
 
 - No beeping...
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set noerrorbells 
 #+end_src
 - .. and hides buffers instead of close them
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set hidden
 #+end_src
 
 Set to auto read when a file is changed from the outside
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set autoread 
 #+end_src
 
 Always display the statusline
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set laststatus=2
 #+end_src
 
 **** Fixing the delay in exiting visual/insert mode
 
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set laststatus=2
 #+end_src
 
 Do time out on mappings and others
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set timeout
 #+end_src
 
 Wait ={num}= ms before timing out a mapping When you’re pressing Escape to leave insert mode in the terminal, it will by default take a second or another keystroke to leave insert mode completely and update the statusline. This fixes that. I got this from [[https://powerline.readthedocs.org/en/latest/tipstricks.html#vim][here]].
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set timeoutlen=2000 
 if !has('gui_running')
     set ttimeoutlen=10
@@ -184,11 +183,11 @@ endif
 #+end_src
 
 **** Moving between screen lines
+
 To use in line wrapping; when you do soft line breaking, moving the cursor up and down will jump from one physical line to another; to move between displayed lines, you must press gj and gk, and this is really annoying!
 
 Although one can do the simple mapping
-
-#+begin_src 
+#+begin_src sh 
    imap <silent> <Down> <C-o>gj
    imap <silent> <Up> <C-o>gk
    nmap <silent> <Down> gj
@@ -201,7 +200,7 @@ this actually breaks VIM's omnicompletion. The function below was found in
 
 to be a nice solution for this problem.
 
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 function! NoremapNormalCmd(key, preserve_omni, ...)
   let cmd = ''
   let icmd = ''
@@ -220,7 +219,7 @@ endfunction
 #+end_src
 
 Cursor moves by screen lines
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 call NoremapNormalCmd("<Up>", 1, "gk")
 call NoremapNormalCmd("<Down>", 1, "gj")
 call NoremapNormalCmd("<Home>", 0, "g<Home>")
@@ -228,53 +227,53 @@ call NoremapNormalCmd("<End>", 0, "g<End>")
 #+end_src
 
 Clear last search pattern by hitting return
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 nnoremap <CR> :noh<CR><CR>
 #+end_src
 
 **** Text formatting
 
 Do soft word wrap
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set wrap linebreak nolist
 #+end_src
 
 Adjust the number of columns shifted by commands < or >
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set shiftwidth=4
 #+end_src
 
 ***** Space vs TAB
 
 Use spaces instead of TABs
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set expandtab
 #+end_src
 
 Each TAB has four spaces
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set tabstop=4
 #+end_src
 
 Let backspace delete indent
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set softtabstop=4
 #+end_src
 
 Set utf8 as standard encoding and en_US as the standard language
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 set encoding=utf8
 #+end_src
 
 *** Specific Filetype Configuration
 
 .tex, .sty and .cls files are always LaTeX files
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 au BufNewFile,BufRead *.tex,*.sty,*.cls set filetype=tex 
 #+end_src
 
 Bash files
-#+begin_src :tangle vimrc.symlink
+#+begin_src sh :tangle vimrc.symlink
 au BufNewFile,BufRead *.sh,*.bash set filetype=sh 
 #+end_src
 

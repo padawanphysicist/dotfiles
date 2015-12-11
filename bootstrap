@@ -1,13 +1,22 @@
 #!/bin/bash
+#
 # bootstrap files to its places.
+#
 
-# Parse command line arguments
-script_name="$0"
+SCRIPT_NAME="$0"
+DOTFILES_ROOT="`pwd`"
+MAX_DEPTH=3
+
+set -e
+echo ''
+
 usage () {
-    echo "Usage: $script_name" 1>&2;
-    exit 1;
+  # Prints usage of the script
+  echo "Usage: $SCRIPT_NAME" 1>&2;
+  exit 1;
 }
 
+# Parse command line arguments
 # Use > 1 to consume two arguments per pass in the loop (e.g. each argument has
 # a corresponding value to go with it). Use > 0 to consume one or more arguments
 # per pass in the loop (e.g. some arguments don't have a corresponding value to
@@ -33,6 +42,11 @@ do
       verbose=true
       shift # past argument
       ;;
+    -r|--remove)
+      removebrokenlinks
+      exit 1
+      shift # past argument
+      ;;
     *)
       # No options
       ;;
@@ -40,111 +54,104 @@ do
   shift # past argument or value
 done
 
-DOTFILES="`pwd`"
-MAX_DEPTH=3
-
-# Set this to the location of your emacs executable
-EMACSCMD="`which emacs`"
-
-# Tangle a single .org file with org-mode
-tangle () {
-  orig="$1"
-  dest=`pwd`
-  echo "File: $orig"
-  $EMACSCMD -nw --batch --eval "
-  (progn
-    (require 'org-install)
-    (find-file (expand-file-name \"$orig\" \"$dest\"))
-    (org-babel-tangle)
-    (kill-buffer))" 2>&1 | grep "Tangled"
-}
-
-
-# Remove broken links from HOME directory
-removebrokenlinks()
-{
+removebrokenlinks() {
+  # Remove broken links from HOME directory
   if [[ "$verbose" == true ]]; then
     echo "*** Removing broken symlinks from $HOME ***"
   fi
   find $HOME -maxdepth 1 -name ".*" -type l | while read f; do if [ ! -e "$f"  ]; then rm -f "$f"; fi; done
 }
-
-set -e
-echo ''
-
 info () {
     printf "\r\033[0;34m$1\033[0m\n"
 }
-
 user () {
     printf "\r  [ \033[0;33m?\033[0m ] $1 "
 }
-
 success () {
     printf "\r\033[2K  [\033[0;32m  OK  \033[0m] $1\n"
 }
-
 fail () {
     printf "\r\033[2K  [\033[0;31mFAIL\033[0m] $1\n"
     echo ''
     exit
 }
+link_file () {
+  local SOURCE=$1 DESTINATION=$2
+  local FORCE= BACKUP= SKIP=
+  local ACTION=
+  if [ -f "$DESTINATION" -o -d "$DESTINATION" -o -L "$DESTINATION" ]
+  then
+    if [ "$FORCE_ALL" == "false" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "false" ]
+    then
+      local CURR_SOURCE="$(readlink $DESTINATION)"
 
-link_files () {
-    ln -s $1 $2
+      if [ "$CURR_SOURCE" == "$SOURCE" ]
+      then
+        SKIP=true;
+      else
+        user "File already exists: $DESTINATION ($(basename "$SOURCE")), what do you want to do?\n\
+        [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+        read -n 1 action
+
+        case "$action" in
+          o )
+            FORCE=true;;
+          O )
+            FORCE_ALL=true;;
+          b )
+            BACKUP=true;;
+          B )
+            BACKUP_ALL=true;;
+          s )
+            SKIP=true;;
+          S )
+            SKIP_ALL=true;;
+          * )
+            ;;
+        esac
+      fi
+    fi
+    FORCE=${FORCE:-$FORCE_ALL}
+    BACKUP=${BACKUP:-$BACKUP_ALL}
+    SKIP=${SKIP:-$SKIP_ALL}
+    if [ "$FORCE" == "true" ]
+    then
+      rm -rf "$DESTINATION"
+      success "removed $DESTINATION"
+    fi
+    if [ "$BACKUP" == "true" ]
+    then
+      mv "$DESTINATION" "${DESTINATION}.backup"
+      success "moved $DESTINATION to ${DESTINATION}.backup"
+    fi
+    if [ "$SKIP" == "true" ]
+    then
+      success "skipped $SOURCE"
+    fi
+  fi
+  if [ "$SKIP" != "true" ]  # "false" or empty
+  then
+    ln -s "$1" "$2"
     success "linked $1 to $2"
+  fi
 }
 
+# Symlink *.symlink files to $HOME
 install_dotfiles () {
   info 'installing dotfiles'
 
-  backup_all=false
-  skip_all=false
+  local FORCE_ALL=false BACKUP_ALL=false SKIP_ALL=false
 
-  for source in `find $DOTFILES -maxdepth $MAX_DEPTH -name \*.symlink`
+  for SOURCE in $(find -H "$DOTFILES_ROOT" -maxdepth $MAX_DEPTH -name '*.symlink' -not -path '*.git*')
   do
-    dest="$HOME/.`basename \"${source%.*}\"`"
-
-    if [ -f $dest ] || [ -d $dest ]
-    then
-      backup=false
-      skip=false
-
-      if [ "$force" == "true" ]
-      then
-        rm -rf $dest
-        success "removed $dest"
-      fi
-
-      if [ "$backup" == "true" ] || [ "$backup_all" == "true" ]
-      then
-        mv $dest $dest\.backup
-        success "moved $dest to $dest.backup"
-      fi
-
-      if [ "$skip" == "false" ] && [ "$skip_all" == "false" ]
-      then
-        link_files $source $dest
-      else
-        success "skipped $source"
-      fi
-    else
-        link_files $source $dest
-    fi
+    DESTINATION="$HOME/.$(basename "${SOURCE%.*}")"
+    link_file "$SOURCE" "$DESTINATION"
   done
 }
 
-# Tangle org-mode files
-for org_file in `find $DOTFILES -maxdepth $MAX_DEPTH -name \*.org`
-do
-  if [[ "$org_file" != *"README"* ]]; then # Exclude README.org.com.br/
-    tangle "$org_file"
-  fi
-done
-
 install_dotfiles
 
-#echo ''
-#printf "\033[0;31mDone!\033[0m \n"
+echo ''
+printf "\033[0;31mDone!\033[0m \n"
 
-# vim: set fdm=marker fmr={{{,}}} ft=sh:
+# vim: set fdm=marker fmr={,} ft=sh:

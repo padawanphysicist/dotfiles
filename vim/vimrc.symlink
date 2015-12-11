@@ -1,0 +1,208 @@
+"
+" vim configuration
+"
+
+" Vundle Configuration {{{
+" Vundle (https://github.com/gmarik/Vundle.vim) is a very nice plug-in manager
+" for Vim. It has the same principles as Pathogen
+" (https://github.com/tpope/vim-pathogen/) but with a Git-GitHub-aware
+" management system.
+
+set nocompatible                  " Be iMproved (required)
+filetype off                      " Required
+set rtp+=~/.vim/bundle/Vundle.vim " Set the runtime path to include Vundle
+call vundle#begin()               " Initialize Vundle
+
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+Plugin 'gmarik/Vundle.vim'   " let Vundle manage Vundle (required)
+Plugin 'tpope/vim-markdown'
+Plugin 'nanotech/jellybeans.vim' " Colorful, dark scheme
+
+" all of your Plugins must be added before the following line
+call vundle#end()            " Required
+filetype plugin indent on    " Required
+"}}}
+" General Settings {{{
+" To sharpen Vim's memory and smartness, we can keep a ~/.viminfo file. This
+" file keeps some useful data, like history searches (/), commands (:), tags
+" (`), registers, etc. With this file it's also possible to to copy a line
+" (yy), quit the file, open a new one and then paste (p) that line you
+" previously copied.
+set viminfo='10,\"30,:20,%,n~/.viminfo
+
+" This set the cursor at the position it was since the last time you opened
+" the file
+au BufReadPost * if line("'\"")|execute("normal `\"")|endif
+
+" Show useless whitespaces in the end of the lines
+au BufNewFile,BufRead * match Error '\s\+$'
+
+" Show hidden characters
+set list
+
+" These are very handy command-line abbreviations
+cab W  w
+cab Wq wq
+cab wQ wq
+cab WQ wq
+cab Q  q
+cab E  e
+
+" Remove espaços redundantes no fim das linhas fiz uma adição ao comando
+" depois do <esc> mz cria uma marca para voltar ao ponto em que se está e 'z
+" retorna a este ponto ao final do comando
+map <F7> <esc>mz:%s/\s\+$//g<cr>`z
+
+" Enable 256 colors
+set t_Co=256
+
+" Turn on syntax highlighting
+syntax enable
+
+" Choose colorscheme
+colorscheme jellybeans
+
+" Show line numbers
+set number
+
+" Enable mouse on all modes
+set mouse=a
+
+" Highlight current line
+set cursorline
+
+" Sets how many lines of history VIM has to remember
+set history=10000
+
+" Turn backup off, since most stuff is in git anyway...
+set nobk
+
+" Prevents automatic backup
+set nowb
+
+" These files must be ignored by VIM
+set wildignore=*.o,*.obj,*.bak,*.exe,*.x
+
+" Textual search options {{{
+
+" Case-insensitive search
+set ignorecase
+
+" With this option, a search is case-insensitive if you enter the search
+" string in ALL lower case
+set smartcase
+
+" Highlight search
+set hlsearch
+
+" Incremental search
+set incsearch
+" }}}
+
+" Set utf8 as standard encoding and en_US as the standard language
+set encoding=utf8
+
+" No noise from VIM:
+"     - No beeping...
+set noerrorbells
+"     - ... and hides buffers instead of close them
+set hidden
+
+" Set to auto read when a file is changed from the outside
+set autoread
+
+" Always display the statusline
+set laststatus=2
+
+" Fixing the delay in exiting visual/insert mode
+set laststatus=2
+
+" Do time out on mappings and others
+set timeout
+
+" Wait {num} ms before timing out a mapping When you’re pressing Escape to
+" leave insert mode in the terminal, it will by default take a second or
+" another keystroke to leave insert mode completely and update the statusline.
+" This fixes that. I got this from
+" https://powerline.readthedocs.org/en/latest/tipstricks.html#vim
+set timeoutlen=2000
+if !has('gui_running')
+    set ttimeoutlen=10
+    augroup FastEscape
+        autocmd!
+        au InsertEnter * set timeoutlen=0
+        au InsertLeave * set timeoutlen=1000
+    augroup END
+endif
+
+" Moving between screen lines {{{
+" To use in line wrapping; when you do soft line breaking, moving the cursor
+" up and down will jump from one physical line to another; to move between
+" displayed lines, you must press gj and gk, and this is really annoying!
+" Although one can do the simple mapping
+"     imap <silent> <Down> <C-o>gj
+"     imap <silent> <Up> <C-o>gk
+"     nmap <silent> <Down> gj
+"     nmap <silent> <Up> gk
+" this actually breaks VIM's omnicompletion. The function below was found in
+" http://vim.wikia.com/wiki/Move_cursor_by_display_lines_when_wrapping
+" to be a nice solution for this problem.
+function! NoremapNormalCmd(key, preserve_omni, ...)
+  let cmd = ''
+  let icmd = ''
+  for x in a:000
+    let cmd .= x
+    let icmd .= "<C-\\><C-O>" . x
+  endfor
+  execute ":nnoremap <silent> " . a:key . " " . cmd
+  execute ":vnoremap <silent> " . a:key . " " . cmd
+  if a:preserve_omni
+    execute ":inoremap <silent> <expr> " . a:key . " pumvisible() ? \"" . a:key . "\" : \"" . icmd . "\""
+  else
+    execute ":inoremap <silent> " . a:key . " " . icmd
+  endif
+endfunction
+
+" Cursor moves by screen lines
+call NoremapNormalCmd("<Up>", 1, "gk")
+call NoremapNormalCmd("<Down>", 1, "gj")
+call NoremapNormalCmd("<Home>", 0, "g<Home>")
+call NoremapNormalCmd("<End>", 0, "g<End>")
+"}}}
+
+" Clear last search pattern by hitting return
+nnoremap <CR> :noh<CR><CR>
+
+" Do soft word wrap
+set wrap linebreak nolist
+
+" Adjust the number of columns shifted by commands < or >
+set shiftwidth=4
+
+" Space vs TAB{{{
+" Use spaces instead of TABs
+set expandtab
+
+" Each TAB has four spaces
+set tabstop=4
+
+" Let backspace delete indent
+set softtabstop=4
+"}}}
+
+" Set utf8 as standard encoding and en_US as the standard language
+set encoding=utf8
+
+" Specific Filetype Configuration {{{
+" .tex, .sty and .cls files are always LaTeX files
+au BufNewFile,BufRead *.tex,*.sty,*.cls set filetype=tex
+
+" Bash files
+au BufNewFile,BufRead *.sh,*.bash set filetype=sh
+"}}}
+
+"}}}
+
+" vim: fdm=marker fmr={{{,}}}:

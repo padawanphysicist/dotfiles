@@ -1,6 +1,5 @@
-* Git configuration
+# Git configuration
 
-#+begin_src sh :tangle gitconfig.symlink
 [alias]
     wdiff = diff --color-words --ignore-all-space
     ldiff = difftool -y -t latex
@@ -12,4 +11,3 @@
 	name = Victor Santos (vct)
 [color]
         ui = true
-#+end_src

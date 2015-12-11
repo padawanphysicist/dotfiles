@@ -7,56 +7,52 @@ SCRIPT_NAME="$0"
 DOTFILES_ROOT="`pwd`"
 MAX_DEPTH=3
 
-set -e
-echo ''
-
 usage () {
   # Prints usage of the script
   echo "Usage: $SCRIPT_NAME" 1>&2;
   exit 1;
 }
 
-# Parse command line arguments
-# Use > 1 to consume two arguments per pass in the loop (e.g. each argument has
-# a corresponding value to go with it). Use > 0 to consume one or more arguments
-# per pass in the loop (e.g. some arguments don't have a corresponding value to
-# go with it).
-while [[ $# > 0 ]]
-do
-  key="$1"
+export FORCE_ALL="false"
+export BACKUP_ALL="false"
+export SKIP_ALL="false"
 
-  case $key in
-    -f|--force)
-      force=true
-      shift # past argument
+set -e
+echo ''
+
+# Parse command line arguments {
+while getopts :foh: option
+do
+  case $option in
+    f)
+      FORCE_ALL="true"
+      BACKUP_ALL="false"
+      SKIP_ALL="false"
       ;;
-    -o|--overwrite)
-      force=true
-      shift # past argument
+    o)
+      FORCE_ALL="true"
+      BACKUP_ALL="false"
+      SKIP_ALL="false"
       ;;
-    -h|--help)
+    h)
       usage
-      shift # past argument
       ;;
-    -v|--verbose)
-      verbose=true
-      shift # past argument
-      ;;
-    -r|--remove)
+    r)
       removebrokenlinks
-      exit 1
-      shift # past argument
+      return
       ;;
-    *)
-      # No options
+    *) # Wrong option
+	  echo "Error: Unknown option: $1" >&2
+      usage
+      return
       ;;
   esac
-  shift # past argument or value
 done
+# }
 
 removebrokenlinks() {
   # Remove broken links from HOME directory
-  if [[ "$verbose" == true ]]; then
+  if [[ "$VERBOSE" == "true" ]]; then
     echo "*** Removing broken symlinks from $HOME ***"
   fi
   find $HOME -maxdepth 1 -name ".*" -type l | while read f; do if [ ! -e "$f"  ]; then rm -f "$f"; fi; done
@@ -81,6 +77,12 @@ link_file () {
   local ACTION=
   if [ -f "$DESTINATION" -o -d "$DESTINATION" -o -L "$DESTINATION" ]
   then
+    #if [ "$FORCE_ALL" == "true" ] # Overwrite all actions
+    #then
+    #  rm -rf "$DESTINATION"
+    #  success "removed $DESTINATION"
+    #  ln -s "$1" "$2"
+    #  success "linked $1 to $2"
     if [ "$FORCE_ALL" == "false" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "false" ]
     then
       local CURR_SOURCE="$(readlink $DESTINATION)"
@@ -90,22 +92,16 @@ link_file () {
         SKIP=true;
       else
         user "File already exists: $DESTINATION ($(basename "$SOURCE")), what do you want to do?\n\
-        [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
-        read -n 1 action
+        [s]kip, [o]verwrite, [b]ackup?"
+        read -n 1 ACTION
 
-        case "$action" in
+        case "$ACTION" in
           o )
             FORCE=true;;
-          O )
-            FORCE_ALL=true;;
           b )
             BACKUP=true;;
-          B )
-            BACKUP_ALL=true;;
           s )
             SKIP=true;;
-          S )
-            SKIP_ALL=true;;
           * )
             ;;
         esac
@@ -135,12 +131,9 @@ link_file () {
     success "linked $1 to $2"
   fi
 }
-
-# Symlink *.symlink files to $HOME
 install_dotfiles () {
+  # Symlink *.symlink files to $HOME
   info 'installing dotfiles'
-
-  local FORCE_ALL=false BACKUP_ALL=false SKIP_ALL=false
 
   for SOURCE in $(find -H "$DOTFILES_ROOT" -maxdepth $MAX_DEPTH -name '*.symlink' -not -path '*.git*')
   do

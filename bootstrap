@@ -3,6 +3,7 @@
 # bootstrap files to its places.
 #
 
+
 SCRIPT_NAME="$0"
 DOTFILES_ROOT="`pwd`"
 MAX_DEPTH=3
@@ -49,7 +50,6 @@ do
   esac
 done
 # }
-
 removebrokenlinks() {
   # Remove broken links from HOME directory
   if [[ "$VERBOSE" == "true" ]]; then
@@ -143,6 +143,61 @@ install_dotfiles () {
 }
 
 install_dotfiles
+
+# vim configuration {{{
+VIM_FOLDER=${HOME}/.vim
+
+# The colorscheme I use is installed by vundle. As it is set BEFORE actually install vundle, vim is annoyed and displays a 'Press ENTER or type command to continue' message. To avoid this, I run vim with a modified (and temporary) configuration file.
+TMPVIMRC=$(mktemp /tmp/vimrc.XXXXXX)
+sed "/^colorscheme jellybeans/d" $HOME/.vimrc > $TMPVIMRC
+
+if [ -d "${VIM_FOLDER}" ]
+then
+  declare ACTION= FORCE= BACKUP= SKIP=
+  if [ "$FORCE_ALL" == "false" ]
+  then
+    user "File already exists: ${VIM_FOLDER}, what do you want to do?\n\
+    [s]kip, [o]verwrite, [b]ackup?"
+    read -n 1 ACTION
+
+    case "$ACTION" in
+      o )
+        FORCE=true;;
+      b )
+        BACKUP=true;;
+      s )
+        SKIP=true;;
+      * )
+        ;;
+    esac
+  fi
+  FORCE=${FORCE:-$FORCE_ALL}
+  BACKUP=${BACKUP:-$BACKUP_ALL}
+  SKIP=${SKIP:-$SKIP_ALL}
+
+  if [ "$FORCE" == "true" ]
+  then
+    rm -rf "$VIM_FOLDER"
+    success "removed $VIM_FOLDER"
+  fi
+  if [ "$BACKUP" == "true" ]
+  then
+    mv "$VIM_FOLDER" "${VIM_FOLDER}.backup"
+    success "moved $VIM_FOLDER to ${VIM_FOLDER}.backup"
+  fi
+  if [ "$SKIP" == "true" ]
+  then
+    success "skipped $VIM_FOLDER"
+  else
+    # Clone Vundle
+    git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+    
+    # Install plugins
+    vim -u $TMPVIMRC +PluginInstall +qall
+  fi
+fi
+rm $TMPVIMRC
+#}}}
 
 echo ''
 printf "\033[0;31mDone!\033[0m \n"

@@ -231,7 +231,7 @@ layers configuration. You are free to put any user code."
   (with-eval-after-load 'mu4e
     ;; Contacts in org mode =D
     (load "org-contacts.el")
-    
+
     (setq mu4e-mu-binary "/usr/bin/mu")
     (setq mu4e-maildir "~/.mail/gmail")
     (setq mu4e-view-show-images t)
@@ -254,7 +254,7 @@ layers configuration. You are free to put any user code."
      mu4e-compose-signature
      (concat
       "vct\n"))
-    
+
     ;; smtpmail
     (require 'smtpmail)
     (require 'starttls)
@@ -265,20 +265,20 @@ layers configuration. You are free to put any user code."
           smtpmail-smtp-server "smtp.gmail.com"
           smtpmail-smtp-user "victor.phb@gmail.com")
     ;(setq starttls-extra-arguments '("--x509cafile" "/usr/pkg/share/ncat/ca-bundle.crt"))
-    
+
     (defun vct:mail-compose-hooks ()
       "Settings for message composition."
       (flyspell-mode)
       (turn-off-auto-fill)
       (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
       (visual-line-mode 1))
-    
+
     (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
     (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
-    
+
     (setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
     (setq mu4e-org-contacts-file  "~/1.documents/0.annotations/0.organizer.org")
-    
+
     (defun insert-emails-from-tags (tag-expression)
       "insert emails from org-contacts that match the tags expression. For example:
     group-phd will match entries tagged with group but not with phd."
@@ -349,6 +349,12 @@ layers configuration. You are free to put any user code."
     ;; Bigger LaTeX previews
     (plist-put org-format-latex-options :scale 1.4)
 
+    ;; Support Shift+arrows to select text
+    (setq org-support-shift-select 'always)
+
+    ;; Limit the size of picture preview
+    (setq org-image-actual-width 300)
+
     ;; Change ltxpng folder location for LaTeX previews
     (setq org-latex-preview-ltxpng-directory "~/.ltxpng/")
 
@@ -395,13 +401,19 @@ layers configuration. You are free to put any user code."
          :recursive t
          :publishing-function org-publish-attachment
          :section-numbers nil
-         ))) 
+         )))
         ; }
       ; For ignore_headline tag {
       (require 'ox-extra)
       (ox-extras-activate '(ignore-headlines))
       ; }
   ) ;; End of org-mode hooks }
+  ; LaTeX configuration {
+  ;; Normal font size in AUCTeX titles
+  (setq font-latex-fontify-sectioning 'color)
+  ;; Uses latexmk to create pdf file
+  (setq org-latex-pdf-process '("latexmk -pdf %f"))
+  ;}
 )
 ; }
 

@@ -62,12 +62,8 @@ OPT=$HOME/opt
 pathdirs=(
 $HOME/.npm/bin
 $HOME/.bin
-$OPT/julia/bin
-$OPT/nodejs/bin
-$OPT/atom-editor/bin
-$OPT/tw5
 $OPT/bin
-$OPT/sage
+$OPT/SageMath
 )
 path=($path $pathdirs)
 #}}}

@@ -144,7 +144,7 @@ install_dotfiles () {
 
 install_dotfiles
 
-# vim configuration {{{
+# vim configuration {
 VIM_FOLDER=${HOME}/.vim
 
 # The colorscheme I use is installed by vundle. As it is set BEFORE actually install vundle, vim is annoyed and displays a 'Press ENTER or type command to continue' message. To avoid this, I run vim with a modified (and temporary) configuration file.
@@ -191,14 +191,16 @@ then
   else
     # Clone Vundle
     git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-    
+
     # Install plugins
     vim -u $TMPVIMRC +PluginInstall +qall
   fi
 fi
 rm $TMPVIMRC
-#}}}
-
+#}
+# LaTeX configuration {
+link_file $DOTFILES_ROOT/texmf $HOME/texmf
+#}
 echo ''
 printf "\033[0;31mDone!\033[0m \n"
 

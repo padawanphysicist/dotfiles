@@ -225,6 +225,10 @@ layers configuration. You are free to put any user code."
   (setq visual-line-fringe-indicators
     '(left-curly-arrow right-curly-arrow))
 
+  ; File associations {
+  (add-to-list 'auto-mode-alist '("README" . text-mode))
+  ; }
+
   (require 'mu4e)
   (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
   ; mu4e configuration {
@@ -414,6 +418,11 @@ layers configuration. You are free to put any user code."
   ;; Uses latexmk to create pdf file
   (setq org-latex-pdf-process '("latexmk -pdf %f"))
   ;}
+  ; Text file configuration {
+  (add-hook 'text-mode-hook (lambda()
+    (auto-fill-mode 1)
+    (setq-default fill-column 80)))
+  ; }
 )
 ; }
 

@@ -357,8 +357,10 @@ layers configuration. You are free to put any user code."
     ;; Support Shift+arrows to select text
     (setq org-support-shift-select nil)
 
+    ;; org-ref configuration {
     (require 'org-ref)
     (setq org-ref-default-citation-link "eqref")
+    ;}
 
     ;; Limit the size of picture preview
     (setq org-image-actual-width 300)
@@ -372,15 +374,19 @@ layers configuration. You are free to put any user code."
 
       ;; CDLaTex configuration
       (setq cdlatex-env-alist
-        '(("vct-eqn" "\\begin{equation}\n?\n\\end{equation}\n" nil)))
+        '(
+          ("vct-eqn" "\\begin{equation}\n?\n\\end{equation}\n" nil)
+          ("vct-alg" "\\begin{align}\n?\n\\end{align}\n" nil)
+         )
+      )
       (setq cdlatex-command-alist
-        '(("equ" "Insert non-numbered env" ""
-           cdlatex-environment ("vct-eqn") t nil)))
-      (setq cdlatex-env-alist
-        '(("vct-alg" "\\begin{align}\n?\n\\end{align}\n" nil)))
-      (setq cdlatex-command-alist
-        '(("alg" "Insert non-numbered env" ""
-           cdlatex-environment ("vct-alg") t nil)))
+        '(
+          ("equation" "Insert non-labeled equation" "" cdlatex-environment ("vct-eqn") t nil)
+          ("equat" "Insert non-labeled equation" "" cdlatex-environment ("vct-eqn") t nil)
+          ("align" "Insert non-labeled align" "" cdlatex-environment ("vct-alg") t nil)
+          ("alig" "Insert non-labeled align" "" cdlatex-environment ("vct-alg") t nil)
+         )
+      )
       ;; Make my life easier when typesetting tensors using abstract index notation
       (setq cdlatex-math-symbol-alist '((?p ("\\phantom{?}"))))
       ;; Uses latexmk for exporting

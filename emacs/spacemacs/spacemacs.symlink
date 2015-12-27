@@ -38,7 +38,7 @@ values."
      ;;        shell-default-position 'bottom)
      spell-checking
      syntax-checking
-      version-control
+     version-control
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -351,10 +351,10 @@ layers configuration. You are free to put any user code."
         (1 'font-lock-keyword-face))))
 
     ;; Bigger LaTeX previews
-    (plist-put org-format-latex-options :scale 1.4)
+    (plist-put org-format-latex-options :scale 1.5)
 
     ;; Support Shift+arrows to select text
-    (setq org-support-shift-select 'always)
+    ;(setq org-support-shift-select nil)
 
     ;; Limit the size of picture preview
     (setq org-image-actual-width 300)
@@ -370,11 +370,17 @@ layers configuration. You are free to put any user code."
       (setq cdlatex-env-alist
         '(("vct-eqn" "\\begin{equation}\n?\n\\end{equation}\n" nil)))
       (setq cdlatex-command-alist
-        '(("eqn" "Insert non-numbered env" ""
+        '(("equ" "Insert non-numbered env" ""
            cdlatex-environment ("vct-eqn") t nil)))
-
+      (setq cdlatex-env-alist
+        '(("vct-alg" "\\begin{align}\n?\n\\end{align}\n" nil)))
+      (setq cdlatex-command-alist
+        '(("alg" "Insert non-numbered env" ""
+           cdlatex-environment ("vct-alg") t nil)))
       ;; Make my life easier when typesetting tensors using abstract index notation
       (setq cdlatex-math-symbol-alist '((?p ("\\phantom{?}"))))
+      ;; Uses latexmk for exporting
+      (setq org-latex-pdf-process '("latexmk -pdf %f"))
       ; For site exporting {
       (require 'ox-publish)
       (setq org-publish-project-alist
@@ -415,13 +421,11 @@ layers configuration. You are free to put any user code."
   ; LaTeX configuration {
   ;; Normal font size in AUCTeX titles
   (setq font-latex-fontify-sectioning 'color)
-  ;; Uses latexmk to create pdf file
-  (setq org-latex-pdf-process '("latexmk -pdf %f"))
   ;}
   ; Text file configuration {
-  (add-hook 'text-mode-hook (lambda()
-    (auto-fill-mode 1)
-    (setq-default fill-column 80)))
+  ;(add-hook 'text-mode-hook (lambda()
+    ;(auto-fill-mode 1)
+    ;(setq-default fill-column 80)))
   ; }
 )
 ; }

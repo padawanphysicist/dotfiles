@@ -12,7 +12,7 @@ values."
    ;; Base distribution to use. This is a layer contained in the directory
    ;; `+distribution'. For now available distributions are `spacemacs-base'
    ;; or `spacemacs'. (default 'spacemacs)
-   dotspacemacs-distribution 'spacemacs
+   dotspacemacs-distribution 'spacemacs-base
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
    dotspacemacs-configuration-layer-path '()
@@ -30,12 +30,8 @@ values."
      emacs-lisp
      git
      github
-     ;; markdown
      org
      latex
-     ;; (shell :variables
-     ;;        shell-default-height 30
-     ;;        shell-default-position 'bottom)
      spell-checking
      syntax-checking
      version-control
@@ -230,6 +226,9 @@ layers configuration. You are free to put any user code."
   (add-to-list 'auto-mode-alist '("README" . text-mode))
   ; }
 
+  (defun insert-current-date () (interactive)
+        (insert (shell-command-to-string "echo -n $(date)")))
+  
   (require 'mu4e)
   (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
   ; mu4e configuration {
@@ -315,6 +314,8 @@ layers configuration. You are free to put any user code."
   (add-hook 'org-export-before-processing-hook (lambda (backend) (org-update-all-dblocks)))
   ; Speedup insertion of LaTeX environments
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+  ; Make org-mode work with files ending in .org
+  (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
   ; }
   ; Fix visual lines navigation {
   ; From https://github.com/syl20bnr/spacemacs/pull/1446. Make evil-mode up/down
@@ -394,8 +395,28 @@ layers configuration. You are free to put any user code."
       ; For site exporting {
       (require 'ox-publish)
       (setq org-publish-project-alist
-        '(("org" :components ("org-notes" "org-static"))
-         ("org-notes"
+        '(("wiki" :components ("org-index" "images" "org-posts" "other"))
+         ("org-posts"
+         :publishing-function org-html-publish-to-html
+         :headline-levels 4 ; Default for this project
+         ;:auto-sitemap t ; Generate sitemap.org automagically...
+         ;:sitemap-filename "sitemap.org" ; ...call it `sitemap.org`...
+         ;:sitemap-title "Sitemap" ; ...with title `Sitemap`
+         :export-creator-info t ; Include `Created by Org` in the postamble
+         :export-author-info t ; Include `Author: Your name` in the postamble
+         :html-postamble nil ; enable postamble
+         :html-preamble nil
+         :base-directory "~/1.documents/0.annotations"
+         :exclude: "0.organizer.org"
+         :base-extension "org"
+         :publishing-directory "~/public_html/posts"
+         :recursive t
+         :section-numbers nil
+         :with-toc nil
+         :with-drawers t
+         :style-include-default t  ;Disable the default css style
+         )
+         ("org-index"
          :publishing-function org-html-publish-to-html
          :headline-levels 4 ; Default for this project
          :auto-sitemap t ; Generate sitemap.org automagically...
@@ -405,23 +426,33 @@ layers configuration. You are free to put any user code."
          :export-author-info t ; Include `Author: Your name` in the postamble
          :html-postamble nil ; enable postamble
          :html-preamble nil
-         :base-directory "~/public_html/org"
+         :base-directory "~/wiki"
+         :exclude: "common.inc.org"
          :base-extension "org"
-         :publishing-directory "~/public_html/"
+         :publishing-directory "~/public_html"
          :recursive t
          :section-numbers nil
          :with-toc nil
          :with-drawers t
          :style-include-default t  ;Disable the default css style
          )
-        ("org-static"
-         :base-directory "~/public_html/org/"
-         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
-         :publishing-directory "~/public_html/"
+        ("images"
+         :base-directory "~/1.documents/0.annotations/0.figures"
+         :base-extension "png\\|jpg\\|gif"
+         :publishing-directory "~/public_html/img"
          :recursive t
          :publishing-function org-publish-attachment
          :section-numbers nil
-         )))
+         )
+        ("other"
+         :base-directory "~/wiki"
+         :base-extension "css\\|js"
+         :publishing-directory "~/public_html"
+         :recursive t
+         :publishing-function org-publish-attachment
+         :section-numbers nil
+         )
+        ))
         ; }
       ; For ignore_headline tag {
       (require 'ox-extra)

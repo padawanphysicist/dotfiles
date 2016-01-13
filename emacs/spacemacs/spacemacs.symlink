@@ -44,6 +44,7 @@ values."
      cdlatex
      vimish-fold
      org-ref
+     pdf-tools
    )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
@@ -221,6 +222,9 @@ layers configuration. You are free to put any user code."
   ;; Fringe indicators for visual line mode
   (setq visual-line-fringe-indicators
     '(left-curly-arrow right-curly-arrow))
+
+  ;; Activate pdf-tools
+  (pdf-tools-install)
 
   ; File associations {
   (add-to-list 'auto-mode-alist '("README" . text-mode))

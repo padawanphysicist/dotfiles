@@ -1,9 +1,0 @@
-#!/bin/bash
-
-PRINTER=$1
-
-sudo cupsreject $PRINTER
-sudo cupsdisable $PRINTER
-sudo lpadmin -x $PRINTER
-
-

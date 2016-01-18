@@ -19,8 +19,13 @@ $ cd .dotfiles
 
 and link the important files to your =$HOME= directory:
 #+begin_src sh
-$ ./bootstrap # this will symlink the important files
+$ make install # this will symlink the important files
 #+end_src
 ** Configuration files
-- [[zsh/zshrc.org]]: Zsh shell configuration file.
-- [[vim/vimrc.org]]: Zsh shell configuration file.
+- [[zshrc.org]]: Zsh shell configuration file.
+- [[vim.org]]: Vim configuration file.
+- [[emacs.org]]: Emacs configuration file.
+- [[tmux.org]]: Tmux configuration file.
+- [[git.org]]: Git configuration file.
+- [[bin.org]]: Some useful scripts.
+- [[festival.org]]: Festival configuration.

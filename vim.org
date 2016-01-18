@@ -1,0 +1,10 @@
+#+title: vim configuration
+
+#+begin_src sh :tangle vim/.vimrc.bundles.local :padline no
+Bundle 'jceb/vim-orgmode'
+Bundle 'tpope/vim-speeddating'
+#+end_src
+
+#+begin_src sh :tangle vim/.vimrc.local :padline no
+colorscheme jellybeans
+#+end_src

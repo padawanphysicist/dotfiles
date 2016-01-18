@@ -1,0 +1,24 @@
+#+title: Git configuration
+
+** Aliases
+#+begin_src sh :tangle git/.gitconfig :padline no
+[alias]
+    wdiff = diff --color-words --ignore-all-space
+    ldiff = difftool -y -t latex
+#+end_src
+** LaTeX diff
+#+begin_src sh :tangle git/.gitconfig :padline no
+[difftool.latex]
+    cmd = ldiff "$LOCAL" "$REMOTE" "$MERGED"
+#+end_src
+** Identity
+#+begin_src sh :tangle git/.gitconfig :padline no
+[user]
+	email = victor.phb@gmail.com
+	name = Victor Santos (vct)
+#+end_src
+** Color UI
+#+begin_src sh :tangle git/.gitconfig :padline no
+[color]
+        ui = true
+#+end_src

@@ -3,7 +3,7 @@ TANGLESCRIPT=./org-tangle
 help: 
 	echo -e "Usage: make <install|update> UPDATE=<0|1>"
 
-install: check_deps tangle
+install: check_deps tangle symlink
 
 check_deps:
 	@command -v stow >/dev/null 2>&1 || { echo -e "\033[0;31mError\033[0m: I require GNU Stow but it's not installed.  Aborting." >&2; exit 1; }

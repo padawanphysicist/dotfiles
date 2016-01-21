@@ -529,6 +529,12 @@ Limit the size of picture preview
     (setq org-image-actual-width 300)
 #+end_src
 
+Set default font for tags
+#+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
+    (custom-set-faces
+      '(org-tag ((t (:foreground "DarkOrange3" :background "gray13" :box t)))))
+#+end_src
+
 Change ltxpng folder location for LaTeX previews
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
     (setq org-latex-preview-ltxpng-directory "~/.ltxpng/")

@@ -36,6 +36,7 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
      (spell-checking :variables spell-checking-enable-by-default nil)
      syntax-checking
      spotify
+     version-control
      )
 #+end_src
 List of additional packages that will be installed without being wrapped in a layer. If you need some configuration for these packages then consider to create a layer, you can also put the configuration in `dotspacemacs/config'.
@@ -46,6 +47,7 @@ List of additional packages that will be installed without being wrapped in a la
      org-ref
      pdf-tools
      vimish-fold
+     lorem-ipsum
    )
 #+end_src
 
@@ -120,9 +122,9 @@ Default major mode of the scratch buffer (default `text-mode')
 
 List of themes, the first of the list is loaded when spacemacs starts. Press <SPC> T n to cycle to the next theme in the list (works great with 2 themes variants, one dark and one light)
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
-   dotspacemacs-themes '(jbeans
-                         spacemacs-dark
+   dotspacemacs-themes '(spacemacs-dark
                          spacemacs-light
+                         jbeans
                          solarized-light
                          solarized-dark
                          leuven
@@ -464,7 +466,8 @@ Speedup insertion of LaTeX environments
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 #+end_src
-***** Update dynamic blocks
+
+****** Update dynamic blocks
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
   (defun org-dblock-write:inc-file (params)
     (let ((file (plist-get params :file)))
@@ -559,70 +562,12 @@ Uses latexmk for exporting
       (setq org-latex-pdf-process '("latexmk -pdf %f"))
 #+end_src
 
-For site exporting
+For site publishing
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
       (require 'ox-publish)
-      (setq org-publish-project-alist
-        '(("wiki" :components ("org-index" "images" "org-posts" "other"))
-         ("org-posts"
-         :publishing-function org-html-publish-to-html
-         :headline-levels 4 ; Default for this project
-         ;:auto-sitemap t ; Generate sitemap.org automagically...
-         ;:sitemap-filename "sitemap.org" ; ...call it `sitemap.org`...
-         ;:sitemap-title "Sitemap" ; ...with title `Sitemap`
-         :export-creator-info t ; Include `Created by Org` in the postamble
-         :export-author-info t ; Include `Author: Your name` in the postamble
-         :html-postamble nil ; enable postamble
-         :html-preamble nil
-         :base-directory "~/1.documents/0.annotations"
-         :exclude: "0.organizer.org"
-         :base-extension "org"
-         :publishing-directory "~/public_html/posts"
-         :recursive t
-         :section-numbers nil
-         :with-toc nil
-         :with-drawers t
-         :style-include-default t  ;Disable the default css style
-         )
-         ("org-index"
-         :publishing-function org-html-publish-to-html
-         :headline-levels 4 ; Default for this project
-         :auto-sitemap t ; Generate sitemap.org automagically...
-         :sitemap-filename "sitemap.org" ; ...call it `sitemap.org`...
-         :sitemap-title "Sitemap" ; ...with title `Sitemap`
-         :export-creator-info t ; Include `Created by Org` in the postamble
-         :export-author-info t ; Include `Author: Your name` in the postamble
-         :html-postamble nil ; enable postamble
-         :html-preamble nil
-         :base-directory "~/wiki"
-         :exclude: "common.inc.org"
-         :base-extension "org"
-         :publishing-directory "~/public_html"
-         :recursive t
-         :section-numbers nil
-         :with-toc nil
-         :with-drawers t
-         :style-include-default t  ;Disable the default css style
-         )
-        ("images"
-         :base-directory "~/1.documents/0.annotations/0.figures"
-         :base-extension "png\\|jpg\\|gif"
-         :publishing-directory "~/public_html/img"
-         :recursive t
-         :publishing-function org-publish-attachment
-         :section-numbers nil
-         )
-        ("other"
-         :base-directory "~/wiki"
-         :base-extension "css\\|js"
-         :publishing-directory "~/public_html"
-         :recursive t
-         :publishing-function org-publish-attachment
-         :section-numbers nil
-         )
-        ))
 #+end_src
-For ignore_headline tag
+
+For ignore_headline tag. Any headline tagged with 'ignore' will be ignored, while keeping its contents
 #+begin_src emacs-lisp :tangle emacs/.spacemacs :padline no
       (require 'ox-extra)
       (ox-extras-activate '(ignore-headlines))

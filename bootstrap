@@ -1,0 +1,131 @@
+#!/bin/bash
+# -*- mode: shell-script -*-
+# vim: set filetype=sh :
+#
+# bootstrap files to its places.
+#
+# The script assumes you have emacs and org-mode installed
+#
+
+SCRIPT_NAME="$0"
+DOTFILES_ROOT="`pwd`"
+MAX_DEPTH=3
+
+# Default actions:
+FORCE_ALL="false"  # do not overwrite any files,
+BACKUP_ALL="false" # do not backup any files,
+SKIP_ALL="true"    # and skip all files. Simply put, do nothing.
+
+usage () {
+  # Prints usage of the script
+  echo "Usage: $SCRIPT_NAME" 1>&2;
+  exit 1;
+}
+ 
+while getopts ":i:cfbh" opt; do
+  case $opt in
+    i)
+      #echo "-i was triggered. Bootstrap" $OPTARG >&2
+      PROGRAM=$OPTARG
+      ;;
+    c)
+      echo "Cleaning all files." >&2
+      ;;
+    f)
+      #echo "Overwriting all files, no backup." >&2
+      FORCE_ALL="true"
+      BACKUP_ALL="false"
+      SKIP_ALL="false"
+      ;;
+    b)
+      #echo "Overwriting all files, backing them up first." >&2
+      FORCE_ALL="true"
+      BACKUP_ALL="true"
+      SKIP_ALL="false"
+      ;;
+    h)
+      usage
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+
+info () {
+  printf "\r\033[0;34m$1\033[0m\n"
+}
+
+user () {
+  printf "\r  [ \033[0;33m?\033[0m ] $1 "
+}
+
+success () {
+  printf "\r\033[2K  [\033[0;32mOK\033[0m] $1\n"
+}
+
+fail () {
+  printf "\r\033[2K  [\033[0;31mFAIL\033[0m] $1\n"
+  echo ''
+  exit
+}
+
+tangle () {
+  ORGFILE=$1
+  DIR=$(dirname ${ORGFILE})
+
+  emacs -Q --batch \
+  --eval "(progn
+  (require 'org)(require 'ob)(require 'ob-tangle)
+  (mapc (lambda (file)
+    (find-file (expand-file-name file \"$DIR\"))
+    (org-babel-tangle)
+    (kill-buffer)) '(\"$ORGFILE\")))" 2>&1 | grep Tangled
+}
+
+link_file () {
+  local SOURCE=$1 DESTINATION=$2
+
+  if [ "$FORCE_ALL" == "false" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "true" ]
+  then
+    # Do nothing
+    success "skipped $SOURCE"
+  else
+    if [ "$FORCE_ALL" == "true" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "false" ]
+    then
+      info "Overwriting (no backup)"
+      rm -rf "$DESTINATION"
+      success "removed $DESTINATION"
+    elif [ "$FORCE_ALL" == "true" ] && [ "$BACKUP_ALL" == "true" ] && [ "$SKIP_ALL" == "false" ]
+    then
+      info "Overwrite, backup first"
+      mv "$DESTINATION" "${DESTINATION}.backup"
+      success "moved $DESTINATION to ${DESTINATION}.backup"
+    fi
+    ln -s "$1" "$2"
+    success "linked $1 to $2"
+  fi
+}
+
+install_dotfile () {
+  FOLDER=$1
+  # Symlink *.symlink files to $HOME
+  info 'installing dotfiles'
+
+  for FILE in $(find -H "$FOLDER" -maxdepth $MAX_DEPTH -name '*.symlink' -not -path '*.git*')
+  do
+    SOURCE=$(readlink -f $FILE)
+    DESTINATION="$HOME/.$(basename "${FILE%.*}")"
+    link_file "$SOURCE" "$DESTINATION"
+  done
+}
+
+if [ -z $PROGRAM ]
+then 
+  echo ""
+else
+  echo "Bootstraping ${PROGRAM}"
+  tangle ${PROGRAM}.org
+  install_dotfile ${PROGRAM}
+fi

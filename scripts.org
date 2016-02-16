@@ -1,0 +1,49 @@
+#+title: Scripts
+
+Here I put my own scripts, as they are not big enough to have their own files. To make it easy to distinguish system scripts from these custom ones, I adopt the convention of prepend with a =vct-= their names.
+
+** =vct-ldiff=
+:properties:
+:tangle: scripts/bin.symlink/vct-ldiff
+:padline: no
+:mkdirp: yes
+:end:
+
+This script helps to compare [[http://www.latex-project.org/][LaTeX]] documents between different [[http://git-scm.com/][git]] revisions, as explained [[https://wiki.math.cmu.edu/iki/wiki/tips/20140301-git-latexdiff.html][here]].
+
+#+begin_src sh
+#!/bin/bash
+# Make sure inputs are tex files
+LOCAL="$1"
+REMOTE="$2"
+MERGED="$3"
+
+if [[ "${MERGED##*.}" == tex ]]; then
+  output="${MERGED%.tex}-diff.tex"
+
+  if [[ -f "$output" ]]; then 
+    read -p "File $output exists. Overwrite? " confirm
+    [[ "$confirm" != y && "$confirm" != yes ]] && exit 1
+  fi
+
+  latexdiff "$LOCAL" "$REMOTE" > "$output"
+  echo "Generated $output"
+else
+  echo "Skipped $MERGED (non tex)."
+fi
+#+end_src
+
+** =vct-tts=
+:properties:
+:tangle: scripts/bin.symlink/vct-tts
+:padline: no
+:mkdirp: yes
+:end:
+
+Send currently selected text to festival (text-to-speech)
+
+#+begin_src sh
+#!/bin/bash
+
+xsel | padsp festival --tts --pipe
+#+end_src

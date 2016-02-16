@@ -1,9 +1,9 @@
-TANGLESCRIPT=./org-tangle
+BOOTSTRAP=./bootstrap
 
-help: 
+help:
 	echo -e "Usage: make <install|update> UPDATE=<0|1>"
 
-install: check_deps tangle symlink
+install: zsh git festival tmux vim emacs scripts
 
 check_deps:
 	@command -v stow >/dev/null 2>&1 || { echo -e "\033[0;31mError\033[0m: I require GNU Stow but it's not installed.  Aborting." >&2; exit 1; }
@@ -11,22 +11,6 @@ check_deps:
 	@command -v zsh >/dev/null 2>&1 || { echo -e "\033[0;31mError\033[0m: I require Z-shell but it's not installed.  Aborting." >&2; exit 1; }
 	@command -v git >/dev/null 2>&1 || { echo -e "\033[0;31mError\033[0m: I require git but it's not installed.  Aborting." >&2; exit 1; }
 
-tangle: zsh tmux git bin festival emacs vim
-
-symlink: tangle
-	stow zsh
-	stow scripts
-	stow tmux
-	stow git
-	stow festival
-	stow emacs
-	stow vim
-
-antigen:
-	@if [ ! -d "$(HOME)/.antigen" ]; then \
-	echo -e "[\033[0;33mW\033[0m] antigen is not installed. Downloading it..."; \
-	git clone https://github.com/zsh-users/antigen.git $(HOME)/.antigen; else \
-	echo -e "[\033[0;32mM\033[0m] antigen is already installed. Skipping..." ; fi
 
 update:
 # Update zsh antigen
@@ -49,52 +33,53 @@ dircolors:
 	echo -e "[\033[0;33mW\033[0m] dircolors-solarized is not installed. Downloading it..."; \
 	git clone https://github.com/seebi/dircolors-solarized $(HOME)/.dircolors-solarized; else \
 	echo -e "[\033[0;32mM\033[0m] dircolors-solarized is already installed. Skipping..." ; fi
+antigen:
+	@if [ ! -d "$(HOME)/.antigen" ]; then \
+	echo -e "[\033[0;33mW\033[0m] antigen is not installed. Downloading it..."; \
+	git clone https://github.com/zsh-users/antigen.git $(HOME)/.antigen; else \
+	echo -e "[\033[0;32mM\033[0m] antigen is already installed. Skipping..." ; fi
 
-spf13:
-	@if [ ! -d "${HOME}/.spf13-vim-3" ]; then \
-	echo "Bootstraping $@ configuration..." \
-	echo -e "[\033[0;33mW\033[0m] spf13-vim is not installed. Downloading it..."; \
-	curl http://j.mp/spf13-vim3 -L -o - | sh ; else \
-	echo -e "[\033[0;32mM\033[0m] spf13-vim is already installed. Skipping..." ; fi
+vundle:
+	@if [ ! -d "${HOME}/.vim" ] || [ ! -d "${HOME}/.vim/bundle" ]; then \
+	echo -e "\r  [\033[0;33mW\033[0m] Vundle is not installed. Downloading it..."; \
+	mkdir -p ~/.vim/bundle; \
+	git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim; else \
+	if [ -d "${HOME}/.vim/bundle" ] ; then \
+	echo -e "\r  [\033[0;32mM\033[0m] Vundle is already installed. Skipping..." ; fi; fi
 
-vim: spf13
-	@if [ ! -d "./$@" ]; then mkdir $@; fi
-	@$(TANGLESCRIPT) $@.org
-
-spacemacs:
-	@if [ ! -d "${HOME}/.emacs.d" ]; then \
-	echo -e "[\033[0;33mW\033[0m] spacemacs is not installed. Downloading it..."; \
-	git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d; \
-	elif [ ! -d "${HOME}/.emacs.d/.git" ]; then \
-	echo  -e "[\033[0;33mW\033[0m] spacemacs is not installed. Downloading it..."; \
-	git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d; else \
-	echo  -e "[\033[0;32mM\033[0m] spacemacs is already installed. Skipping..."; fi
+vim: vundle
+	@./bootstrap -i $@ -f
+	vim +PluginInstall +qall
 
 zsh: dircolors antigen
-	@echo "Bootstraping $@ configuration...";
-	@if [ ! -d "./$@" ]; then mkdir $@; fi
-	@$(TANGLESCRIPT) $@.org
-bin:
+	@./bootstrap -i $@ -f
+scripts:
 	@echo "Bootstraping $@ configuration..."
-	@if [ ! -d "./scripts/.$@" ]; then mkdir -p scripts/.$@; fi
-	@$(TANGLESCRIPT) $@.org
-	@chmod +x scripts/.$@/*
+	@./bootstrap -i $@ -f
+	@chmod +x $@/*
 git:
 	@echo "Bootstraping $@ configuration..."
-	@if [ ! -d "./$@" ]; then mkdir $@; fi
-	@$(TANGLESCRIPT) $@.org
+	@./bootstrap -i $@ -f
 festival:
 	@echo "Bootstraping $@ configuration..."
-	@if [ ! -d "./$@" ]; then mkdir $@; fi
-	@$(TANGLESCRIPT) $@.org
+	@./bootstrap -i $@ -f
 tmux:
 	@echo "Bootstraping $@ configuration..."
-	@if [ ! -d "./$@" ]; then mkdir $@; fi
-	@$(TANGLESCRIPT) $@.org
+	@./bootstrap -i $@ -f
+
+spacemacs:
+	@if [ ! -d "${HOME}/.emacs.d" ] || [ ! -d "${HOME}/.emacs.d/.git" ]; then \
+	echo -e "\r  [\033[0;33mW\033[0m] spacemacs is not installed. Downloading it..."; \
+	git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d; else \
+	if [ -d "${HOME}/.emacs.d/.git" ] ; then \
+	echo -e "\r  [\033[0;32mM\033[0m] spacemacs is already installed. Skipping..." ; fi; fi
+
 emacs: spacemacs
-	@echo "Bootstraping $@ configuration..."
-	@if [ ! -d "./emacs" ]; then mkdir -p emacs/.elisp; fi
-	@$(TANGLESCRIPT) emacs.org
-clean:
+	@./bootstrap -i $@ -f
+	@echo -e "\r  [\033[0;33mW\033[0m] Starting emacs so it can finish package installation. Close it when done.";
+	@emacs
+
+cleanall:
 	rm -fr zsh emacs vim tmux scripts festival git
-	rm -fr ~/.dircolors-solarized ~/.antigen ~/.vim ~/.spf13-vim-3
+	rm -f ~/.zshrc ~/.spacemacs ~/.nvimrc ~/.vimrc ~/.tmux.conf ~/.bin ~/.festivalrc ~/.gitconfig
+	rm -fr ~/.dircolors-solarized ~/.antigen ~/.emacs.d ~/.elisp ~/.nvim ~/.vim

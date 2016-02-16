@@ -1,10 +1,112 @@
 #+title: vim configuration
 
-#+begin_src sh :tangle vim/.vimrc.bundles.local :padline no
-Bundle 'jceb/vim-orgmode'
-Bundle 'tpope/vim-speeddating'
+** =.vimrc=
+:properties:
+:tangle: vim/vimrc.symlink
+:padline: no
+:mkdirp: yes
+:end:
+
+Be iMproved
+#+begin_src sh
+set nocompatible
 #+end_src
 
-#+begin_src sh :tangle vim/.vimrc.local :padline no
-colorscheme jellybeans
+*** Vundle configuration
+
+#+begin_src sh
+if has('vim_starting')
+  filetype off
 #+end_src
+
+Set the runtime path to include Vundle and initialize
+#+begin_src sh
+  set runtimepath+=~/.vim/bundle/Vundle.vim/
+#+end_src
+
+#+begin_src sh
+endif
+#+end_src
+
+Start Vundle
+#+begin_src sh
+call vundle#begin()
+#+end_src
+
+Vundle packages
+Let Vundle manage Vundle (Required):
+#+begin_src sh
+Plugin 'VundleVim/Vundle.vim'
+#+end_src
+
+Misc packages
+#+begin_src sh
+Plugin 'scrooloose/nerdtree'
+Plugin 'tpope/vim-commentary'
+Plugin 'tpope/vim-fugitive'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'sheerun/vim-polyglot'
+Plugin 'bronson/vim-trailing-whitespace'
+Plugin 'jiangmiao/auto-pairs'
+#+end_src
+
+Color
+#+begin_src sh
+Plugin 'nanotech/jellybeans.vim'
+Plugin 'altercation/vim-colors-solarized.git'
+#+end_src
+
+Org-mode
+#+begin_src sh
+Plugin 'jceb/vim-orgmode'
+#+end_src
+
+use CTRL-A/CTRL-X to increment dates, times, and more
+#+begin_src sh
+Plugin 'tpope/vim-speeddating'
+#+end_src
+
+Finish NeoBundle
+#+begin_src sh
+call vundle#end()
+filetype plugin indent on
+#+end_src
+
+*** Basic Setup
+
+#+begin_src sh
+#+end_src
+
+Load Powerline configuration
+#+begin_src sh
+set rtp+=$HOME/.local/lib/python3.5/site-packages/powerline/bindings/vim/
+#+end_src
+
+Always show statusline
+#+begin_src sh
+set laststatus=2
+#+end_src
+
+Use 256 colours (Use this setting only if your terminal supports 256 colours)
+#+begin_src sh
+set t_Co=256
+#+end_src
+
+Always display the tabline, even if there is only one tab
+#+begin_src sh
+set showtabline=2
+#+end_src
+
+Enable mouse in all modes
+#+begin_src sh
+set mouse=a
+#+end_src
+
+Enable colors
+#+begin_src sh
+syntax enable
+set background=dark
+colorscheme solarized
+#+end_src
+

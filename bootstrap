@@ -1,131 +1,211 @@
-#!/bin/bash
-# -*- mode: shell-script -*-
-# vim: set filetype=sh :
+#!/usr/bin/env python
+# -*- mode: python -*-
 #
 # bootstrap files to its places.
 #
 # The script assumes you have emacs and org-mode installed
 #
 
-SCRIPT_NAME="$0"
-DOTFILES_ROOT="`pwd`"
-MAX_DEPTH=3
+import sys, os, shutil, glob, subprocess
+from optparse import OptionParser
 
-# Default actions:
-FORCE_ALL="false"  # do not overwrite any files,
-BACKUP_ALL="false" # do not backup any files,
-SKIP_ALL="true"    # and skip all files. Simply put, do nothing.
+# Path to this file
+CWD  = os.path.dirname(os.path.abspath(__file__))
+HOME = os.getenv('HOME')
 
-usage () {
-  # Prints usage of the script
-  echo "Usage: $SCRIPT_NAME" 1>&2;
-  exit 1;
-}
- 
-while getopts ":i:cfbh" opt; do
-  case $opt in
-    i)
-      #echo "-i was triggered. Bootstrap" $OPTARG >&2
-      PROGRAM=$OPTARG
-      ;;
-    c)
-      echo "Cleaning all files." >&2
-      ;;
-    f)
-      #echo "Overwriting all files, no backup." >&2
-      FORCE_ALL="true"
-      BACKUP_ALL="false"
-      SKIP_ALL="false"
-      ;;
-    b)
-      #echo "Overwriting all files, backing them up first." >&2
-      FORCE_ALL="true"
-      BACKUP_ALL="true"
-      SKIP_ALL="false"
-      ;;
-    h)
-      usage
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      ;;
-  esac
-done
+full_path = lambda baseFolderPath, fileName: baseFolderPath + '/' + fileName
+symlink_mapping = [
+    ['spacemacs', full_path(CWD, 'emacs/spacemacsrc'),   full_path(HOME, '.spacemacs')],
+    ['spacemacs', full_path(CWD, 'emacs/elisp'),         full_path(HOME, '.elisp')],
+    ['vim',       full_path(CWD, 'vim/vimrc'),           full_path(HOME, '.vimrc')],
+    ['zsh',       full_path(CWD, 'zsh/zshrc'),           full_path(HOME, '.zshrc')],
+    ['tmux',      full_path(CWD, 'tmux/tmux.conf'),      full_path(HOME, '.tmux.conf')],
+    ['bin',       full_path(CWD, 'scripts/bin'),         full_path(HOME, '.bin')],
+    ['festival',  full_path(CWD, 'festival/festivalrc'), full_path(HOME, '.festivalrc')],
+    ['git',       full_path(CWD, 'git/gitconfig'),       full_path(HOME, '.gitconfig')]
+]
+git_repo_mapping = [
+    ['spacemacs', 'https://github.com/syl20bnr/spacemacs',        full_path(HOME, '.emacs.d')],
+    ['vim',       'https://github.com/VundleVim/Vundle.vim.git',  full_path(HOME, '.vim/bundle/Vundle.vim')],
+    ['zsh',       'https://github.com/zsh-users/antigen.git',     full_path(HOME, '.antigen')],
+    ['zsh',       'https://github.com/seebi/dircolors-solarized', full_path(HOME, '.dircolors-solarized')]
+]
+config_mapping = [
+    ['spacemacs', 'emacs.org'],
+    ['vim',       'vim.org'],
+    ['zsh',       'zsh.org'],
+    ['tmux',      'tmux.org'],
+    ['bin',       'scripts.org'],
+    ['festival',  'festival.org'],
+    ['git',       'git.org']
+]
 
-
-info () {
-  printf "\r\033[0;34m$1\033[0m\n"
+fg = {
+    'default':'\033[39m',
+    'ok':'\033[92m',
+    'msg':'\033[94m',
+    'warn':'\033[93m',
+    'error':'\033[91m',
+    'end':'\033[0m'
 }
 
-user () {
-  printf "\r  [ \033[0;33m?\033[0m ] $1 "
-}
+msg   = lambda s: print('[' + fg['msg']   + 'M'  + fg['end'] + ']' + '\t{0}'.format(s))
+done  = lambda s: print('[' + fg['ok']    + 'OK' + fg['end'] + ']' + '\t{0}'.format(s))
+warn  = lambda s: print('[' + fg['warn']  + 'W'  + fg['end'] + ']' + '\t{0}'.format(s))
+error = lambda s: print('[' + fg['error'] + 'E'  + fg['end'] + ']' + '\t{0}'.format(s))
 
-success () {
-  printf "\r\033[2K  [\033[0;32mOK\033[0m] $1\n"
-}
+get_rules     = lambda rule, ruleList: list(filter(lambda lstElem: lstElem[0] == rule, ruleList))
+get_symlinks  = lambda rule: list(map(lambda lstElem: lstElem[1:], get_rules(rule, symlink_mapping)))
+get_configs   = lambda rule: list(map(lambda lstElem: lstElem[1:][0], get_rules(rule, config_mapping)))
+get_git_repos = lambda rule: list(map(lambda lstElem: lstElem[1:], get_rules(rule, git_repo_mapping)))
 
-fail () {
-  printf "\r\033[2K  [\033[0;31mFAIL\033[0m] $1\n"
-  echo ''
-  exit
-}
 
-tangle () {
-  ORGFILE=$1
-  DIR=$(dirname ${ORGFILE})
+def create_symlink (opts, rule=None):
+    for src, dest in get_symlinks(rule):
+        if os.path.islink(dest) and opts.force:
+            warn('removing existing symlink at ' + dest)
+            os.remove(dest)
+        elif os.path.isfile(dest) or os.path.islink(dest):
+            warn('file exist at path: ' + dest)
+            continue
+        os.symlink(src, dest)
+        done('Created symlink ' + src + ' -> ' + dest)
 
-  emacs -Q --batch \
-  --eval "(progn
-  (require 'org)(require 'ob)(require 'ob-tangle)
-  (mapc (lambda (file)
-    (find-file (expand-file-name file \"$DIR\"))
-    (org-babel-tangle)
-    (kill-buffer)) '(\"$ORGFILE\")))" 2>&1 | grep Tangled
-}
+def tangle (rule=None):
+    for filePath in get_configs(rule):
+        dirName = os.path.dirname(filePath)
 
-link_file () {
-  local SOURCE=$1 DESTINATION=$2
+        elisp_script='(progn (require \'org)(require \'ob)(require \'ob-tangle) (mapc (lambda (file) (find-file (expand-file-name file \"' + dirName + '\")) (org-babel-tangle) (kill-buffer)) \'(\"' + filePath +'\")))'
 
-  if [ "$FORCE_ALL" == "false" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "true" ]
-  then
-    # Do nothing
-    success "skipped $SOURCE"
-  else
-    if [ "$FORCE_ALL" == "true" ] && [ "$BACKUP_ALL" == "false" ] && [ "$SKIP_ALL" == "false" ]
-    then
-      info "Overwriting (no backup)"
-      rm -rf "$DESTINATION"
-      success "removed $DESTINATION"
-    elif [ "$FORCE_ALL" == "true" ] && [ "$BACKUP_ALL" == "true" ] && [ "$SKIP_ALL" == "false" ]
-    then
-      info "Overwrite, backup first"
-      mv "$DESTINATION" "${DESTINATION}.backup"
-      success "moved $DESTINATION to ${DESTINATION}.backup"
-    fi
-    ln -s "$1" "$2"
-    success "linked $1 to $2"
-  fi
-}
+        emacs = subprocess.Popen(['emacs', '-Q', '--batch', '--eval', elisp_script], stdout=subprocess.PIPE)
+        grep = subprocess.Popen('grep Tangle'.split(), stdin=emacs.stdout, stdout=subprocess.PIPE)
+        emacs.stdout.close()
+        output=grep.communicate()[0]
+        emacs.wait()
 
-install_dotfile () {
-  FOLDER=$1
-  # Symlink *.symlink files to $HOME
-  info 'installing dotfiles'
+def bootstrap (options, rule, action, force=False):
+    def post_install(rule):
+        if rule == 'spacemacs':
+            msg('Opening emacs for package installation. Close the window when finished...')
+            subprocess.call(['emacs'])
+        elif rule == 'vim':
+            msg('Opening vim for package installation')
+            subprocess.call(['vim', '+PluginInstall', '+qall'])
 
-  for FILE in $(find -H "$FOLDER" -maxdepth $MAX_DEPTH -name '*.symlink' -not -path '*.git*')
-  do
-    SOURCE=$(readlink -f $FILE)
-    DESTINATION="$HOME/.$(basename "${FILE%.*}")"
-    link_file "$SOURCE" "$DESTINATION"
-  done
-}
+    msg('bootstraping {0}...'.format(rule))
 
-if [ -z $PROGRAM ]
-then 
-  echo ""
-else
-  echo "Bootstraping ${PROGRAM}"
-  tangle ${PROGRAM}.org
-  install_dotfile ${PROGRAM}
-fi
+    gitRepos = get_git_repos(rule)
+
+    # Check if the chosen rule has any git repos to clone/upgrade
+    # No git repos to handle, or
+    if len(gitRepos) == 0 or action == 'update':
+        if action == 'install' or action == 'update':
+            tangle(rule)
+            if action == 'install':
+                create_symlink(options, rule)
+    else:
+        # To avoid unecessary tangling and symlinking
+        disentangled, symlinked = False, False
+        for srcRepo, dest in gitRepos:
+            if action == 'install':
+                if os.path.exists(dest):
+                    if force:
+                        warn('removing existing symlink')
+                        os.remove(dest) if os.path.isfile(dest) else shutil.rmtree(dest)
+                    else:
+                        error('file exists at path: {0}'.format(dest))
+                        sys.exit()
+
+                msg('Cloning ' + srcRepo + ' to ' + dest)
+                subprocess.call(['git', 'clone', srcRepo, dest])
+
+                if not disentangled:
+                    tangle(rule)
+                    disentangled = True
+                if not symlinked:
+                    create_symlink(options, rule)
+                    symlinked = True
+                post_install(rule)
+            elif action == 'upgrade':
+                if not (os.path.isfile(dest) or os.path.islink(dest)):
+                    error('file does not exist at path')
+                    sys.exit()
+                if rule == 'spacemacs':
+                    git_fetch = subprocess.Popen(['git', '-C', dest, 'fetch'], stdout=subprocess.PIPE)
+                    print('{0}'.format(subprocess.list2cmdline(git_fetch.args)))
+                    output_fetch = git_fetch.communicate()[0]
+                    msg('Getting most recent spacemacs version...')
+                    git_get_version = subprocess.Popen(['git', '-C', dest, 'describe', '--abbrev=0', '--tags'], stdout=subprocess.PIPE)
+                    print('{0}'.format(subprocess.list2cmdline(git_get_version.args)))
+                    tag = git_get_version.communicate()[0].rstrip().decode('utf-8')
+                    msg('Got version {0}...'.format(tag))
+                    git_update = subprocess.Popen(['git', '-C', dest, 'reset', '--hard', tag], stdout=subprocess.PIPE)
+                    print('{0}'.format(subprocess.list2cmdline(git_update.args)))
+                    output_update = git_update.communicate()[0]
+
+                    post_install(rule)
+
+def main():
+    parser = OptionParser()
+    parser.add_option('-i', '--install',
+                      dest='install',
+                      help='bootstrap rules for PROG',
+                      metavar='PROG')
+    parser.add_option('-u', '--update',
+                      dest='update',
+                      help='update rules for PROG',
+                      metavar='PROG')
+    parser.add_option('-U', '--upgrade',
+                      dest='upgrade',
+                      help='upgrade rules for PROG',
+                      metavar='PROG')
+    parser.add_option('-f', '--force',
+                      default=False,
+                      action='store_true',
+                      dest='force',
+                      help='overwrite files (remove previous files and symlinks)')
+    parser.add_option('-C', '--clean-all',
+                      default=False,
+                      action='store_true',
+                      dest='cleanall',
+                      help='Clean all files')
+
+    (options, args) = parser.parse_args()
+
+    warn('***Overwriting mode enabled***') if options.force else print('')
+
+    if len(args) == 1:
+        parser.error("incorrect number of arguments")
+    # You cannot install and update at the same time
+    if options.install and options.update:
+        parser.error("options -i and -u are mutually exclusive")
+    elif options.install and options.upgrade:
+        parser.error("options -i and -U are mutually exclusive")
+    elif options.update and options.upgrade:
+        parser.error("options -u and -U are mutually exclusive")
+    elif options.install:
+        bootstrap(options, options.install, 'install', options.force)
+    elif options.update:
+        bootstrap(options, options.update, 'update', options.force)
+    elif options.upgrade:
+        bootstrap(options, options.upgrade, 'upgrade', options.force)
+    elif options.cleanall:
+        for rule, repo, dest in git_repo_mapping:
+            shutil.rmtree(dest, ignore_errors=True)
+        # Remove symlinks
+        for rule, src, dest in symlink_mapping:
+            if os.path.isfile(src) and not os.path.islink(src):
+                os.remove(src)
+            elif os.path.isdir(src) and os.path.islink(src):
+                shutil.rmtree(src, ignore_errors=True)
+            if os.path.exists(dest):
+                os.remove(dest)
+            
+            # Vim needs additional massage
+            if rule == 'vim':
+                shutil.rmtree(HOME + '/.vim', ignore_errors=True)
+
+if __name__ == "__main__":
+    main()
+
+# vim: set ft=python :

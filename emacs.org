@@ -4,7 +4,7 @@
 
 ** =.spacemacs=
 :properties:
-:tangle: emacs/spacemacs.symlink
+:tangle: emacs/spacemacsrc
 :padline: no
 :mkdirp: yes
 :end:
@@ -17,7 +17,7 @@ This is the Spacemacs configuration file. it is loaded by Spacemacs at startup, 
 
 You should not put any user code in this function besides modifying the variable values.
 
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
 (defun dotspacemacs/layers ()
   (setq-default
 #+end_src
@@ -59,7 +59,7 @@ List of additional packages that will be installed without being wrapped in a la
 #+end_src
 
 A list of packages and/or extensions that will not be install and loaded.
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
     dotspacemacs-excluded-packages '()
 #+end_src
 
@@ -149,7 +149,7 @@ If non nil the cursor color matches the state color.
 Default font. `powerline-scale' allows to quickly tweak the mode-line size to make separators look not too crappy.
 #+begin_src emacs-lisp
     dotspacemacs-default-font '(
-      "Inconsolata for Powerline"
+      "Hack"
       :size 15
       :weight normal
       :width normal
@@ -373,13 +373,118 @@ Fringe indicators for visual line mode
   (setq visual-line-fringe-indicators
     '(left-curly-arrow right-curly-arrow))
 #+end_src
+**** mu4e configuration
+First we load mu4e
+#+begin_src emacs-lisp
+(require 'mu4e)
+(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
+#+end_src
+
+and then we configure it:
+#+begin_src emacs-lisp
+(with-eval-after-load 'mu4e
+  ;; Contacts in org mode =D
+  (load "org-contacts.el")
+
+  (setq mu4e-mu-binary "/usr/bin/mu")
+  (setq mu4e-maildir "~/.maildir")
+  (setq mu4e-view-show-images t)
+  (setq mu4e-html2text-command "w3m -dump -T text/html")
+  ;(setq mu4e-view-prefer-html t)
+  ;(setq mu4e-use-fancy-chars t)
+  (setq mu4e-headers-skip-duplicates t)
+  (setq mu4e-get-mail-command "offlineimap -q")
+  (setq mu4e-update-interval 300)
+  (setq mu4e-attachment-dir  "~/0.inbox")
+  (setq mu4e-drafts-folder "/[Gmail].Drafts")
+  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+  (setq mu4e-trash-folder  "/[Gmail].Trash")
+  (setq mu4e-sent-messages-behavior 'delete)
+  (setq message-kill-buffer-on-exit t)
+  (setq mu4e-hide-index-messages t)
+  (setq
+   user-mail-address "victor.phb@gmail.com"
+   user-full-name  "Victor Santos"
+   mu4e-compose-signature
+   (concat
+    "vct\n"))
+
+  ;; smtpmail
+  (require 'smtpmail)
+  (require 'starttls)
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-stream-type 'starttls
+        smtpmail-smtp-service 587
+        smtpmail-default-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-user "victor.phb@gmail.com")
+  ;(setq starttls-extra-arguments '("--x509cafile" "/usr/pkg/share/ncat/ca-bundle.crt"))
+
+  (defun vct:mail-compose-hooks ()
+    "Settings for message composition."
+    (flyspell-mode)
+    (turn-off-auto-fill)
+    (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+    (visual-line-mode 1))
+
+  (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
+  (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
+
+  (setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
+  (setq mu4e-org-contacts-file  "~/1.documents/0.annotations/0.organizer.org")
+
+  (defun insert-emails-from-tags (tag-expression)
+    "insert emails from org-contacts that match the tags expression. For example:
+  group-phd will match entries tagged with group but not with phd."
+    (interactive "sTags: ")
+    (insert
+      (mapconcat 'identity
+        (loop for contact in (org-contacts-filter)
+          for contact-name = (car contact)
+            for email = (org-contacts-strip-link (car (org-contacts-split-property
+              (or
+                (cdr (assoc-string org-contacts-email-property
+                  (caddr contact)))
+                    ""))))
+                  for tags = (cdr (assoc "TAGS" (nth 2 contact)))
+                            for tags-list = (if tags
+                            (split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
+                                  '())
+                                      if (let ((todo-only nil))
+                                       (eval (cdr (org-make-tags-matcher tag-expression))))
+                                           collect (org-contacts-format-email contact-name email))
+                                                 ",")))
+
+)
+#+end_src
 
 **** Org-mode configuration
-[[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs. 
+[[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs.
+
 Enable visual line mode
 #+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
 #+end_src
+
+Load programming languages
+#+begin_src emacs-lisp
+    (org-babel-do-load-languages 'org-babel-load-languages '(
+      (python . t)
+      (C . t)
+      (emacs-lisp . t)
+      (gnuplot . t)
+      (haskell . t)
+      (shell . t)
+    ))
+#+end_src
+
+Update all dynamic blocks before export
+#+begin_src emacs-lisp
+(add-hook 'org-export-before-processing-hook
+  (lambda (backend)
+    (org-update-all-dblocks)))
+#+end_src
+
 
 <<cdlatex>>
 Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/][CDLaTeX]]:
@@ -476,6 +581,21 @@ Uses latexmk for exporting
     (setq org-latex-pdf-process '("latexmk -pdf %f"))
 #+end_src
 
+LaTeX backend specific
+#+begin_src emacs-lisp
+    (require 'ox-latex)
+
+    (setq org-latex-prefer-user-labels t)
+
+    ;; Remove headline title before export
+    (defun ignored-headlines-removal (backend)
+      (org-map-entries
+        (lambda ()
+          (delete-region (point)
+            (progn (forward-line) (point)))) "ignore_heading"))
+    (add-hook 'org-export-before-parsing-hook 'ignored-headlines-removal)
+#+end_src
+
 For site publishing
 #+begin_src emacs-lisp
     (require 'ox-publish)
@@ -508,7 +628,7 @@ Closing =defun dotspacemacs/user-config=
 *** Org-mode LaTeX custom classes
 **** JCAP class
 :properties:
-:tangle: emacs/elisp.symlink/jcap.el
+:tangle: emacs/elisp/jcap.el
 :padline: no
 :mkdirp: yes
 :end:
@@ -530,21 +650,27 @@ Closing =defun dotspacemacs/user-config=
 
 **** Article draft
 :properties:
-:tangle emacs/.elisp/org-article-draft.el
+:tangle: emacs/elisp/org-article-draft.el
 :padline: no
 :mkdirp: yes
 :end:
 
 #+begin_src emacs-lisp
-(require 'ox-latex)
 (unless (boundp 'org-latex-classes)
   (setq org-latex-classes nil))
+
 (add-to-list 'org-latex-classes
   '("org-article-draft"
 "\\documentclass[12pt,a4paper]{article}
+
+% Font/encoding
+\\usepackage[T1]{fontenc}
+\\usepackage[utf8]{inputenc}
+
 % Language and geometry
 \\usepackage[english]{babel}
-\\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+
 % Set link colors (from http://tex.stackexchange.com/questions/100905/best-practice-for-hyperref-link-colours)
 \\usepackage[dvipsnames]{xcolor}
 \\usepackage{hyperref}
@@ -564,9 +690,21 @@ Closing =defun dotspacemacs/user-config=
 \\usepackage{amsmath,amssymb,amsfonts,amsthm}
 % For include figures
 \\usepackage{graphicx}
+
+\\makeatletter
+\\renewcommand{\\maketitle}{%
+\\begin{center}%
+{\\LARGE \\@title \\par}%
+\\vskip 1.5em%
+{{\\small\\@author}\\par}%
+{{\\itshape\\@date}\\par}%
+\\end{center}%
+}\\makeatother
+
 [NO-DEFAULT-PACKAGES]
 [PACKAGES]
 [EXTRA]"
+  ("\\part{%s}" . "\\part*{%s}")
   ("\\section{%s}" . "\\section*{%s}")
   ("\\subsection{%s}" . "\\subsection*{%s}")
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -574,9 +712,24 @@ Closing =defun dotspacemacs/user-config=
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 #+end_src
 
+Dynamic blocks
+#+begin_src emacs-lisp
+(defun get-string-from-file (filePath)
+  "Return filePath's file content."
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(defun org-dblock-write:insert-abstract (params)
+  (let ((file (plist-get params :file)))
+    (insert (format "#+begin_abstract\n%s\n#+end_abstract" (get-string-from-file file)))
+  )
+)
+#+end_src
+
 **** RevTeX
 :properties:
-:tangle: emacs/elisp.symlink/revtex.el
+:tangle: emacs/elisp/revtex.el
 :padline: no
 :mkdirp: yes
 :end:
@@ -632,7 +785,7 @@ Closing =defun dotspacemacs/user-config=
 
 **** Org-mode CV
 :properties:
-:tangle: emacs/elisp.symlink/org-mode-cv.el
+:tangle: emacs/elisp/org-mode-cv.el
 :padline: no
 :mkdirp: yes
 :end:
@@ -683,7 +836,7 @@ Closing =defun dotspacemacs/user-config=
 
 ** "Normal" emacs configuration
 :properties:
-:tangle: emacs/emacs.symlink
+:tangle: emacs/emacsrc
 :padline: no
 :mkdirp: yes
 :end:

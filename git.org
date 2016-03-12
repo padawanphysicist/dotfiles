@@ -2,7 +2,7 @@
 
 ** =.gitconfig=
 :properties:
-:tangle: git/gitconfig.symlink
+:tangle: git/gitconfig
 :padline: no
 :mkdirp: yes
 :end:

@@ -4,9 +4,10 @@ Here I put my own scripts, as they are not big enough to have their own files. T
 
 ** =vct-ldiff=
 :properties:
-:tangle: scripts/bin.symlink/vct-ldiff
+:tangle: scripts/bin/vct-ldiff
 :padline: no
 :mkdirp: yes
+:tangle-mode: (identity #o777)
 :end:
 
 This script helps to compare [[http://www.latex-project.org/][LaTeX]] documents between different [[http://git-scm.com/][git]] revisions, as explained [[https://wiki.math.cmu.edu/iki/wiki/tips/20140301-git-latexdiff.html][here]].
@@ -35,9 +36,10 @@ fi
 
 ** =vct-tts=
 :properties:
-:tangle: scripts/bin.symlink/vct-tts
+:tangle: scripts/bin/vct-tts
 :padline: no
 :mkdirp: yes
+:tangle-mode: (identity #o777)
 :end:
 
 Send currently selected text to festival (text-to-speech)

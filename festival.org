@@ -4,7 +4,7 @@
 
 ** =.festivalrc=
 :properties:
-:tangle: festival/festivalrc.symlink
+:tangle: festival/festivalrc
 :padline: no
 :mkdirp: yes
 :end:

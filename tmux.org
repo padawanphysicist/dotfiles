@@ -2,7 +2,7 @@
 
 ** =.tmux.conf=
 :properties:
-:tangle: tmux/tmux.conf.symlink
+:tangle: tmux/tmux.conf
 :padline: no
 :mkdirp: yes
 :end:

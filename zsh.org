@@ -9,7 +9,7 @@
 
 ** =.zshrc=
 :properties:
-:tangle: zsh/zshrc.symlink
+:tangle: zsh/zshrc
 :padline: no
 :mkdirp: yes
 :end:
@@ -69,7 +69,7 @@ path=($path $pathdirs)
 
 ** Antigen
 :properties:
-:tangle: zsh/zshrc.symlink
+:tangle: zsh/zshrc
 :padline: no
 :mkdirp: yes
 :end:
@@ -106,14 +106,14 @@ antigen apply
 
 ** General configuration
 :properties:
-:tangle: zsh/zshrc.symlink
+:tangle: zsh/zshrc
 :padline: no
 :mkdirp: yes
 :end:
 
 Colored ls
 #+begin_src sh
-eval `dircolors /home/santos/.dircolors-solarized/dircolors.256dark`
+eval `dircolors /home/vct/.dircolors-solarized/dircolors.256dark`
 #+end_src
 
 Command completion

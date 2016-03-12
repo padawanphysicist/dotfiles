@@ -2,41 +2,31 @@
 
 ** =.vimrc=
 :properties:
-:tangle: vim/vimrc.symlink
+:tangle: vim/vimrc
 :padline: no
 :mkdirp: yes
 :end:
 
 Be iMproved
 #+begin_src sh
-set nocompatible
-#+end_src
-
-*** Vundle configuration
-
-#+begin_src sh
-if has('vim_starting')
-  filetype off
-#+end_src
-
-Set the runtime path to include Vundle and initialize
-#+begin_src sh
-  set runtimepath+=~/.vim/bundle/Vundle.vim/
-#+end_src
-
-#+begin_src sh
+if &compatible
+   set nocompatible
 endif
+#+end_src
+
+*** Plugin configuration
+
+#+begin_src sh
+filetype off
+#+end_src
+
+#+begin_src sh
+set runtimepath+=~/.vim/bundle/Vundle.vim
 #+end_src
 
 Start Vundle
 #+begin_src sh
 call vundle#begin()
-#+end_src
-
-Vundle packages
-Let Vundle manage Vundle (Required):
-#+begin_src sh
-Plugin 'VundleVim/Vundle.vim'
 #+end_src
 
 Misc packages
@@ -54,12 +44,6 @@ Plugin 'jiangmiao/auto-pairs'
 Color
 #+begin_src sh
 Plugin 'nanotech/jellybeans.vim'
-Plugin 'altercation/vim-colors-solarized.git'
-#+end_src
-
-Org-mode
-#+begin_src sh
-Plugin 'jceb/vim-orgmode'
 #+end_src
 
 use CTRL-A/CTRL-X to increment dates, times, and more
@@ -74,14 +58,6 @@ filetype plugin indent on
 #+end_src
 
 *** Basic Setup
-
-#+begin_src sh
-#+end_src
-
-Load Powerline configuration
-#+begin_src sh
-set rtp+=$HOME/.local/lib/python3.5/site-packages/powerline/bindings/vim/
-#+end_src
 
 Always show statusline
 #+begin_src sh
@@ -107,6 +83,6 @@ Enable colors
 #+begin_src sh
 syntax enable
 set background=dark
-colorscheme solarized
+colorscheme jellybeans
 #+end_src
 

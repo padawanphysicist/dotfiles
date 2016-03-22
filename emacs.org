@@ -44,6 +44,7 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       (spell-checking :variables spell-checking-enable-by-default nil)
       syntax-checking
       spotify
+      haskell
       version-control
     )
 #+end_src
@@ -55,6 +56,7 @@ List of additional packages that will be installed without being wrapped in a la
       cdlatex
       org-ref
       vimish-fold
+      ox-reveal
     )
 #+end_src
 
@@ -387,7 +389,7 @@ and then we configure it:
   (load "org-contacts.el")
 
   (setq mu4e-mu-binary "/usr/bin/mu")
-  (setq mu4e-maildir "~/.maildir")
+  (setq mu4e-maildir "~/.maildir/")
   (setq mu4e-view-show-images t)
   (setq mu4e-html2text-command "w3m -dump -T text/html")
   ;(setq mu4e-view-prefer-html t)
@@ -396,9 +398,9 @@ and then we configure it:
   (setq mu4e-get-mail-command "offlineimap -q")
   (setq mu4e-update-interval 300)
   (setq mu4e-attachment-dir  "~/0.inbox")
-  (setq mu4e-drafts-folder "/[Gmail].Drafts")
-  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
-  (setq mu4e-trash-folder  "/[Gmail].Trash")
+  (setq mu4e-drafts-folder "/gmail/[Gmail].Drafts")
+  (setq mu4e-sent-folder   "/gmail/[Gmail].Sent Mail")
+  (setq mu4e-trash-folder  "/gmail/[Gmail].Trash")
   (setq mu4e-sent-messages-behavior 'delete)
   (setq message-kill-buffer-on-exit t)
   (setq mu4e-hide-index-messages t)

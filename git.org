@@ -23,8 +23,8 @@ LaTeX diff
 Identity
 #+begin_src sh
 [user]
-    email = victor.phb@gmail.com
-    name = Victor Santos (vct)
+    email = victor_santos@fisica.ufc.br
+    name = Victor Santos
 #+end_src
 
 Color UI

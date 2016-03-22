@@ -39,6 +39,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'sheerun/vim-polyglot'
 Plugin 'bronson/vim-trailing-whitespace'
 Plugin 'jiangmiao/auto-pairs'
+Plugin 'jceb/vim-orgmode'
 #+end_src
 
 Color

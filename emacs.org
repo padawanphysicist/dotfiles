@@ -44,7 +44,6 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       (spell-checking :variables spell-checking-enable-by-default nil)
       syntax-checking
       spotify
-      haskell
       version-control
     )
 #+end_src
@@ -57,6 +56,7 @@ List of additional packages that will be installed without being wrapped in a la
       org-ref
       vimish-fold
       ox-reveal
+      spaceline
     )
 #+end_src
 
@@ -151,7 +151,7 @@ If non nil the cursor color matches the state color.
 Default font. `powerline-scale' allows to quickly tweak the mode-line size to make separators look not too crappy.
 #+begin_src emacs-lisp
     dotspacemacs-default-font '(
-      "Hack"
+      "Source code Pro for Powerline"
       :size 15
       :weight normal
       :width normal
@@ -348,6 +348,12 @@ Configuration function for user code. This function is called at the very end of
 
 #+begin_src emacs-lisp
 (defun dotspacemacs/user-config ()
+#+end_src
+
+The default old spacemacs modeline was moved to a separate project, [[https://github.com/TheBB/spaceline][spaceline]], and therefore you must include it separately:
+#+begin_src emacs-lisp
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
 #+end_src
 
 Add user elisp code to emacs' =PATH=

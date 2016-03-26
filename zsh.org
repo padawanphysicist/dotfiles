@@ -144,6 +144,7 @@ alias ls="ls --color=auto"
 alias glog="git log --graph --oneline --decorate --date-order --color --boundary"
 alias lh='ls -l .??*'
 alias lhd='ls -ld .??*'
+alias emacx='emacsclient -t'
 
 man() {
   env \

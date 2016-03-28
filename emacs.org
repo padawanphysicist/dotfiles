@@ -57,6 +57,7 @@ List of additional packages that will be installed without being wrapped in a la
       vimish-fold
       ox-reveal
       spaceline
+      ob-ipython
     )
 #+end_src
 
@@ -485,6 +486,12 @@ Load programming languages
       (shell . t)
     ))
 #+end_src
+
+Add support for IPython/Jupyter
+#+begin_src emacs-lisp
+(require 'ob-ipython)
+#+end_src
+
 
 Update all dynamic blocks before export
 #+begin_src emacs-lisp

@@ -43,7 +43,6 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       (shell :variables shell-default-height 30 shell-default-position 'bottom)
       (spell-checking :variables spell-checking-enable-by-default nil)
       syntax-checking
-      spotify
       version-control
     )
 #+end_src
@@ -674,6 +673,24 @@ Closing =defun dotspacemacs/user-config=
 (unless (boundp 'org-latex-classes)
   (setq org-latex-classes nil))
 
+(setq org-latex-listings 'minted)
+(setq org-latex-minted-options '(
+  ("frame" "lines")
+  ("fontsize" "\\scriptsize")
+))
+
+(setq org-latex-pdf-process '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+
+(require 'ox-latex)
+
+;; Do not ask confirmation for evaluating code blocks
+(setq org-confirm-babel-evaluate nil)
+
+(add-to-list 'org-export-filter-src-block-functions
+  (lambda (contents backend info)
+    (when (eq backend 'latex)
+      (replace-regexp-in-string "ipython" "python" contents))))
+
 (add-to-list 'org-latex-classes
   '("org-article-draft"
 "\\documentclass[12pt,a4paper]{article}
@@ -705,6 +722,8 @@ Closing =defun dotspacemacs/user-config=
 \\usepackage{amsmath,amssymb,amsfonts,amsthm}
 % For include figures
 \\usepackage{graphicx}
+% For source code listings
+\\usepackage[cache=false]{minted}
 
 \\makeatletter
 \\renewcommand{\\maketitle}{%
@@ -849,9 +868,3 @@ Dynamic blocks
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 #+end_src
 
-** "Normal" emacs configuration
-:properties:
-:tangle: emacs/emacsrc
-:padline: no
-:mkdirp: yes
-:end:

@@ -58,6 +58,9 @@ List of additional packages that will be installed without being wrapped in a la
       spaceline
       ob-ipython
       google-translate
+      visual-fill-column
+      google-contacts
+      rainbow-mode
     )
 #+end_src
 
@@ -152,7 +155,7 @@ If non nil the cursor color matches the state color.
 Default font. `powerline-scale' allows to quickly tweak the mode-line size to make separators look not too crappy.
 #+begin_src emacs-lisp
     dotspacemacs-default-font '(
-      "Source code Pro for Powerline"
+      "Inconsolata for Powerline"
       :size 15
       :weight normal
       :width normal
@@ -346,9 +349,45 @@ Initialization function for user code. It is called immediately after `dotspacem
 *** Configuration function for user code
 
 Configuration function for user code. This function is called at the very end of Spacemacs initialization after layers configuration. You are free to put any user code.
-
 #+begin_src emacs-lisp
 (defun dotspacemacs/user-config ()
+#+end_src
+
+Change user-reserved prefix name
+#+begin_src emacs-lisp
+  (spacemacs/declare-prefix "o" "user-defined-prefix")
+#+end_src
+
+Enable clipboard in emacs
+#+begin_src emacs-lisp
+  (defun copy-to-clipboard ()
+    "Copies selection to x-clipboard."
+    (interactive)
+    (if (display-graphic-p)
+        (progn
+          (message "Yanked region to x-clipboard!")
+          (call-interactively 'clipboard-kill-ring-save)
+          )
+      (if (region-active-p)
+          (progn
+            (shell-command-on-region (region-beginning) (region-end) "xsel -i -b")
+            (message "Yanked region to clipboard!")
+            (deactivate-mark))
+        (message "No region active; can't yank to clipboard!"))))
+
+  (defun paste-from-clipboard ()
+    "Pastes from x-clipboard."
+    (interactive)
+    (if (display-graphic-p)
+        (progn
+          (clipboard-yank)
+          (message "graphics active")
+          )
+      (insert (shell-command-to-string "xsel -o -b"))
+      )
+    )
+  (spacemacs/set-leader-keys "oy" 'copy-to-clipboard)
+  (spacemacs/set-leader-keys "op" 'paste-from-clipboard)
 #+end_src
 
 The default old spacemacs modeline was moved to a separate project, [[https://github.com/TheBB/spaceline][spaceline]], and therefore you must include it separately:
@@ -370,6 +409,18 @@ Nice abbreviations for people like me who forget sometimes and keep pressing Shi
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "Wq" 'evil-save-and-close))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "wQ" 'evil-save-and-close))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "WQ" 'evil-save-and-close))
+#+end_src
+
+Fixing visual lines navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down operate in screen lines instead of logical lines, both in normal state and visual mode.
+#+begin_src emacs-lisp
+  (define-key evil-normal-state-map "j" 'evil-next-visual-line)
+  (define-key evil-normal-state-map (kbd "<down>" ) 'evil-next-visual-line)
+  (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
+  (define-key evil-normal-state-map (kbd "<up>" ) 'evil-previous-visual-line)
+  (define-key evil-visual-state-map "j" 'evil-next-visual-line)
+  (define-key evil-visual-state-map (kbd "<down>" ) 'evil-next-visual-line)
+  (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+  (define-key evil-visual-state-map (kbd "<up>" ) 'evil-previous-visual-line)
 #+end_src
 
 Make org-mode work with files ending in .org
@@ -394,6 +445,12 @@ Google translate configuration
 ;; Run google-translate query with SPC x g t
 (spacemacs/set-leader-keys "xgt" 'google-translate-smooth-translate)
 #+end_src
+
+Use this at your risk! I'm NOT conservative regarding local file variable, as I always know the code I'll be executing.
+#+begin_src emacs-lisp
+    (setq enable-local-variables :all)
+#+end_src
+
 **** mu4e configuration
 First we load mu4e
 #+begin_src emacs-lisp
@@ -405,18 +462,20 @@ and then we configure it:
 #+begin_src emacs-lisp
 (with-eval-after-load 'mu4e
   ;; Contacts in org mode =D
-  (load "org-contacts.el")
+  ;(load "org-contacts.el")
+  (require 'google-contacts)
+  (require 'google-contacts-message)
 
   (setq mu4e-mu-binary "/usr/bin/mu")
   (setq mu4e-maildir "~/.maildir/")
   (setq mu4e-view-show-images t)
   (setq mu4e-html2text-command "w3m -dump -T text/html")
-  ;(setq mu4e-view-prefer-html t)
+  (setq mu4e-view-prefer-html t)
   ;(setq mu4e-use-fancy-chars t)
   (setq mu4e-headers-skip-duplicates t)
   (setq mu4e-get-mail-command "offlineimap -q")
   (setq mu4e-update-interval 300)
-  (setq mu4e-attachment-dir  "~/0.inbox")
+  (setq mu4e-attachment-dir  "~/0.Inbox")
   (setq mu4e-drafts-folder "/gmail/[Gmail].Drafts")
   (setq mu4e-sent-folder   "/gmail/[Gmail].Sent Mail")
   (setq mu4e-trash-folder  "/gmail/[Gmail].Trash")
@@ -451,30 +510,30 @@ and then we configure it:
   (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
   (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
 
-  (setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
+  ;(setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
   (setq mu4e-org-contacts-file  "~/1.documents/0.annotations/0.organizer.org")
 
-  (defun insert-emails-from-tags (tag-expression)
-    "insert emails from org-contacts that match the tags expression. For example:
-  group-phd will match entries tagged with group but not with phd."
-    (interactive "sTags: ")
-    (insert
-      (mapconcat 'identity
-        (loop for contact in (org-contacts-filter)
-          for contact-name = (car contact)
-            for email = (org-contacts-strip-link (car (org-contacts-split-property
-              (or
-                (cdr (assoc-string org-contacts-email-property
-                  (caddr contact)))
-                    ""))))
-                  for tags = (cdr (assoc "TAGS" (nth 2 contact)))
-                            for tags-list = (if tags
-                            (split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
-                                  '())
-                                      if (let ((todo-only nil))
-                                       (eval (cdr (org-make-tags-matcher tag-expression))))
-                                           collect (org-contacts-format-email contact-name email))
-                                                 ",")))
+ ; (defun insert-emails-from-tags (tag-expression)
+ ;   "insert emails from org-contacts that match the tags expression. For example:
+ ; group-phd will match entries tagged with group but not with phd."
+ ;   (interactive "sTags: ")
+ ;   (insert
+ ;     (mapconcat 'identity
+ ;       (loop for contact in (org-contacts-filter)
+ ;         for contact-name = (car contact)
+ ;           for email = (org-contacts-strip-link (car (org-contacts-split-property
+ ;             (or
+ ;               (cdr (assoc-string org-contacts-email-property
+ ;                 (caddr contact)))
+ ;                   ""))))
+ ;                 for tags = (cdr (assoc "TAGS" (nth 2 contact)))
+ ;                           for tags-list = (if tags
+ ;                           (split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
+ ;                                 '())
+ ;                                     if (let ((todo-only nil))
+ ;                                      (eval (cdr (org-make-tags-matcher tag-expression))))
+ ;                                          collect (org-contacts-format-email contact-name email))
+ ;                                                ",")))
 
 )
 #+end_src
@@ -482,36 +541,22 @@ and then we configure it:
 **** Org-mode configuration
 [[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs.
 
-Enable visual line mode
+Configuration to be done AFTER load org
 #+begin_src emacs-lisp
+  (with-eval-after-load 'org
+#+end_src
+
+[[https://github.com/joostkremers/visual-fill-column][Visual Fill Column]] is a minor mode which mimics the effect of fill-column in visual-line-mode: instead of wrapping lines at window edge, it wraps at fill-column
+#+begin_src emacs-lisp
+  (require 'visual-fill-column)
+
+  ;; Enable visual line mode
   (add-hook 'org-mode-hook 'visual-line-mode)
+
+  ;; Soft-wrap at column 80
+  (setq visual-fill-column-width 80)
+  (add-hook 'org-mode-hook 'visual-fill-column-mode)
 #+end_src
-
-Load programming languages
-#+begin_src emacs-lisp
-    (org-babel-do-load-languages 'org-babel-load-languages '(
-      (python . t)
-      (C . t)
-      (emacs-lisp . t)
-      (gnuplot . t)
-      (haskell . t)
-      (shell . t)
-    ))
-#+end_src
-
-Add support for IPython/Jupyter
-#+begin_src emacs-lisp
-(require 'ob-ipython)
-#+end_src
-
-
-Update all dynamic blocks before export
-#+begin_src emacs-lisp
-(add-hook 'org-export-before-processing-hook
-  (lambda (backend)
-    (org-update-all-dblocks)))
-#+end_src
-
 
 <<cdlatex>>
 Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/][CDLaTeX]]:
@@ -519,25 +564,11 @@ Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.domin
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 #+end_src
 
-Fixing visual lines navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down operate in screen lines instead of logical lines, both in normal state and visual mode.
+Update all dynamic blocks before export
 #+begin_src emacs-lisp
-  (define-key evil-normal-state-map "j" 'evil-next-visual-line)
-  (define-key evil-normal-state-map (kbd "<down>" ) 'evil-next-visual-line)
-  (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
-  (define-key evil-normal-state-map (kbd "<up>" ) 'evil-previous-visual-line)
-  (define-key evil-visual-state-map "j" 'evil-next-visual-line)
-  (define-key evil-visual-state-map (kbd "<down>" ) 'evil-next-visual-line)
-  (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
-  (define-key evil-visual-state-map (kbd "<up>" ) 'evil-previous-visual-line)
-#+end_src
-
-#+begin_src emacs-lisp
-  (with-eval-after-load 'org
-#+end_src
-
-Use this at your risk! I'm NOT conservative regarding local file variable, as I always know the code I'll be executing.
-#+begin_src emacs-lisp
-    (setq enable-local-variables :all)
+(add-hook 'org-export-before-processing-hook
+  (lambda (backend)
+    (org-update-all-dblocks)))
 #+end_src
 
 Partial LaTeX syntax highlighting in org-mode buffers
@@ -551,6 +582,18 @@ Partial LaTeX syntax highlighting in org-mode buffers
          (2 'font-lock-constant-face))
         ("\\(\\\\textrm\\|\\\\frac\\)"
          (1 'font-lock-keyword-face))))
+#+end_src
+
+Syntax sugar for font formatting
+#+begin_src emacs-lisp
+    (add-to-list 'org-emphasis-alist
+        '("*" (:foreground "white" :weight bold)))
+
+    (add-to-list 'org-emphasis-alist
+        '("/" (:inherit italic :family "Monospace" :height 0.95)))
+
+    ;; Hide markers
+    (setq org-hide-emphasis-markers t)
 #+end_src
 
 Bigger LaTeX previews
@@ -634,6 +677,23 @@ For ignore_headline tag. Any headline tagged with 'ignore' will be ignored, whil
     (ox-extras-activate '(ignore-headlines))
 #+end_src
 
+Load programming languages
+#+begin_src emacs-lisp
+    (org-babel-do-load-languages 'org-babel-load-languages '(
+      (python . t)
+      (C . t)
+      (emacs-lisp . t)
+      (gnuplot . t)
+      (haskell . t)
+      (shell . t)
+    ))
+#+end_src
+
+Add support for IPython/Jupyter
+#+begin_src emacs-lisp
+(require 'ob-ipython)
+#+end_src
+
 Closing =with-eval-after-load 'org=
 #+begin_src emacs-lisp
   )
@@ -650,6 +710,9 @@ Closing =defun dotspacemacs/user-config=
 #+begin_src emacs-lisp
 )
 #+end_src
+
+
+
 
 ** Custom elisp folder
 *** Org-mode LaTeX custom classes

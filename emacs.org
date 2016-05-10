@@ -59,8 +59,8 @@ List of additional packages that will be installed without being wrapped in a la
       ob-ipython
       google-translate
       visual-fill-column
-      google-contacts
       rainbow-mode
+      mustache
     )
 #+end_src
 
@@ -461,17 +461,13 @@ First we load mu4e
 and then we configure it:
 #+begin_src emacs-lisp
 (with-eval-after-load 'mu4e
-  ;; Contacts in org mode =D
-  ;(load "org-contacts.el")
-  (require 'google-contacts)
-  (require 'google-contacts-message)
+  (load-file "/home/vct/.elisp/helm-goobook.el")
 
   (setq mu4e-mu-binary "/usr/bin/mu")
   (setq mu4e-maildir "~/.maildir/")
   (setq mu4e-view-show-images t)
   (setq mu4e-html2text-command "w3m -dump -T text/html")
   (setq mu4e-view-prefer-html t)
-  ;(setq mu4e-use-fancy-chars t)
   (setq mu4e-headers-skip-duplicates t)
   (setq mu4e-get-mail-command "offlineimap -q")
   (setq mu4e-update-interval 300)
@@ -498,7 +494,6 @@ and then we configure it:
         smtpmail-default-smtp-server "smtp.gmail.com"
         smtpmail-smtp-server "smtp.gmail.com"
         smtpmail-smtp-user "victor.phb@gmail.com")
-  ;(setq starttls-extra-arguments '("--x509cafile" "/usr/pkg/share/ncat/ca-bundle.crt"))
 
   (defun vct:mail-compose-hooks ()
     "Settings for message composition."
@@ -509,32 +504,6 @@ and then we configure it:
 
   (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
   (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
-
-  ;(setq org-contacts-files '("~/1.documents/0.annotations/0.organizer.org"))
-  (setq mu4e-org-contacts-file  "~/1.documents/0.annotations/0.organizer.org")
-
- ; (defun insert-emails-from-tags (tag-expression)
- ;   "insert emails from org-contacts that match the tags expression. For example:
- ; group-phd will match entries tagged with group but not with phd."
- ;   (interactive "sTags: ")
- ;   (insert
- ;     (mapconcat 'identity
- ;       (loop for contact in (org-contacts-filter)
- ;         for contact-name = (car contact)
- ;           for email = (org-contacts-strip-link (car (org-contacts-split-property
- ;             (or
- ;               (cdr (assoc-string org-contacts-email-property
- ;                 (caddr contact)))
- ;                   ""))))
- ;                 for tags = (cdr (assoc "TAGS" (nth 2 contact)))
- ;                           for tags-list = (if tags
- ;                           (split-string (substring (cdr (assoc "TAGS" (nth 2 contact))) 1 -1) ":")
- ;                                 '())
- ;                                     if (let ((todo-only nil))
- ;                                      (eval (cdr (org-make-tags-matcher tag-expression))))
- ;                                          collect (org-contacts-format-email contact-name email))
- ;                                                ",")))
-
 )
 #+end_src
 
@@ -715,6 +684,61 @@ Closing =defun dotspacemacs/user-config=
 
 
 ** Custom elisp folder
+*** Helm and Goobook
+:properties:
+:tangle: emacs/elisp/helm-goobook.el
+:padline: no
+:mkdirp: yes
+:end:
+#+begin_src emacs-lisp
+;;; helm-goobook.el
+;; Copyright 2016 Shivam Kalra
+;;
+;; Author: Shivam Kalra <skalra@gmx.ca>
+
+;;; Code:
+(defun goobook-search (search-term)
+  (message search-term)
+  (process-lines "goosearch" search-term))
+
+(defun helm-goobook-search ()
+  (mapcar (lambda (entry)
+            (let* ((vals (split-string entry "\t"))
+                   (email (car vals))
+                   (name (car (cdr vals)))
+                   (key (format "%s <%s>" name email)))
+              `(,key
+                (name . ,name)
+                (email . ,email)
+                (val . ,key)))) (goobook-search helm-pattern)))
+
+(defun helm-goobook-insert-key (entry)
+  (with-helm-current-buffer
+    (insert (cdr (assoc 'val entry)))))
+
+(defun helm-goobook-insert-name (entry)
+  (with-helm-current-buffer
+    (insert (cdr (assoc 'name entry)))))
+
+(defun helm-goobook-insert-email (entry)
+  (with-helm-current-buffer
+    (insert (cdr (assoc 'email entry)))))
+
+(defvar helm-source-goobook
+  '((name . "Goobook Search")
+    (volatile)
+    (delayed)
+    (requires-pattern . 3)
+    (candidates .  helm-goobook-search)
+    (action . (("Insert key" . helm-goobook-insert-key)
+               ("Insert email" . helm-goobook-insert-email)
+               ("Insert name" . helm-goobook-insert-name)))))
+
+(defun helm-goobook ()
+  (interactive)
+  (helm :sources '(helm-source-goobook)
+	:buffer "*helm-goobook*"))
+#+end_src
 *** Org-mode LaTeX custom classes
 **** JCAP class
 :properties:

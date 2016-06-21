@@ -61,12 +61,14 @@ List of additional packages that will be installed without being wrapped in a la
       visual-fill-column
       rainbow-mode
       mustache
+      web-mode
+      pdf-tools
     )
 #+end_src
 
 A list of packages and/or extensions that will not be install and loaded.
 #+begin_src emacs-lisp
-    dotspacemacs-excluded-packages '()
+    dotspacemacs-excluded-packages '(org-bullets)
 #+end_src
 
 If non-nil spacemacs will delete any orphan packages, i.e. packages that are declared in a layer which is not a member of the list `dotspacemacs-configuration-layers'. (default t)
@@ -434,6 +436,11 @@ Fringe indicators for visual line mode
     '(left-curly-arrow right-curly-arrow))
 #+end_src
 
+Activate pdf-tools
+#+begin_src emacs-lisp
+  (pdf-tools-install)
+#+end_src
+
 Google translate configuration
 #+begin_src emacs-lisp
 (require 'google-translate)
@@ -461,10 +468,10 @@ First we load mu4e
 and then we configure it:
 #+begin_src emacs-lisp
 (with-eval-after-load 'mu4e
-  (load-file "/home/vct/.elisp/helm-goobook.el")
+  (load-file "~/.elisp/helm-goobook.el")
 
   (setq mu4e-mu-binary "/usr/bin/mu")
-  (setq mu4e-maildir "~/.maildir/")
+  (setq mu4e-maildir (expand-file-name "~/.maildir"))
   (setq mu4e-view-show-images t)
   (setq mu4e-html2text-command "w3m -dump -T text/html")
   (setq mu4e-view-prefer-html t)
@@ -472,14 +479,14 @@ and then we configure it:
   (setq mu4e-get-mail-command "offlineimap -q")
   (setq mu4e-update-interval 300)
   (setq mu4e-attachment-dir  "~/0.Inbox")
-  (setq mu4e-drafts-folder "/gmail/[Gmail].Drafts")
-  (setq mu4e-sent-folder   "/gmail/[Gmail].Sent Mail")
-  (setq mu4e-trash-folder  "/gmail/[Gmail].Trash")
+  (setq mu4e-drafts-folder "/[Gmail].Drafts")
+  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+  (setq mu4e-trash-folder  "/[Gmail].Trash")
   (setq mu4e-sent-messages-behavior 'delete)
   (setq message-kill-buffer-on-exit t)
   (setq mu4e-hide-index-messages t)
   (setq
-   user-mail-address "victor.phb@gmail.com"
+   user-mail-address "victor_santos@fisica.ufc.br"
    user-full-name  "Victor Santos"
    mu4e-compose-signature
    (concat

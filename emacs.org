@@ -1,15 +1,15 @@
-#+title: Emacs configuration
+* Emacs configuration
 
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an highly extensible and customizable text editor. It presents at its core an interpreter of a [[https://en.wikipedia.org/wiki/Lisp_programming_language][Lisp]] dialect called Emacs Lisp. GNU Emacs is one of the most powerful text editor available today.
 
 ** =.spacemacs=
-:properties:
-:tangle: emacs/spacemacsrc
-:padline: no
-:mkdirp: yes
-:end:
+:PROPERTIES:
+:TANGLE: emacs/spacemacsrc
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-[[http://spacemacs.org/][Spacemacs_]] is a new way to experience GNU Emacs -- a sophisticated starter-kit focused on ergonomics, mnemonics and consistency.
+[[http://spacemacs.org/][Spacemacs]] is a new way to experience GNU Emacs -- a sophisticated starter-kit focused on ergonomics, mnemonics and consistency.
 
 This is the Spacemacs configuration file. it is loaded by Spacemacs at startup, and it must be stored in your =$HOME= directory.
 
@@ -17,23 +17,23 @@ This is the Spacemacs configuration file. it is loaded by Spacemacs at startup, 
 
 You should not put any user code in this function besides modifying the variable values.
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/layers ()
   (setq-default
-#+end_src
+#+END_SRC
 
 Base distribution to use. This is a layer contained in the directory `+distribution'. For now available distributions are `spacemacs-base' or `spacemacs'. (default 'spacemacs)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-distribution 'spacemacs-base
-#+end_src
+#+END_SRC
 
 List of additional paths where to look for configuration layers. Paths must have a trailing slash (i.e. `~/.mycontribs/')
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-configuration-layer-path '()
-#+end_src
+#+END_SRC
 
 List of configuration layers to load. If it is the symbol `all' (dotspacemacs-configuration-layers all) instead of a list then all discovered layers will be installed.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-configuration-layers '(
       auto-completion
       emacs-lisp
@@ -45,10 +45,10 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       syntax-checking
       version-control
     )
-#+end_src
+#+END_SRC
 
 List of additional packages that will be installed without being wrapped in a layer. If you need some configuration for these packages then consider to create a layer, you can also put the configuration in `dotspacemacs/config'.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-additional-packages '(
       jbeans-theme
       cdlatex
@@ -64,79 +64,79 @@ List of additional packages that will be installed without being wrapped in a la
       web-mode
       pdf-tools
     )
-#+end_src
+#+END_SRC
 
 A list of packages and/or extensions that will not be install and loaded.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-excluded-packages '(org-bullets)
-#+end_src
+#+END_SRC
 
 If non-nil spacemacs will delete any orphan packages, i.e. packages that are declared in a layer which is not a member of the list `dotspacemacs-configuration-layers'. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-delete-orphan-packages t
-#+end_src
+#+END_SRC
 
 Finally, we close the function =dotspacemacs/layers=:
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ))
-#+end_src
+#+END_SRC
 
 *** Initialization function
 
 This function is called at the very startup of Spacemacs initialization before layers configuration. You should not put any user code in there besides modifying the variable values.
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/init ()
   (setq-default
-#+end_src
+#+END_SRC
 
 If non nil ELPA repositories are contacted via HTTPS whenever it's possible. Set it to nil if you have no way to use HTTPS in your environment, otherwise it is strongly recommended to let it set to t. This variable has no effect if Emacs is launched with the parameter `--insecure' which forces the value of this variable to nil. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-elpa-https t
-#+end_src
+#+END_SRC
 
 Maximum allowed time in seconds to contact an ELPA repository.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-elpa-timeout 5
-#+end_src
+#+END_SRC
 
 If non nil then spacemacs will check for updates at startup when the current branch is not `develop'. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-check-for-update t
-#+end_src
+#+END_SRC
 
 One of `vim', `emacs' or `hybrid'. Evil is always enabled but if the variable is `emacs' then the `holy-mode' is enabled at startup. `hybrid' uses emacs key bindings for vim's insert mode, but otherwise leaves evil unchanged. (default 'vim)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-editing-style 'vim
-#+end_src
+#+END_SRC
 
 If non nil output loading progress in `*Messages*' buffer. (default nil)
-#+begin_src emacs-lisp
-    dotspacemacs-verbose-loading t
-#+end_src
+#+BEGIN_SRC emacs-lisp
+    dotspacemacs-verbose-loading nil
+#+END_SRC
 
 Specify the startup banner. Default value is `official', it displays the official spacemacs logo. An integer value is the index of text banner, `random' chooses a random text banner in `core/banners' directory. A string value must be a path to an image format supported by your Emacs build. If the value is nil then no banner is displayed. (default 'official)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-startup-banner 'official
-#+end_src
+#+END_SRC
 
 List of items to show in the startup buffer. If nil it is disabled. Possible values are: `recents' `bookmarks' `projects'. (default '(recents projects))
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-startup-lists '(recents projects)
-#+end_src
+#+END_SRC
 
 Number of recent files to show in the startup buffer. Ignored if `dotspacemacs-startup-lists' doesn't include `recents'. (default 5)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-startup-recent-list-size 5
-#+end_src
+#+END_SRC
 
 Default major mode of the scratch buffer (default `text-mode')
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-scratch-mode 'text-mode
-#+end_src
+#+END_SRC
 
 List of themes, the first of the list is loaded when spacemacs starts. Press <SPC> T n to cycle to the next theme in the list (works great with 2 themes variants, one dark and one light)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-themes '(
       spacemacs-dark
       spacemacs-light
@@ -147,15 +147,15 @@ List of themes, the first of the list is loaded when spacemacs starts. Press <SP
       monokai
       zenburn
     )
-#+end_src
+#+END_SRC
 
 If non nil the cursor color matches the state color.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-colorize-cursor-according-to-state t
-#+end_src
+#+END_SRC
 
 Default font. `powerline-scale' allows to quickly tweak the mode-line size to make separators look not too crappy.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-default-font '(
       "Inconsolata for Powerline"
       :size 15
@@ -163,205 +163,206 @@ Default font. `powerline-scale' allows to quickly tweak the mode-line size to ma
       :width normal
       :powerline-scale 1.1
     )
-#+end_src
+#+END_SRC
 
 The leader key
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-leader-key "SPC"
-#+end_src
+#+END_SRC
 
 The leader key accessible in `emacs state' and `insert state' (default "M-m")
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-emacs-leader-key "M-m"
-#+end_src
+#+END_SRC
 
 Major mode leader key is a shortcut key which is the equivalent of pressing `<leader> m`. Set it to `nil` to disable it. (default ",")
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-major-mode-leader-key ","
-#+end_src
+#+END_SRC
 
 Major mode leader key accessible in `emacs state' and `insert state'. (default "C-M-m)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-major-mode-emacs-leader-key "C-M-m"
-#+end_src
+#+END_SRC
 
 These variables control whether separate commands are bound in the GUI to the key pairs C-i, TAB and C-m, RET. Setting it to a non-nil value, allows for separate commands under <C-i> and TAB or <C-m> and RET. In the terminal, these pairs are generally indistinguishable, so this only works in the GUI. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-distinguish-gui-tab nil
-#+end_src
+#+END_SRC
 
 The command key used for Evil commands (ex-commands) and Emacs commands (M-x). By default the command key is `:' so ex-commands are executed like in Vim with `:' and Emacs commands are executed with `<leader> :'.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-command-key ":"
-#+end_src
+#+END_SRC
 
 If non nil `Y' is remapped to `y$'. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-remap-Y-to-y$ t
-#+end_src
+#+END_SRC
 
 Name of the default layout (default "Default")
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-default-layout-name "Default"
-#+end_src
+#+END_SRC
 
 If non nil the default layout name is displayed in the mode-line. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-display-default-layout nil
-#+end_src
+#+END_SRC
 
 If non nil then the last auto saved layouts are resume automatically upon start. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-auto-resume-layouts nil
-#+end_src
+#+END_SRC
 
 Location where to auto-save files. Possible values are `original' to auto-save the file in-place, `cache' to auto-save the file to another file stored in the cache directory and `nil' to disable auto-saving. (default 'cache)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-auto-save-file-location 'cache
-#+end_src
+#+END_SRC
 
 Maximum number of rollback slots to keep in the cache. (default 5)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-max-rollback-slots 5
-#+end_src
+#+END_SRC
 
 If non nil then `ido' replaces `helm' for some commands. For now only `find-files' (SPC f f), `find-spacemacs-file' (SPC f e s), and `find-contrib-file' (SPC f e c) are replaced. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-use-ido nil
-#+end_src
+#+END_SRC
 
 If non nil, `helm' will try to miminimize the space it uses. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-helm-resize nil
-#+end_src
+#+END_SRC
 
 if non nil, the helm header is hidden when there is only one source. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-helm-no-header nil
-#+end_src
+#+END_SRC
 
 define the position to display `helm', options are `bottom', `top', `left', or `right'. (default 'bottom)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-helm-position 'bottom
-#+end_src
+#+END_SRC
 
 If non nil the paste micro-state is enabled. When enabled pressing `p` several times cycle between the kill ring content. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-enable-paste-micro-state nil
-#+end_src
+#+END_SRC
 
 Which-key delay in seconds. The which-key buffer is the popup listing the commands bound to the current keystroke sequence. (default 0.4)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-which-key-delay 0.4
-#+end_src
+#+END_SRC
 
 Which-key frame position. Possible values are `right', `bottom' and `right-then-bottom'. right-then-bottom tries to display the frame to the right; if there is insufficient space it displays it at the bottom. (default 'bottom)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-which-key-position 'bottom
-#+end_src
+#+END_SRC
 
 If non nil a progress bar is displayed when spacemacs is loading. This may increase the boot time on some systems and emacs builds, set it to nil to boost the loading time. (default t)
-#+begin_src emacs-lisp
-    dotspacemacs-loading-progress-bar t
-#+end_src
+#+BEGIN_SRC emacs-lisp
+    dotspacemacs-loading-progress-bar nil
+#+END_SRC
 
 If non nil the frame is fullscreen when Emacs starts up. (default nil) (Emacs 24.4+ only)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-fullscreen-at-startup nil
-#+end_src
+#+END_SRC
 
 If non nil `spacemacs/toggle-fullscreen' will not use native fullscreen. Use to disable fullscreen animations in OSX. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-fullscreen-use-non-native nil
-#+end_src
+#+END_SRC
 
 If non nil the frame is maximized when Emacs starts up. Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil. (default nil) (Emacs 24.4+ only)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-maximized-at-startup nil
-#+end_src
+#+END_SRC
 
 A value from the range (0..100), in increasing opacity, which describes the transparency level of a frame when it's active or selected. Transparency can be toggled through `toggle-transparency'. (default 90)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-active-transparency 90
-#+end_src
+#+END_SRC
 
 A value from the range (0..100), in increasing opacity, which describes the transparency level of a frame when it's inactive or deselected. Transparency can be toggled through `toggle-transparency'. (default 90)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-inactive-transparency 50
-#+end_src
+#+END_SRC
 
 If non nil unicode symbols are displayed in the mode line. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-mode-line-unicode-symbols t
-#+end_src
+#+END_SRC
 
 If non nil smooth scrolling (native-scrolling) is enabled. Smooth scrolling overrides the default behavior of Emacs which recenters the point when it reaches the top or bottom of the screen. (default t)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-smooth-scrolling t
-#+end_src
+#+END_SRC
 
 If non nil line numbers are turned on in all `prog-mode' and `text-mode' derivatives. If set to `relative', also turns on relative line numbers. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-line-numbers nil
-#+end_src
+#+END_SRC
 
 If non-nil smartparens-strict-mode will be enabled in programming modes. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-smartparens-strict-mode nil
-#+end_src
+#+END_SRC
 
 Select a scope to highlight delimiters. Possible values are `any', `current', `all' or `nil'. Default is `all' (highlight any scope and emphasis the current one). (default 'all)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-highlight-delimiters 'all
-#+end_src
+#+END_SRC
 
 If non nil advises quit functions to keep server open when quitting. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-persistent-server nil
-#+end_src
+#+END_SRC
 
 List of search tool executable names. Spacemacs uses the first installed tool of the list. Supported tools are `ag', `pt', `ack' and `grep'. (default '("ag" "pt" "ack" "grep"))
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
-#+end_src
+#+END_SRC
 
 The default package repository used if no explicit repository has been specified with an installed package. Not used for now. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-default-package-repository nil
-#+end_src
+#+END_SRC
 
 Delete whitespace while saving buffer. Possible values are `all' to aggressively delete empty line and long sequences of whitespace, `trailing' to delete only the whitespace at end of lines, `changed'to delete only whitespace for changed lines or `nil' to disable cleanup. (default nil)
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     dotspacemacs-whitespace-cleanup 'trailing
-#+end_src
+#+END_SRC
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ))
-#+end_src
+#+END_SRC
 
 *** Initialization function for user code
 
 Initialization function for user code. It is called immediately after `dotspacemacs/init'.  You are free to put any user code.
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/user-init ()
 )
-#+end_src
+#+END_SRC
 
 *** Configuration function for user code
 
 Configuration function for user code. This function is called at the very end of Spacemacs initialization after layers configuration. You are free to put any user code.
-#+begin_src emacs-lisp
+
+#+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/user-config ()
-#+end_src
+#+END_SRC
 
 Change user-reserved prefix name
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (spacemacs/declare-prefix "o" "user-defined-prefix")
-#+end_src
+#+END_SRC
 
 Enable clipboard in emacs
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (defun copy-to-clipboard ()
     "Copies selection to x-clipboard."
     (interactive)
@@ -390,31 +391,31 @@ Enable clipboard in emacs
     )
   (spacemacs/set-leader-keys "oy" 'copy-to-clipboard)
   (spacemacs/set-leader-keys "op" 'paste-from-clipboard)
-#+end_src
+#+END_SRC
 
 The default old spacemacs modeline was moved to a separate project, [[https://github.com/TheBB/spaceline][spaceline]], and therefore you must include it separately:
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (require 'spaceline-config)
   (spaceline-spacemacs-theme)
-#+end_src
+#+END_SRC
 
 Add user elisp code to emacs' =PATH=
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.elisp/")
   (let ((default-directory "~/.elisp/"))
     (normal-top-level-add-subdirs-to-load-path))
-#+end_src
+#+END_SRC
 
 Nice abbreviations for people like me who forget sometimes and keep pressing Shift key while typing.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "W[rite]" 'save-buffer))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "Wq" 'evil-save-and-close))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "wQ" 'evil-save-and-close))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "WQ" 'evil-save-and-close))
-#+end_src
+#+END_SRC
 
 Fixing visual lines navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down operate in screen lines instead of logical lines, both in normal state and visual mode.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (define-key evil-normal-state-map "j" 'evil-next-visual-line)
   (define-key evil-normal-state-map (kbd "<down>" ) 'evil-next-visual-line)
   (define-key evil-normal-state-map "k" 'evil-previous-visual-line)
@@ -423,26 +424,26 @@ Fixing visual lines navigation: I got this solution [[https://github.com/syl20bn
   (define-key evil-visual-state-map (kbd "<down>" ) 'evil-next-visual-line)
   (define-key evil-visual-state-map "k" 'evil-previous-visual-line)
   (define-key evil-visual-state-map (kbd "<up>" ) 'evil-previous-visual-line)
-#+end_src
+#+END_SRC
 
 Make org-mode work with files ending in .org
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-#+end_src
+#+END_SRC
 
 Fringe indicators for visual line mode
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (setq visual-line-fringe-indicators
     '(left-curly-arrow right-curly-arrow))
-#+end_src
+#+END_SRC
 
 Activate pdf-tools
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (pdf-tools-install)
-#+end_src
+#+END_SRC
 
 Google translate configuration
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (require 'google-translate)
 (require 'google-translate-smooth-ui)
 
@@ -451,22 +452,23 @@ Google translate configuration
 
 ;; Run google-translate query with SPC x g t
 (spacemacs/set-leader-keys "xgt" 'google-translate-smooth-translate)
-#+end_src
+#+END_SRC
 
 Use this at your risk! I'm NOT conservative regarding local file variable, as I always know the code I'll be executing.
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq enable-local-variables :all)
-#+end_src
+#+END_SRC
 
 **** mu4e configuration
+
 First we load mu4e
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (require 'mu4e)
 (add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-#+end_src
+#+END_SRC
 
 and then we configure it:
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'mu4e
   (load-file "~/.elisp/helm-goobook.el")
 
@@ -512,18 +514,19 @@ and then we configure it:
   (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
   (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
 )
-#+end_src
+#+END_SRC
 
 **** Org-mode configuration
+
 [[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs.
 
 Configuration to be done AFTER load org
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'org
 #+end_src
 
 [[https://github.com/joostkremers/visual-fill-column][Visual Fill Column]] is a minor mode which mimics the effect of fill-column in visual-line-mode: instead of wrapping lines at window edge, it wraps at fill-column
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (require 'visual-fill-column)
 
   ;; Enable visual line mode
@@ -532,23 +535,23 @@ Configuration to be done AFTER load org
   ;; Soft-wrap at column 80
   (setq visual-fill-column-width 80)
   (add-hook 'org-mode-hook 'visual-fill-column-mode)
-#+end_src
+#+END_SRC
 
 <<cdlatex>>
 Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/][CDLaTeX]]:
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-#+end_src
+#+END_SRC
 
 Update all dynamic blocks before export
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (add-hook 'org-export-before-processing-hook
   (lambda (backend)
     (org-update-all-dblocks)))
-#+end_src
+#+END_SRC
 
 Partial LaTeX syntax highlighting in org-mode buffers
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (font-lock-add-keywords 'org-mode
       '(("\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
          (1 'font-lock-keyword-face)
@@ -558,10 +561,10 @@ Partial LaTeX syntax highlighting in org-mode buffers
          (2 'font-lock-constant-face))
         ("\\(\\\\textrm\\|\\\\frac\\)"
          (1 'font-lock-keyword-face))))
-#+end_src
+#+END_SRC
 
 Syntax sugar for font formatting
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (add-to-list 'org-emphasis-alist
         '("*" (:foreground "white" :weight bold)))
 
@@ -570,37 +573,37 @@ Syntax sugar for font formatting
 
     ;; Hide markers
     (setq org-hide-emphasis-markers t)
-#+end_src
+#+END_SRC
 
 Bigger LaTeX previews
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (plist-put org-format-latex-options :scale 1.5)
-#+end_src
+#+END_SRC
 
 org-ref configuration
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (require 'org-ref)
     (setq org-ref-default-citation-link "eqref")
-#+end_src
+#+END_SRC
 
 Limit the size of picture preview
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq org-image-actual-width 300)
-#+end_src
+#+END_SRC
 
 Set default font for tags
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (custom-set-faces
       '(org-tag ((t (:foreground "DarkOrange3" :background "gray13" :box t)))))
-#+end_src
+#+END_SRC
 
 Change ltxpng folder location for LaTeX previews
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq org-latex-preview-ltxpng-directory "~/.ltxpng/")
-#+end_src
+#+END_SRC
 
 CDLaTex configuration (it was loaded [[cdlatex][here]])
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq cdlatex-env-alist
       '(
         ("vct-eqn" "\\begin{equation}\n?\n\\end{equation}\n" nil)
@@ -615,20 +618,20 @@ CDLaTex configuration (it was loaded [[cdlatex][here]])
         ("alig" "Insert non-labeled align" "" cdlatex-environment ("vct-alg") t nil)
        )
     )
-#+end_src
+#+END_SRC
 
 This makes my life easier when typesetting tensors using abstract index notation
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq cdlatex-math-symbol-alist '((?p ("\\phantom{?}"))))
-#+end_src
+#+END_SRC
 
 Uses latexmk for exporting
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (setq org-latex-pdf-process '("latexmk -pdf %f"))
-#+end_src
+#+END_SRC
 
 LaTeX backend specific
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (require 'ox-latex)
 
     (setq org-latex-prefer-user-labels t)
@@ -640,21 +643,21 @@ LaTeX backend specific
           (delete-region (point)
             (progn (forward-line) (point)))) "ignore_heading"))
     (add-hook 'org-export-before-parsing-hook 'ignored-headlines-removal)
-#+end_src
+#+END_SRC
 
 For site publishing
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (require 'ox-publish)
-#+end_src
+#+END_SRC
 
 For ignore_headline tag. Any headline tagged with 'ignore' will be ignored, while keeping its contents
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (require 'ox-extra)
     (ox-extras-activate '(ignore-headlines))
-#+end_src
+#+END_SRC
 
 Load programming languages
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
     (org-babel-do-load-languages 'org-babel-load-languages '(
       (python . t)
       (C . t)
@@ -663,41 +666,39 @@ Load programming languages
       (haskell . t)
       (shell . t)
     ))
-#+end_src
+#+END_SRC
 
 Add support for IPython/Jupyter
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (require 'ob-ipython)
-#+end_src
+#+END_SRC
 
 Closing =with-eval-after-load 'org=
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   )
-#+end_src
+#+END_SRC
 
 **** LaTeX configuration
 
 Normal font size in AUCTeX titles
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (setq font-latex-fontify-sectioning 'color)
-#+end_src
+#+END_SRC
 
 Closing =defun dotspacemacs/user-config=
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 )
-#+end_src
+#+END_SRC
 
-
-
-
-** Custom elisp folder
+** =.elisp/=
 *** Helm and Goobook
-:properties:
-:tangle: emacs/elisp/helm-goobook.el
-:padline: no
-:mkdirp: yes
-:end:
-#+begin_src emacs-lisp
+:PROPERTIES:
+:TANGLE: emacs/elisp/helm-goobook.el
+:PADLINE: no
+:MKDIRP: yes
+:END:
+
+#+BEGIN_SRC emacs-lisp
 ;;; helm-goobook.el
 ;; Copyright 2016 Shivam Kalra
 ;;
@@ -745,16 +746,18 @@ Closing =defun dotspacemacs/user-config=
   (interactive)
   (helm :sources '(helm-source-goobook)
 	:buffer "*helm-goobook*"))
-#+end_src
-*** Org-mode LaTeX custom classes
-**** JCAP class
-:properties:
-:tangle: emacs/elisp/jcap.el
-:padline: no
-:mkdirp: yes
-:end:
+#+END_SRC
 
-#+begin_src emacs-lisp
+*** Org-mode LaTeX custom classes
+
+**** JCAP class
+:PROPERTIES:
+:TANGLE: emacs/elisp/jcap.el
+:PADLINE: no
+:MKDIRP: yes
+:END:
+
+#+BEGIN_SRC emacs-lisp
 (require 'ox-latex)
 (unless (boundp 'org-latex-classes) (setq org-latex-classes nil))
 (add-to-list 'org-latex-classes '("jcap"
@@ -767,16 +770,16 @@ Closing =defun dotspacemacs/user-config=
 ("\\section{%s}" . "\\section*{%s}")
 ("\\subsection{%s}" . "\\subsection*{%s}")
 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
-#+end_src
+#+END_SRC
 
 **** Article draft
-:properties:
-:tangle: emacs/elisp/org-article-draft.el
-:padline: no
-:mkdirp: yes
-:end:
+:PROPERTIES:
+:TANGLE: emacs/elisp/org-article-draft.el
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (unless (boundp 'org-latex-classes)
   (setq org-latex-classes nil))
 
@@ -851,10 +854,10 @@ Closing =defun dotspacemacs/user-config=
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
   ("\\paragraph{%s}" . "\\paragraph*{%s}")
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-#+end_src
+#+END_SRC
 
 Dynamic blocks
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun get-string-from-file (filePath)
   "Return filePath's file content."
   (with-temp-buffer
@@ -866,16 +869,16 @@ Dynamic blocks
     (insert (format "#+begin_abstract\n%s\n#+end_abstract" (get-string-from-file file)))
   )
 )
-#+end_src
+#+END_SRC
 
 **** RevTeX
-:properties:
-:tangle: emacs/elisp/revtex.el
-:padline: no
-:mkdirp: yes
-:end:
+:PROPERTIES:
+:TANGLE: emacs/elisp/revtex.el
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (require 'ox-latex)
 
 (unless (boundp 'org-latex-classes)
@@ -922,16 +925,16 @@ Dynamic blocks
 
 (eval-after-load 'ox-latex
   '(add-to-list 'org-export-filter-final-output-functions 'vct/remove-title-date))
-#+end_src
+#+END_SRC
 
 **** Org-mode CV
-:properties:
-:tangle: emacs/elisp/org-mode-cv.el
-:padline: no
-:mkdirp: yes
-:end:
+:PROPERTIES:
+:TANGLE: emacs/elisp/org-mode-cv.el
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (require 'ox-latex)
 (unless (boundp 'org-latex-classes)
   (setq org-latex-classes nil))
@@ -973,4 +976,4 @@ Dynamic blocks
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
   ("\\paragraph{%s}" . "\\paragraph*{%s}")
   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-#+end_src
+#+END_SRC

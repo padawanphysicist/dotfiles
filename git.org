@@ -1,34 +1,46 @@
-#+title: Git configuration
+* Git configuration
 
 ** =.gitconfig=
-:properties:
-:tangle: git/gitconfig
-:padline: no
-:mkdirp: yes
-:end:
+:PROPERTIES:
+:TANGLE: git/gitconfig
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-Aliases
-#+begin_src sh
+*** Aliases
+
+#+BEGIN_SRC sh
 [alias]
+    gl = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
     wdiff = diff --color-words --ignore-all-space
     ldiff = difftool -y -t latex
-#+end_src
+#+END_SRC
 
-LaTeX diff
-#+begin_src sh
+*** Tools
+
+#+BEGIN_SRC sh
+[core]
+    editor = vim
+#+END_SRC
+
+*** LaTeX diff
+
+#+BEGIN_SRC sh
 [difftool.latex]
     cmd = ldiff "$LOCAL" "$REMOTE" "$MERGED"
-#+end_src
+#+END_SRC
 
-Identity
-#+begin_src sh
+*** Identity
+
+#+BEGIN_SRC sh
 [user]
     email = victor_santos@fisica.ufc.br
     name = Victor Santos
-#+end_src
+#+END_SRC
 
-Color UI
-#+begin_src sh
+*** Color UI
+
+#+BEGIN_SRC sh
 [color]
     ui = true
-#+end_src
+#+END_SRC

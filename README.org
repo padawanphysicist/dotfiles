@@ -1,31 +1,32 @@
 * dotfiles
+
 This is my dotfiles repo. I hope you find something useful here!
 
 ** Instructions
+
 Clone the repository in a folder of your preference (here I will clone as `.dotfiles`), either from [[https://github.com][GitHub]],
-#+begin_src sh
+#+BEGIN_SRC sh
 $ git clone https://github.com/padawanphysicist/dotfiles.git .dotfiles
-#+end_src
+#+END_SRC
 
 or from [[https://gitlab.com][GitLab]]:
-#+begin_src sh
+#+BEGIN_SRC sh
 $ git clone https://gitlab.com/padawanphysicist/dotfiles.git .dotfiles
-#+end_src
+#+END_SRC
 
 then enter the directory,
-#+begin_src sh
+#+BEGIN_SRC sh
 $ cd .dotfiles
-#+end_src
+#+END_SRC
 
 and link the important files to your =$HOME= directory:
-#+begin_src sh
-$ make install # this will symlink the important files
-#+end_src
+#+BEGIN_SRC sh
+$ ./bashstrap -i all # this will bootstrap all configuration process
+#+END_SRC
+
 ** Configuration files
-- [[zshrc.org]]: Zsh shell configuration file.
+- [[bash.org]]: Bash  configuration file.
 - [[vim.org]]: Vim configuration file.
 - [[emacs.org]]: Emacs configuration file.
 - [[tmux.org]]: Tmux configuration file.
 - [[git.org]]: Git configuration file.
-- [[bin.org]]: Some useful scripts.
-- [[festival.org]]: Festival configuration.

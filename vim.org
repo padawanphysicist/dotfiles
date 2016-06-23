@@ -1,89 +1,30 @@
-#+title: vim configuration
+* Vim configuration
 
-** =.vimrc=
-:properties:
-:tangle: vim/vimrc
-:padline: no
-:mkdirp: yes
-:end:
+Because I'll never leave [[http://www.vim.org/][Vim]] style =)
 
-Be iMproved
-#+begin_src sh
-if &compatible
-   set nocompatible
-endif
-#+end_src
+This configuration is meant for use with [[http://vim.spf13.com/][spf13-vim]], which is for vim what [[http://spacemacs.org/][spacemacs]] is to [[https://www.gnu.org/software/emacs/][emacs]].
 
-*** Plugin configuration
+** =.vimrc.bundles.local=
+:PROPERTIES:
+:TANGLE: vim/vimrc.bundles.local
+:PADLINE: no
+:MKDIRP: yes
+:END:
 
-#+begin_src sh
-filetype off
-#+end_src
+This file list additional bundles for install
 
-#+begin_src sh
-set runtimepath+=~/.vim/bundle/Vundle.vim
-#+end_src
+*** Org-mode
 
-Start Vundle
-#+begin_src sh
-call vundle#begin()
-#+end_src
+I can never leave the awesome [[http://orgmode.org/][org-mode]], even inside vim!
 
-Misc packages
-#+begin_src sh
-Plugin 'scrooloose/nerdtree'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-fugitive'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'sheerun/vim-polyglot'
-Plugin 'bronson/vim-trailing-whitespace'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'jceb/vim-orgmode'
-#+end_src
+#+BEGIN_SRC sh
+Bundle 'jceb/vim-orgmode'
+Bundle 'tpope/vim-speeddating'
+Bundle 'Konfekt/FastFold'
+#+END_SRC
 
-Color
-#+begin_src sh
-Plugin 'nanotech/jellybeans.vim'
-#+end_src
+*** Additional themes
 
-use CTRL-A/CTRL-X to increment dates, times, and more
-#+begin_src sh
-Plugin 'tpope/vim-speeddating'
-#+end_src
-
-Finish NeoBundle
-#+begin_src sh
-call vundle#end()
-filetype plugin indent on
-#+end_src
-
-*** Basic Setup
-
-Always show statusline
-#+begin_src sh
-set laststatus=2
-#+end_src
-
-Use 256 colours (Use this setting only if your terminal supports 256 colours)
-#+begin_src sh
-set t_Co=256
-#+end_src
-
-Always display the tabline, even if there is only one tab
-#+begin_src sh
-set showtabline=2
-#+end_src
-
-Enable mouse in all modes
-#+begin_src sh
-set mouse=a
-#+end_src
-
-Enable colors
-#+begin_src sh
-syntax enable
-set background=dark
-colorscheme jellybeans
-#+end_src
-
+#+BEGIN_SRC sh
+Bundle 'nanotech/jellybeans.vim'
+#+END_SRC

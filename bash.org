@@ -108,4 +108,5 @@ alias ae='aunpack' # ae = mnemonic for Archive Extracter
 #+BEGIN_SRC sh
 alias df="df -H"
 alias du="du -ch"
+alias emacx="emacsclient -t"
 #+END_SRC

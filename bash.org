@@ -70,6 +70,17 @@ OPT=${HOME}/4.Opt
 export PATH=${OPT}/bin:${HOME}/.bin:${HOME}/.local/bin:${PATH}
 #+END_SRC
 
+*** Eternal bash history
+
+#+BEGIN_SRC sh
+export HISTSIZE=
+export HISTFILESIZE=
+export HISTTIMEFORMAT="[%F %T] "
+export HISTCONTROL=erasedups
+export HISTFILE="${HOME}/.bash_eternal_history"
+PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+#+END_SRC
+
 *** Tmux terminal setting
 
 #+BEGIN_SRC sh

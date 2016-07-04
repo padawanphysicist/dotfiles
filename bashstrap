@@ -226,7 +226,9 @@ function bootstrap {
         tangle ${RULE_NAME}
     fi
     symlink ${RULE_NAME}
-    postprocess ${RULE_NAME}
+    if [[ "${INSTALL}" == "true" ]]; then # Postprocess only for installing process
+        postprocess ${RULE_NAME}
+    fi
 }
 
 if [ ${RULE} == "all" ]; then

@@ -44,6 +44,7 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       (spell-checking :variables spell-checking-enable-by-default nil)
       syntax-checking
       version-control
+      (mu4e :variables mu4e-installation-path "/usr/share/emacs/site-lisp")
     )
 #+END_SRC
 
@@ -461,38 +462,37 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
 
 **** mu4e configuration
 
-First we load mu4e
-#+BEGIN_SRC emacs-lisp
-(require 'mu4e)
-(add-to-list 'load-path "/usr/share/emacs/site-lisp/mu4e")
-#+END_SRC
-
-and then we configure it:
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'mu4e
-  (load-file "~/.elisp/helm-goobook.el")
+  ;(load-file "~/.elisp/helm-goobook.el")
 
-  (setq mu4e-mu-binary "/usr/bin/mu")
-  (setq mu4e-maildir (expand-file-name "~/.maildir"))
-  (setq mu4e-view-show-images t)
-  (setq mu4e-html2text-command "w3m -dump -T text/html")
-  (setq mu4e-view-prefer-html t)
-  (setq mu4e-headers-skip-duplicates t)
-  (setq mu4e-get-mail-command "offlineimap -q")
-  (setq mu4e-update-interval 300)
-  (setq mu4e-attachment-dir  "~/0.Inbox")
-  (setq mu4e-drafts-folder "/[Gmail].Drafts")
-  (setq mu4e-sent-folder   "/[Gmail].Sent Mail")
-  (setq mu4e-trash-folder  "/[Gmail].Trash")
-  (setq mu4e-sent-messages-behavior 'delete)
-  (setq message-kill-buffer-on-exit t)
-  (setq mu4e-hide-index-messages t)
+  (when (fboundp 'imagemagick-register-types)
+    (imagemagick-register-types))
   (setq
-   user-mail-address "victor_santos@fisica.ufc.br"
-   user-full-name  "Victor Santos"
-   mu4e-compose-signature
-   (concat
-    "vct\n"))
+    mu4e-maildir (expand-file-name "~/.maildir")
+    mu4e-view-show-images t
+    mu4e-image-max-width  800
+    mu4e-html2text-command "w3m -dump -T text/html"
+    mu4e-view-prefer-html t
+    mu4e-headers-skip-duplicates t
+    mu4e-get-mail-command "offlineimap -q"
+    mu4e-update-interval 300
+    mu4e-attachment-dir  "~/0.Inbox"
+    mu4e-drafts-folder "/[Gmail].Drafts"
+    mu4e-sent-folder   "/[Gmail].Sent Mail"
+    mu4e-trash-folder  "/[Gmail].Trash"
+    mu4e-sent-messages-behavior 'delete
+    message-kill-buffer-on-exit t
+    mu4e-hide-index-messages t
+    user-mail-address "victor_santos@fisica.ufc.br"
+    user-full-name  "Victor Santos"
+    mu4e-compose-signature 
+     (concat 
+       "Victor Santos\n"
+       "Universidade Federal do Ceará\n"
+       "victor_santos@fisica.ufc.br | vsantos@gravity.psu.edu\n"
+     )
+  )
 
   ;; smtpmail
   (require 'smtpmail)

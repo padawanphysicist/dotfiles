@@ -17,20 +17,28 @@ This is the Spacemacs configuration file. it is loaded by Spacemacs at startup, 
 
 You should not put any user code in this function besides modifying the variable values.
 
+**** Open =dotspacemacs/layers=
+
 #+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/layers ()
   (setq-default
 #+END_SRC
+
+**** Base distribution
 
 Base distribution to use. This is a layer contained in the directory `+distribution'. For now available distributions are `spacemacs-base' or `spacemacs'. (default 'spacemacs)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-distribution 'spacemacs-base
 #+END_SRC
 
+**** Set additional paths for configuration layers
+
 List of additional paths where to look for configuration layers. Paths must have a trailing slash (i.e. `~/.mycontribs/')
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-configuration-layer-path '()
 #+END_SRC
+
+**** Load configuration layers
 
 List of configuration layers to load. If it is the symbol `all' (dotspacemacs-configuration-layers all) instead of a list then all discovered layers will be installed.
 #+BEGIN_SRC emacs-lisp
@@ -60,9 +68,12 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
     )
 #+END_SRC
 
+**** Additional packages
+
 List of additional packages that will be installed without being wrapped in a layer. If you need some configuration for these packages then consider to create a layer, you can also put the configuration in `dotspacemacs/config'.
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-additional-packages '(
+      jbeans-theme
       cdlatex
       org-ref
       vimish-fold
@@ -76,15 +87,21 @@ List of additional packages that will be installed without being wrapped in a la
     )
 #+END_SRC
 
+**** Excluded packages
+
 A list of packages and/or extensions that will not be install and loaded.
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-excluded-packages '(org-bullets)
 #+END_SRC
 
+**** Delete orphan packages
+
 If non-nil spacemacs will delete any orphan packages, i.e. packages that are declared in a layer which is not a member of the list `dotspacemacs-configuration-layers'. (default t)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-delete-orphan-packages t
 #+END_SRC
+
+**** Close =dotspacemacs/layers=
 
 Finally, we close the function =dotspacemacs/layers=:
 #+BEGIN_SRC emacs-lisp
@@ -95,12 +112,17 @@ Finally, we close the function =dotspacemacs/layers=:
 
 This function is called at the very startup of Spacemacs initialization before layers configuration. You should not put any user code in there besides modifying the variable values.
 
+**** Open =dotspacemacs/init=
+
 #+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/init ()
   (setq-default
 #+END_SRC
 
+**** Connect ELPA with https
+
 If non nil ELPA repositories are contacted via HTTPS whenever it's possible. Set it to nil if you have no way to use HTTPS in your environment, otherwise it is strongly recommended to let it set to t. This variable has no effect if Emacs is launched with the parameter `--insecure' which forces the value of this variable to nil. (default t)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-elpa-https t
 #+END_SRC
@@ -110,22 +132,34 @@ Maximum allowed time in seconds to contact an ELPA repository.
     dotspacemacs-elpa-timeout 5
 #+END_SRC
 
+**** Check for updates
+
 If non nil then spacemacs will check for updates at startup when the current branch is not `develop'. (default t)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-check-for-update t
 #+END_SRC
 
+**** Editing style
+
 One of `vim', `emacs' or `hybrid'. Evil is always enabled but if the variable is `emacs' then the `holy-mode' is enabled at startup. `hybrid' uses emacs key bindings for vim's insert mode, but otherwise leaves evil unchanged. (default 'vim)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-editing-style 'vim
 #+END_SRC
 
+**** Output loading progress
+
 If non nil output loading progress in `*Messages*' buffer. (default nil)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-verbose-loading nil
 #+END_SRC
 
+**** Startup banner
+
 Specify the startup banner. Default value is `official', it displays the official spacemacs logo. An integer value is the index of text banner, `random' chooses a random text banner in `core/banners' directory. A string value must be a path to an image format supported by your Emacs build. If the value is nil then no banner is displayed. (default 'official)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-startup-banner 'official
 #+END_SRC
@@ -145,16 +179,19 @@ Default major mode of the scratch buffer (default `text-mode')
     dotspacemacs-scratch-mode 'text-mode
 #+END_SRC
 
+**** Theme
+
 List of themes, the first of the list is loaded when spacemacs starts. Press <SPC> T n to cycle to the next theme in the list (works great with 2 themes variants, one dark and one light)
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-themes '(
+      jbeans
+      monokai
       spacemacs-dark
       spacemacs-light
-      jbeans
       solarized-light
       solarized-dark
       leuven
-      monokai
       zenburn
     )
 #+END_SRC
@@ -164,18 +201,24 @@ If non nil the cursor color matches the state color.
     dotspacemacs-colorize-cursor-according-to-state t
 #+END_SRC
 
+***** Font setting
+
 Default font. `powerline-scale' allows to quickly tweak the mode-line size to make separators look not too crappy.
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-default-font '(
-      "Inconsolata for Powerline"
+      "Source Code Pro"
       :size 15
       :weight normal
       :width normal
-      :powerline-scale 1.1
+      :powerline-scale 1.2
     )
 #+END_SRC
 
+**** Leader key
+
 The leader key
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-leader-key "SPC"
 #+END_SRC
@@ -210,7 +253,10 @@ If non nil `Y' is remapped to `y$'. (default t)
     dotspacemacs-remap-Y-to-y$ t
 #+END_SRC
 
+**** Layout
+
 Name of the default layout (default "Default")
+
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-default-layout-name "Default"
 #+END_SRC
@@ -265,15 +311,20 @@ Which-key delay in seconds. The which-key buffer is the popup listing the comman
     dotspacemacs-which-key-delay 0.4
 #+END_SRC
 
+**** =which-key= position
 Which-key frame position. Possible values are `right', `bottom' and `right-then-bottom'. right-then-bottom tries to display the frame to the right; if there is insufficient space it displays it at the bottom. (default 'bottom)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-which-key-position 'bottom
 #+END_SRC
 
+**** Progress bar
+
 If non nil a progress bar is displayed when spacemacs is loading. This may increase the boot time on some systems and emacs builds, set it to nil to boost the loading time. (default t)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-loading-progress-bar nil
 #+END_SRC
+
+**** Fullscreen
 
 If non nil the frame is fullscreen when Emacs starts up. (default nil) (Emacs 24.4+ only)
 #+BEGIN_SRC emacs-lisp
@@ -290,6 +341,8 @@ If non nil the frame is maximized when Emacs starts up. Takes effect only if `do
     dotspacemacs-maximized-at-startup nil
 #+END_SRC
 
+**** Transparency
+
 A value from the range (0..100), in increasing opacity, which describes the transparency level of a frame when it's active or selected. Transparency can be toggled through `toggle-transparency'. (default 90)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-active-transparency 90
@@ -305,46 +358,63 @@ If non nil unicode symbols are displayed in the mode line. (default t)
     dotspacemacs-mode-line-unicode-symbols t
 #+END_SRC
 
+**** Smooth scrolling
+
 If non nil smooth scrolling (native-scrolling) is enabled. Smooth scrolling overrides the default behavior of Emacs which recenters the point when it reaches the top or bottom of the screen. (default t)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-smooth-scrolling t
 #+END_SRC
+
+**** Line numbers
 
 If non nil line numbers are turned on in all `prog-mode' and `text-mode' derivatives. If set to `relative', also turns on relative line numbers. (default nil)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-line-numbers nil
 #+END_SRC
 
+**** Smart paren closing
+
 If non-nil smartparens-strict-mode will be enabled in programming modes. (default nil)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-smartparens-strict-mode nil
 #+END_SRC
+
+**** Highlight delimiters
 
 Select a scope to highlight delimiters. Possible values are `any', `current', `all' or `nil'. Default is `all' (highlight any scope and emphasis the current one). (default 'all)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-highlight-delimiters 'all
 #+END_SRC
 
+**** Keep server open?
+
 If non nil advises quit functions to keep server open when quitting. (default nil)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-persistent-server nil
 #+END_SRC
+
+**** Executable names
 
 List of search tool executable names. Spacemacs uses the first installed tool of the list. Supported tools are `ag', `pt', `ack' and `grep'. (default '("ag" "pt" "ack" "grep"))
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
 #+END_SRC
 
+**** Default packages repository
+
 The default package repository used if no explicit repository has been specified with an installed package. Not used for now. (default nil)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-default-package-repository nil
 #+END_SRC
+
+**** Delete whitespaces
 
 Delete whitespace while saving buffer. Possible values are `all' to aggressively delete empty line and long sequences of whitespace, `trailing' to delete only the whitespace at end of lines, `changed'to delete only whitespace for changed lines or `nil' to disable cleanup. (default nil)
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-whitespace-cleanup 'trailing
 #+END_SRC
 
+**** Closing =dotspacemacs/init=
 #+BEGIN_SRC emacs-lisp
 ))
 #+END_SRC
@@ -362,9 +432,13 @@ Initialization function for user code. It is called immediately after `dotspacem
 
 Configuration function for user code. This function is called at the very end of Spacemacs initialization after layers configuration. You are free to put any user code.
 
+**** Open =dotspacemacs/user-config=
+
 #+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/user-config ()
 #+END_SRC
+
+**** Folding
 
 Configure vimish-fold to behave more-or-less like vim
 #+BEGIN_SRC emacs-lisp
@@ -376,6 +450,8 @@ Configure vimish-fold to behave more-or-less like vim
 (define-key evil-normal-state-map "zk" 'vimish-fold-previous-fold)
 #+END_SRC
 
+**** Search engine configuration
+
 Configure search engine layer to use firefox
 #+BEGIN_SRC emacs-lisp
 (setq browse-url-browser-function 'browse-url-generic
@@ -383,15 +459,21 @@ Configure search engine layer to use firefox
       browse-url-generic-program "firefox")
 #+END_SRC
 
+**** Spell check
+
 Use aspell for spell check
 #+BEGIN_SRC emacs-lisp
 (setq ispell-program-name "aspell")
 #+END_SRC
 
+**** User prefix
+
 Change user-reserved prefix name
 #+BEGIN_SRC emacs-lisp
   (spacemacs/declare-prefix "o" "user-defined-prefix")
 #+END_SRC
+
+**** Clipboard in terminal
 
 Enable clipboard in emacs
 #+BEGIN_SRC emacs-lisp
@@ -425,11 +507,17 @@ Enable clipboard in emacs
   (spacemacs/set-leader-keys "op" 'paste-from-clipboard)
 #+END_SRC
 
+**** Powerline configuration
+
 The default old spacemacs modeline was moved to a separate project, [[https://github.com/TheBB/spaceline][spaceline]], and therefore you must include it separately:
 #+BEGIN_SRC emacs-lisp
   (require 'spaceline-config)
   (spaceline-spacemacs-theme)
+  (setq powerline-default-separator 'wave)
+  (spaceline-compile)
 #+END_SRC
+
+**** Custom elisp folder
 
 Add user elisp code to emacs' =PATH=
 #+BEGIN_SRC emacs-lisp
@@ -438,6 +526,8 @@ Add user elisp code to emacs' =PATH=
     (normal-top-level-add-subdirs-to-load-path))
 #+END_SRC
 
+**** Abbreviations
+
 Nice abbreviations for people like me who forget sometimes and keep pressing Shift key while typing.
 #+BEGIN_SRC emacs-lisp
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "W[rite]" 'save-buffer))
@@ -445,6 +535,8 @@ Nice abbreviations for people like me who forget sometimes and keep pressing Shi
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "wQ" 'evil-save-and-close))
   (eval-after-load 'evil-ex '(evil-ex-define-cmd "WQ" 'evil-save-and-close))
 #+END_SRC
+
+**** Visual line navigation
 
 Fixing visual lines navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down operate in screen lines instead of logical lines, both in normal state and visual mode.
 #+BEGIN_SRC emacs-lisp
@@ -458,10 +550,14 @@ Fixing visual lines navigation: I got this solution [[https://github.com/syl20bn
   (define-key evil-visual-state-map (kbd "<up>" ) 'evil-previous-visual-line)
 #+END_SRC
 
+**** Mode list configuration
+
 Make org-mode work with files ending in .org
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 #+END_SRC
+
+**** Fringe indicators
 
 Fringe indicators for visual line mode
 #+BEGIN_SRC emacs-lisp
@@ -469,10 +565,14 @@ Fringe indicators for visual line mode
     '(left-curly-arrow right-curly-arrow))
 #+END_SRC
 
+**** Document viewer
+
 Activate pdf-tools
 #+BEGIN_SRC emacs-lisp
   (pdf-tools-install)
 #+END_SRC
+
+**** Google translate
 
 Google translate configuration
 #+BEGIN_SRC emacs-lisp
@@ -485,6 +585,8 @@ Google translate configuration
 ;; Run google-translate query with SPC x g t
 (spacemacs/set-leader-keys "xgt" 'google-translate-smooth-translate)
 #+END_SRC
+
+**** Enable local variables
 
 Use this at your risk! I'm NOT conservative regarding local file variable, as I always know the code I'll be executing.
 #+BEGIN_SRC emacs-lisp
@@ -551,10 +653,99 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
 
 [[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs.
 
+For toggling LaTeX previews
+#+BEGIN_SRC emacs-lisp
+(defvar org-latex-fragment-last nil
+  "Holds last fragment/environment you were on.")
+
+(defun org-latex-fragment-toggle ()
+  "Toggle a latex fragment image "
+  (and (eq 'org-mode major-mode)
+       (let* ((el (org-element-context))
+              (el-type (car el)))
+         (cond
+          ;; were on a fragment and now on a new fragment
+          ((and
+            ;; fragment we were on
+            org-latex-fragment-last
+            ;; and are on a fragment now
+            (or
+             (eq 'latex-fragment el-type)
+             (eq 'latex-environment el-type))
+            ;; but not on the last one this is a little tricky. as you edit the
+            ;; fragment, it is not equal to the last one. We use the begin
+            ;; property which is less likely to change for the comparison.
+            (not (= (org-element-property :begin el)
+                    (org-element-property :begin org-latex-fragment-last))))
+           ;; go back to last one and put image back
+           (save-excursion
+             (goto-char (org-element-property :begin org-latex-fragment-last))
+             (org-preview-latex-fragment))
+           ;; now remove current image
+           (goto-char (org-element-property :begin el))
+           (let ((ov (loop for ov in (org--list-latex-overlays)
+                           if
+                           (and
+                            (<= (overlay-start ov) (point))
+                            (>= (overlay-end ov) (point)))
+                           return ov)))
+             (when ov
+               (delete-overlay ov)))
+           ;; and save new fragment
+           (setq org-latex-fragment-last el))
+
+          ;; were on a fragment and now are not on a fragment
+          ((and
+            ;; not on a fragment now
+            (not (or
+                  (eq 'latex-fragment el-type)
+                  (eq 'latex-environment el-type)))
+            ;; but we were on one
+            org-latex-fragment-last)
+           ;; put image back on
+           (save-excursion
+             (goto-char (org-element-property :begin org-latex-fragment-last))
+             (org-preview-latex-fragment))
+           ;; unset last fragment
+           (setq org-latex-fragment-last nil))
+
+          ;; were not on a fragment, and now are
+          ((and
+            ;; we were not one one
+            (not org-latex-fragment-last)
+            ;; but now we are
+            (or
+             (eq 'latex-fragment el-type)
+             (eq 'latex-environment el-type)))
+           (goto-char (org-element-property :begin el))
+           ;; remove image
+           (let ((ov (loop for ov in (org--list-latex-overlays)
+                           if
+                           (and
+                            (<= (overlay-start ov) (point))
+                            (>= (overlay-end ov) (point)))
+                           return ov)))
+             (when ov
+               (delete-overlay ov)))
+           (setq org-latex-fragment-last el))))))
+
+
+(add-hook 'post-command-hook 'org-latex-fragment-toggle)
+#+END_SRC
+
+Open main (and only so far) task manager file.
+#+BEGIN_SRC emacs-lisp
+(defun open-organizer ()
+  (interactive)
+  "Open organizer/todo file."
+  (find-file "~/1.Working/0.organizer.org"))
+(spacemacs/set-leader-keys "aa" 'open-organizer)
+#+END_SRC
+
 Configuration to be done AFTER load org
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'org
-#+end_src
+#+END_SRC
 
 [[https://github.com/joostkremers/visual-fill-column][Visual Fill Column]] is a minor mode which mimics the effect of fill-column in visual-line-mode: instead of wrapping lines at window edge, it wraps at fill-column
 #+BEGIN_SRC emacs-lisp
@@ -703,6 +894,18 @@ Add support for IPython/Jupyter
 #+BEGIN_SRC emacs-lisp
 (require 'ob-ipython)
 #+END_SRC
+
+Configure org-capture
+#+BEGIN_SRC emacs-lisp
+(setq org-default-notes-file "~/1.Working/0.notes.org")
+#+END_SRC
+
+Configure org-agenda
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-files "~/1.Working/0.organizer.org")
+#+END_SRC
+
+
 
 Closing =with-eval-after-load 'org=
 #+BEGIN_SRC emacs-lisp

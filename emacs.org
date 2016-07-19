@@ -65,6 +65,7 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       version-control
       (mu4e :variables
         mu4e-installation-path "/usr/share/emacs/site-lisp")
+      spotify
     )
 #+END_SRC
 

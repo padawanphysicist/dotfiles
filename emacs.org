@@ -85,6 +85,7 @@ List of additional packages that will be installed without being wrapped in a la
       visual-fill-column
       mustache
       pdf-tools
+      pkgbuild-mode
     )
 #+END_SRC
 

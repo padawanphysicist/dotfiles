@@ -37,7 +37,6 @@ function clean {
         emacs)
             rm -frv ${HOME}/.emacs.d
             rm -frv ${HOME}/.spacemacs
-            rm -frv ${HOME}/.elisp
             ;;
         tmux)
             rm -frv ${HOME}/.tmux.conf
@@ -175,8 +174,6 @@ function symlink {
         emacs)
             printf "Symlinking "
             ln -sfv ${DOTFILES_ROOT}/emacs/spacemacsrc ${HOME}/.spacemacs
-            printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/emacs/elisp ${HOME}/.elisp
             ;;
         vim)
             printf "Symlinking "

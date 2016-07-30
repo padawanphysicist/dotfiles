@@ -85,6 +85,7 @@ List of additional packages that will be installed without being wrapped in a la
       visual-fill-column
       mustache
       pdf-tools
+      pkgbuild-mode
     )
 #+END_SRC
 
@@ -437,6 +438,20 @@ Configuration function for user code. This function is called at the very end of
 
 #+BEGIN_SRC emacs-lisp
 (defun dotspacemacs/user-config ()
+#+END_SRC
+
+**** Timestamp
+
+Sometimes it's nice to have a timestamp in your files
+#+BEGIN_SRC emacs-lisp
+(require 's)
+(setq
+  time-stamp-active t
+  time-stamp-time-zone "UTC"
+  time-stamp-format (s-concat "%:y%02m%02d%02H%02M%02S" (format-time-string "%3N" (current-time) t))
+  time-stamp-pattern "10/MODIFIED: %%$"
+)
+(add-hook 'before-save-hook 'time-stamp) ; update when saving
 #+END_SRC
 
 **** Folding
@@ -898,292 +913,4 @@ Normal font size in AUCTeX titles
 Closing =defun dotspacemacs/user-config=
 #+BEGIN_SRC emacs-lisp
 )
-#+END_SRC
-
-** =.elisp/=
-*** Helm and Goobook
-:PROPERTIES:
-:TANGLE: emacs/elisp/helm-goobook.el
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-#+BEGIN_SRC emacs-lisp
-;;; helm-goobook.el
-;; Copyright 2016 Shivam Kalra
-;;
-;; Author: Shivam Kalra <skalra@gmx.ca>
-
-;;; Code:
-(defun goobook-search (search-term)
-  (message search-term)
-  (process-lines "goosearch" search-term))
-
-(defun helm-goobook-search ()
-  (mapcar (lambda (entry)
-            (let* ((vals (split-string entry "\t"))
-                   (email (car vals))
-                   (name (car (cdr vals)))
-                   (key (format "%s <%s>" name email)))
-              `(,key
-                (name . ,name)
-                (email . ,email)
-                (val . ,key)))) (goobook-search helm-pattern)))
-
-(defun helm-goobook-insert-key (entry)
-  (with-helm-current-buffer
-    (insert (cdr (assoc 'val entry)))))
-
-(defun helm-goobook-insert-name (entry)
-  (with-helm-current-buffer
-    (insert (cdr (assoc 'name entry)))))
-
-(defun helm-goobook-insert-email (entry)
-  (with-helm-current-buffer
-    (insert (cdr (assoc 'email entry)))))
-
-(defvar helm-source-goobook
-  '((name . "Goobook Search")
-    (volatile)
-    (delayed)
-    (requires-pattern . 3)
-    (candidates .  helm-goobook-search)
-    (action . (("Insert key" . helm-goobook-insert-key)
-               ("Insert email" . helm-goobook-insert-email)
-               ("Insert name" . helm-goobook-insert-name)))))
-
-(defun helm-goobook ()
-  (interactive)
-  (helm :sources '(helm-source-goobook)
-	:buffer "*helm-goobook*"))
-#+END_SRC
-
-*** Org-mode LaTeX custom classes
-
-**** JCAP class
-:PROPERTIES:
-:TANGLE: emacs/elisp/jcap.el
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-#+BEGIN_SRC emacs-lisp
-(require 'ox-latex)
-(unless (boundp 'org-latex-classes) (setq org-latex-classes nil))
-(add-to-list 'org-latex-classes '("jcap"
-"\\documentclass[11pt,a4paper]{article}
-\\usepackage{jcappub}
-\\usepackage{float} % Useful for right positioning of figures and tables
-[NO-DEFAULT-PACKAGES]
-[PACKAGES]
-[EXTRA]"
-("\\section{%s}" . "\\section*{%s}")
-("\\subsection{%s}" . "\\subsection*{%s}")
-("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
-#+END_SRC
-
-**** Article draft
-:PROPERTIES:
-:TANGLE: emacs/elisp/org-article-draft.el
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-#+BEGIN_SRC emacs-lisp
-(unless (boundp 'org-latex-classes)
-  (setq org-latex-classes nil))
-
-(setq org-latex-listings 'minted)
-(setq org-latex-minted-options '(
-  ("frame" "lines")
-  ("fontsize" "\\scriptsize")
-))
-
-(setq org-latex-pdf-process '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
-
-(require 'ox-latex)
-
-;; Do not ask confirmation for evaluating code blocks
-(setq org-confirm-babel-evaluate nil)
-
-(add-to-list 'org-export-filter-src-block-functions
-  (lambda (contents backend info)
-    (when (eq backend 'latex)
-      (replace-regexp-in-string "ipython" "python" contents))))
-
-(add-to-list 'org-latex-classes
-  '("org-article-draft"
-"\\documentclass[12pt,a4paper]{article}
-
-% Font/encoding
-\\usepackage[T1]{fontenc}
-\\usepackage[utf8]{inputenc}
-
-% Language and geometry
-\\usepackage[english]{babel}
-\\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
-
-% Set link colors (from http://tex.stackexchange.com/questions/100905/best-practice-for-hyperref-link-colours)
-\\usepackage[dvipsnames]{xcolor}
-\\usepackage{hyperref}
-\\usepackage{cleveref}
-\\newcommand\\myshade{85}
-\\colorlet{mylinkcolor}{violet}
-\\colorlet{mycitecolor}{YellowOrange}
-\\colorlet{myurlcolor}{Aquamarine}
-\\hypersetup{
-  linkcolor  = mylinkcolor!\\myshade!black,
-  citecolor  = mycitecolor!\\myshade!black,
-  urlcolor   = myurlcolor!\\myshade!black,
-  colorlinks = true
-}
-\\usepackage{float} % Useful for right positioning of figures and tables
-% Math packages
-\\usepackage{amsmath,amssymb,amsfonts,amsthm}
-% For include figures
-\\usepackage{graphicx}
-% For source code listings
-\\usepackage[cache=false]{minted}
-
-\\makeatletter
-\\renewcommand{\\maketitle}{%
-\\begin{center}%
-{\\LARGE \\@title \\par}%
-\\vskip 1.5em%
-{{\\small\\@author}\\par}%
-{{\\itshape\\@date}\\par}%
-\\end{center}%
-}\\makeatother
-
-[NO-DEFAULT-PACKAGES]
-[PACKAGES]
-[EXTRA]"
-  ("\\part{%s}" . "\\part*{%s}")
-  ("\\section{%s}" . "\\section*{%s}")
-  ("\\subsection{%s}" . "\\subsection*{%s}")
-  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-  ("\\paragraph{%s}" . "\\paragraph*{%s}")
-  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-#+END_SRC
-
-Dynamic blocks
-#+BEGIN_SRC emacs-lisp
-(defun get-string-from-file (filePath)
-  "Return filePath's file content."
-  (with-temp-buffer
-    (insert-file-contents filePath)
-    (buffer-string)))
-
-(defun org-dblock-write:insert-abstract (params)
-  (let ((file (plist-get params :file)))
-    (insert (format "#+begin_abstract\n%s\n#+end_abstract" (get-string-from-file file)))
-  )
-)
-#+END_SRC
-
-**** RevTeX
-:PROPERTIES:
-:TANGLE: emacs/elisp/revtex.el
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-#+BEGIN_SRC emacs-lisp
-(require 'ox-latex)
-
-(unless (boundp 'org-latex-classes)
-  (setq org-latex-classes nil))
-
-(add-to-list 'org-latex-classes
-       '("revtex"
-         "\\documentclass{revtex4-1}
-\\usepackage[english]{babel}
-\\usepackage[utf8]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{amsmath,amssymb,amsfonts,amsthm,amssymb,amsbsy,amsopn,amstext}
-\\usepackage[mathcal]{eucal}
-\\usepackage{mathrsfs}
-\\usepackage{latexsym}
-\\usepackage{bm}
-\\usepackage{wrapfig}
-\\usepackage{color}
-\\usepackage{units}
-\\usepackage{textcomp}
-\\usepackage{graphicx}
-\\usepackage{subfigure}
-\\usepackage{hyperref}
-\\usepackage{slashed}
-\\usepackage{float} % Useful for right positioning of figures and tables
-[NO-DEFAULT-PACKAGES]
-[NO-PACKAGES]
-[NO-EXTRA]"
-("\\section{%s}" . "\\section*{%s}")
-("\\subsection{%s}" . "\\subsection*{%s}")
-("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
-
-(setq org-latex-title-command "")
-(setq org-latex-with-hyperref nil)
-
-(defun vct/remove-title-date (string backend info)
-  "Remove the \date{XXX} and \title{XXX} commands before the \begin{document}...\end{document}"
-  (when (org-export-derived-backend-p backend 'latex)
-    (message "Removing \date and \title from preamble...")
-    (let ((case-fold-search nil))
-      (goto-char 1)
-      (replace-regexp-in-string "\\\\date{[0-9a-zA-Z\\][^}]*}" "" (replace-regexp-in-string "\\\\title{[0-9a-zA-Z][^}]*}" "" string))
-    )))
-
-(eval-after-load 'ox-latex
-  '(add-to-list 'org-export-filter-final-output-functions 'vct/remove-title-date))
-#+END_SRC
-
-**** Org-mode CV
-:PROPERTIES:
-:TANGLE: emacs/elisp/org-mode-cv.el
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-#+BEGIN_SRC emacs-lisp
-(require 'ox-latex)
-(unless (boundp 'org-latex-classes)
-  (setq org-latex-classes nil))
-(add-to-list 'org-latex-classes
-  '("vct-orgmode-latex-cv"
-"\\documentclass[11pt,a4paper]{article}
-\\usepackage[utf8]{inputenc}
-\\usepackage[T1]{fontenc}
-% Language and geometry
-\\usepackage[brazil,english]{babel}
-\\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
-% Set link colors (from http://tex.stackexchange.com/questions/100905/best-practice-for-hyperref-link-colours)
-\\usepackage[dvipsnames]{xcolor}
-\\usepackage{hyperref}
-\\usepackage{cleveref}
-\\newcommand\\myshade{85}
-\\colorlet{mylinkcolor}{violet}
-\\colorlet{mycitecolor}{YellowOrange}
-\\colorlet{myurlcolor}{Aquamarine}
-\\hypersetup{
-  linkcolor  = mylinkcolor!\\myshade!black,
-  citecolor  = mycitecolor!\\myshade!black,
-  urlcolor   = myurlcolor!\\myshade!black,
-  colorlinks = true
-}
-\\usepackage{float} % Useful for right positioning of figures and tables
-% Math packages
-\\usepackage{amsmath,amssymb,amsfonts,amsthm}
-% For include figures
-\\usepackage{graphicx}
-% CV formatting
-\\usepackage{vct-orgmode-cv}
-[NO-DEFAULT-PACKAGES]
-[PACKAGES]
-[EXTRA]"
-  ("\\begin{flushleft}\\textcolor{red}{%s}\\end{flushleft}" . "")
-  ("\\section{%s}" . "\\section*{%s}")
-  ("\\subsection{%s}" . "\\subsection*{%s}")
-  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-  ("\\paragraph{%s}" . "\\paragraph*{%s}")
-  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 #+END_SRC

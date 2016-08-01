@@ -672,53 +672,81 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
 For toggling LaTeX previews (stolen and modified from John Kitchin at
 http://kitchingroup.cheme.cmu.edu/blog/2015/10/09/Automatic-latex-image-toggling-when-cursor-is-on-a-fragment/)
 #+BEGIN_SRC emacs-lisp
-(require 'dash)
+  (require 'dash)
 
-(defvar org-latex-fragment-last nil
-  "Holds last fragment/environment you were on.")
+  (defvar org-latex-fragment-last nil
+    "Holds last fragment/environment you were on.")
 
-(defun vct:org-latex-fragment-toggle ()
-  "Toggle a LaTeX fragment image "
-  (if (eq 'org-mode major-mode)
-    (let* ((el (org-element-context))
-          (el-type (car el)))
-      (cond
-        ;; Before: NOT in a fragment
-        ;; Now: IN a fragment
-        ((and
-          ;; We were not in a fragment...
-          (not org-latex-fragment-last)
-          ;; ... but now we are!
-          (or (eq 'latex-fragment el-type)
-              (eq 'latex-environment el-type)))
-          ;; Remove image overlay
+  (defun vct:org-latex-fragment-toggle ()
+    "Toggle a LaTeX fragment image "
+    (if (eq 'org-mode major-mode)
+      (let* ((el (org-element-context))
+            (el-type (car el)))
+        (cond
+          ;; Before: IN a fragment
+          ;; Now: IN a fragment
+          ((and
+            ;; fragment we were on
+            org-latex-fragment-last
+            ;; and are on a fragment now
+            (or
+             (eq 'latex-fragment el-type)
+             (eq 'latex-environment el-type))
+            ;; but not on the last one this is a little tricky. as you edit the
+            ;; fragment, it is not equal to the last one. We use the begin
+            ;; property which is less likely to change for the comparison.
+            (not (= (org-element-property :begin el)
+                    (org-element-property :begin org-latex-fragment-last))))
+           ;; go back to last one and put image back
+           (save-excursion
+             (goto-char (org-element-property :begin org-latex-fragment-last))
+             (org-preview-latex-fragment))
+           ;; now remove current image
+           (goto-char (org-element-property :begin el))
+           (let ((ov (loop for ov in (org--list-latex-overlays)
+                           if
+                           (and
+                            (<= (overlay-start ov) (point))
+                            (>= (overlay-end ov) (point)))
+                           return ov)))
+             (when ov (delete-overlay ov)))
+           ;; and save new fragment
+           (setq org-latex-fragment-last el))
 
-          (org-toggle-latex-fragment)
-          ;(setq ov (-first (lambda (x) (and (<= (overlay-start x) (point)) (>= (overlay-end x) (point)))) (org--list-latex-overlays)))
-          ;(when ov (delete-overlay ov))
+          ;; Before: NOT in a fragment
+          ;; Now: IN a fragment
+          ((and
+            ;; We were not in a fragment...
+            (not org-latex-fragment-last)
+            ;; ... but now we are!
+            (or (eq 'latex-fragment el-type)
+                (eq 'latex-environment el-type)))
+            ;; Remove image overlay
 
-          ;(message "You were not in a fragment, but now you are at the fragment (%d,%d)" (org-element-property :begin el) (org-element-property :end el))
-          (setq org-latex-fragment-last el))
-        ;; Before: IN a fragment
-        ;; Now: NOT in a fragment
-        ((and
-          ;; We were in a fragment...
-          org-latex-fragment-last
-          ;; ... but now we are not!
-          (not (or
-                 (eq 'latex-fragment el-type)
-                 (eq 'latex-environment el-type))))
-          (save-excursion
-            ;; Go to the previous fragment...
-            (goto-char (org-element-property :begin org-latex-fragment-last))
-            ;; and preview it
-            (org-toggle-latex-fragment))
-          ;(message "You were at the fragment (%d,%d), but now you are not in any" (org-element-property :begin org-latex-fragment-last) (org-element-property :end org-latex-fragment-last))
-          (setq org-latex-fragment-last nil))
-        ;; Were in a fragment, and now we in another fragment
-      ))))
+            (setq ov (-first (lambda (x) (and (<= (overlay-start x) (point)) (>= (overlay-end x) (point)))) (org--list-latex-overlays)))
+            (when ov (delete-overlay ov))
 
-(add-hook 'post-command-hook 'vct:org-latex-fragment-toggle)
+            ;(org-toggle-latex-fragment)
+            (setq org-latex-fragment-last el))
+          ;; Before: IN a fragment
+          ;; Now: NOT in a fragment
+          ((and
+            ;; We were in a fragment...
+            org-latex-fragment-last
+            ;; ... but now we are not!
+            (not (or
+                   (eq 'latex-fragment el-type)
+                   (eq 'latex-environment el-type))))
+            (save-excursion
+              ;; Go to the previous fragment...
+              (goto-char (org-element-property :begin org-latex-fragment-last))
+              ;; and preview it
+              (org-toggle-latex-fragment))
+            (setq org-latex-fragment-last nil))
+          ;; Were in a fragment, and now we in another fragment
+        ))))
+
+  (add-hook 'post-command-hook 'vct:org-latex-fragment-toggle)
 #+END_SRC
 
 Open main (and only so far) task manager file.

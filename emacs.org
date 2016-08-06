@@ -61,7 +61,7 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
       (latex :variables latex-enable-auto-fill nil)
       python
       shell-scripts
-      (colors :variables colors-enable-rainbow-identifiers t)
+      (colors :variables colors-enable-rainbow-identifiers nil)
       git
       org
       search-engine
@@ -82,7 +82,9 @@ List of configuration layers to load. If it is the symbol `all' (dotspacemacs-co
 List of additional packages that will be installed without being wrapped in a layer. If you need some configuration for these packages then consider to create a layer, you can also put the configuration in `dotspacemacs/config'.
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-additional-packages '(
+      beacon
       jbeans-theme
+      atom-one-dark-theme
       cdlatex
       org-ref
       vimish-fold
@@ -195,14 +197,15 @@ List of themes, the first of the list is loaded when spacemacs starts. Press <SP
 
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-themes '(
+      atom-one-dark
+      zenburn
       spacemacs-dark
+      solarized-dark
       spacemacs-light
       solarized-light
-      solarized-dark
       jbeans
       monokai
       leuven
-      zenburn
     )
 #+END_SRC
 
@@ -217,9 +220,12 @@ Default font. `powerline-scale' allows to quickly tweak the mode-line size to ma
 
 #+BEGIN_SRC emacs-lisp
     dotspacemacs-default-font '(
-      "Source Code Pro for Powerline"
-      :size 17
+      "MesloLGLDZ Nerd Font"
+      :foundry "PfEd"
+      :slant normal
       :weight normal
+      :height 113
+      ;:size 17
       :width normal
       :powerline-scale 1.2
     )
@@ -455,6 +461,14 @@ Configuration function for user code. This function is called at the very end of
 (defun dotspacemacs/user-config ()
 #+END_SRC
 
+**** Heartbeat cursor mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package heartbeat-cursor :load-path "~/.elisp")
+(heartbeat-cursor-mode)
+(beacon-mode 1)
+#+END_SRC
+
 **** Timestamp
 
 Sometimes it's nice to have a timestamp in your files
@@ -544,6 +558,7 @@ The default old spacemacs modeline was moved to a separate project, [[https://gi
 #+BEGIN_SRC emacs-lisp
   (require 'spaceline-config)
   (spaceline-spacemacs-theme)
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
   (setq powerline-default-separator 'wave)
   (spaceline-compile)
 #+END_SRC

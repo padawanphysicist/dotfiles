@@ -243,3 +243,9 @@ bind c new-window -c "#{pane_current_path}"
 bind '"' split-window -c "#{pane_current_path}"
 bind % split-window -h -c "#{pane_current_path}"
 #+END_SRC
+
+**** Powerline configuration
+
+#+BEGIN_SRC sh
+source ${HOME}/.local/lib/python3.5/site-packages/powerline/bindings/tmux/powerline.conf
+#+END_SRC

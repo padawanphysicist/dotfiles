@@ -26,5 +26,16 @@ Bundle 'Konfekt/FastFold'
 *** Additional themes
 
 #+BEGIN_SRC sh
-Bundle 'nanotech/jellybeans.vim'
+Bundle 'joshdick/onedark.vim'
+#+END_SRC
+
+** =.vimrc.local=
+:PROPERTIES:
+:TANGLE: vim/vimrc.local
+:PADLINE: no
+:MKDIRP: yes
+:END:
+
+#+BEGIN_SRC sh
+colorscheme onedark
 #+END_SRC

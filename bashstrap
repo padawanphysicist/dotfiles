@@ -171,6 +171,7 @@ function symlink {
         vim)
             printf "Symlinking "
             ln -sfv "${DOTFILES_ROOT}/vim/vimrc.bundles.local" "${HOME}/.vimrc.bundles.local"
+            ln -sfv "${DOTFILES_ROOT}/vim/vimrc.local" "${HOME}/.vimrc.local"
             printf ""
             ;;
         tmux)

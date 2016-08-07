@@ -2,21 +2,12 @@
 
 This configuration is built over [[https://github.com/Bash-it/bash-it][bash-it]], a collection of community Bash commands and scripts, /a là/ [[https://github.com/robbyrussell/oh-my-zsh][oh-my-zsh]].
 
-** =custom.bash=
+** =bashrc=
 :PROPERTIES:
-:TANGLE: bash/custom.bash
+:TANGLE: bash/bashrc
 :PADLINE: no
 :MKDIRP: yes
 :END:
-
-This file keeps custom general configurations
-
-*** Theme for =bash-it=
-
-#+BEGIN_SRC sh
-export BASH_IT_THEME='powerline'
-#+END_SRC
-
 *** Theme for =ls=
 
 I like a lot [[http://ethanschoonover.com/solarized][solarized]] colorscheme, so I was lucky to find [[https://github.com/seebi/dircolors-solarized][this]].
@@ -81,32 +72,53 @@ export HISTFILE="${HOME}/.bash_eternal_history"
 PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
 #+END_SRC
 
+*** Powerline configuration
+
+To get git status in the prompt, I used [[https://gitlab.com/snippets/23806][this]] configuration, saving it at =${HOME}/.local/powerline/config.json=.
+
+#+BEGIN_SRC sh
+powerline-daemon -q
+POWERLINE_BASH_CONTINUATION=1
+POWERLINE_BASH_SELECT=1
+
+export POWERLINE_BASH_PATH=${HOME}/.local/lib/python3.5/site-packages/powerline/bindings/bash/powerline.sh
+if [ -f ${POWERLINE_BASH_PATH} ]; then
+    source ${POWERLINE_BASH_PATH}
+fi
+#+END_SRC
+
 *** Tmux terminal setting
 
 #+BEGIN_SRC sh
 export TERM=xterm-256color
 #+END_SRC
 
-** =custom.aliases.bash=
-:PROPERTIES:
-:TANGLE: bash/custom.aliases.bash
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-This file stores additional aliases
-
-*** Archive Extracter
+*** Aliases
+**** Archive Extracter
 
 Linux provides various tools for archiving and compressing files such as [[https://en.wikipedia.org/wiki/Zip_(file_format)][zip]], [[https://en.wikipedia.org/wiki/Bzip2][bzip]], [[https://en.wikipedia.org/wiki/Gzip][gzip]], [[https://en.wikipedia.org/wiki/Tar_(computing)][tar]], [[https://en.wikipedia.org/wiki/RAR_(file_format)][rar]], /etc/. There are more tools that are not native to Linux, but provide good archiving and compressing abilities. With such a large number of tools at hand, sometimes it becomes difficult to remember all the commands. '[[http://www.nongnu.org/atool/][atool]]' allows you to manage these different file archives with a single command.
 #+BEGIN_SRC sh
 alias ae='aunpack' # ae = mnemonic for Archive Extracter
 #+END_SRC
 
-*** Misc
+**** Misc
 
 #+BEGIN_SRC sh
+alias ls="ls --color"
 alias df="df -H"
 alias du="du -ch"
 alias emacx="emacsclient -t"
+#+END_SRC
+
+** =inputrc=
+:PROPERTIES:
+:TANGLE: bash/inputrc
+:PADLINE: no
+:MKDIRP: yes
+:END:
+#+BEGIN_SRC sh
+set show-all-if-ambiguous on
+set menu-complete-display-prefix on
+set bell-style audible
+Tab: menu-complete
 #+END_SRC

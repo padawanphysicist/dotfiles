@@ -26,7 +26,7 @@ function clean {
     local RULE_NAME=$1
     case ${RULE_NAME} in
         bash)
-            rm -frv ${HOME}/.bash_it
+            rm -frv ${HOME}/.inputrc
             rm -frv ${HOME}/.bashrc*
             rm -frv ${HOME}/.dircolors-solarized
             ;;
@@ -119,20 +119,13 @@ function setup {
     local RULE_NAME=$1
     # Installing dependencies
     if [ ${INSTALL} == "true" ]; then
-        case ${RULE_NAME} in 
+        case ${RULE_NAME} in
             bash)
                 if [ ! -d "${HOME}/.dircolors-solarized" ]; then
                     printf "Installing dircolors-solarized...\n"
                     git clone "https://github.com/seebi/dircolors-solarized" "${HOME}/.dircolors-solarized"
                 else
                     printf "${HOME}/.dircolors-solarized exists."
-                fi
-                
-                if [ ! -d "${HOME}/.bash_it" ]; then
-                    printf "Installing bash-it...\n"
-                    git clone --depth=1 https://github.com/Bash-it/bash-it.git ${HOME}/.bash_it
-                else
-                    printf "${HOME}/.bash_it exists."
                 fi
                 ;;
             emacs)
@@ -158,7 +151,7 @@ function setup {
         esac
     elif [ ${UPGRADE} == "true" ]; then
         printf ""
-    else 
+    else
         printf ""
     fi
 }
@@ -168,8 +161,8 @@ function symlink {
     case ${RULE_NAME} in
         bash)
             printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/bash/custom.bash ${HOME}/.bash_it/lib/custom.bash
-            ln -sfv ${DOTFILES_ROOT}/bash/custom.aliases.bash ${HOME}/.bash_it/aliases/custom.aliases.bash
+            ln -sfv ${DOTFILES_ROOT}/bash/bashrc ${HOME}/.bashrc
+            ln -sfv ${DOTFILES_ROOT}/bash/inputrc ${HOME}/.inputrc
             ;;
         emacs)
             printf "Symlinking "

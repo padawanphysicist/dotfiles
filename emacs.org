@@ -93,8 +93,7 @@ List of additional packages that will be installed without being wrapped in a la
       ob-ipython
       google-translate
       visual-fill-column
-      mustache
-      pdf-tools
+      deft
       pkgbuild-mode
     )
 #+END_SRC
@@ -611,13 +610,6 @@ Fringe indicators for visual line mode
     '(left-curly-arrow right-curly-arrow))
 #+END_SRC
 
-**** Document viewer
-
-Activate pdf-tools
-#+BEGIN_SRC emacs-lisp
-  (pdf-tools-install)
-#+END_SRC
-
 **** Google translate
 
 Google translate configuration
@@ -693,6 +685,29 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
   (add-hook 'mu4e-compose-mode-hook 'vct:mail-compose-hooks)
   (add-hook 'message-mode-hook 'vct:mail-compose-hooks)
 )
+#+END_SRC
+
+**** Deft configuration
+
+[[jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by [[notational.net][Notational Velocity]]. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
+
+#+BEGIN_SRC emacs-lisp
+(require 'deft)
+
+(setq deft-default-extension "org")
+(setq deft-extensions '("org" "txt" "tex"))
+(setq deft-directory "~/1.Working/0.Annotations")
+(setq deft-recursive t)
+(setq deft-use-filename-as-title nil)
+(setq deft-use-filter-string-for-filename t)
+(setq deft-file-naming-rules '((noslash . "-")
+                               (nospace . "-")
+                               (case-fn . downcase)))
+(setq deft-text-mode 'org-mode)
+
+;; Keybindings
+(spacemacs/set-leader-keys "aD" 'deft)
+(spacemacs/set-leader-keys "af" 'deft-find-file)
 #+END_SRC
 
 **** Org-mode configuration
@@ -777,15 +792,6 @@ http://kitchingroup.cheme.cmu.edu/blog/2015/10/09/Automatic-latex-image-toggling
         ))))
 
   (add-hook 'post-command-hook 'vct:org-latex-fragment-toggle)
-#+END_SRC
-
-Open main (and only so far) task manager file.
-#+BEGIN_SRC emacs-lisp
-(defun open-organizer ()
-  (interactive)
-  "Open organizer/todo file."
-  (find-file "~/1.Working/0.organizer.org"))
-(spacemacs/set-leader-keys "aa" 'open-organizer)
 #+END_SRC
 
 Configuration to be done AFTER load org

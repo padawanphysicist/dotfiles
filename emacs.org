@@ -635,10 +635,9 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
 
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'mu4e
-  ;(load-file "~/.elisp/helm-goobook.el")
+  ;; Google contacts
+  (load-file "~/.elisp/helm-goobook.el")
 
-  (when (fboundp 'imagemagick-register-types)
-    (imagemagick-register-types))
   (setq
     mu4e-maildir (expand-file-name "~/.maildir")
     mu4e-view-show-images t
@@ -714,8 +713,7 @@ Use this at your risk! I'm NOT conservative regarding local file variable, as I 
 
 [[orgmode.org][Org-mode]] is an editing and organizing mode for notes, planning, and authoring in the free software text editor Emacs.
 
-For toggling LaTeX previews (stolen and modified from John Kitchin at
-http://kitchingroup.cheme.cmu.edu/blog/2015/10/09/Automatic-latex-image-toggling-when-cursor-is-on-a-fragment/)
+For toggling LaTeX previews (stolen and modified from John Kitchin [[http://kitchingroup.cheme.cmu.edu/blog/2015/10/09/Automatic-latex-image-toggling-when-cursor-is-on-a-fragment/a][here]])
 #+BEGIN_SRC emacs-lisp
   (require 'dash)
 
@@ -817,13 +815,6 @@ Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.domin
   (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 #+END_SRC
 
-Update all dynamic blocks before export
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-export-before-processing-hook
-  (lambda (backend)
-    (org-update-all-dblocks)))
-#+END_SRC
-
 Partial LaTeX syntax highlighting in org-mode buffers
 #+BEGIN_SRC emacs-lisp
     (font-lock-add-keywords 'org-mode
@@ -843,10 +834,10 @@ Syntax sugar for font formatting
         '("*" (:foreground "white" :weight bold)))
 
     (add-to-list 'org-emphasis-alist
-        '("/" (:inherit italic :family "Monospace" :height 0.95)))
+        '("=" (:foreground "SteelBlue" :weight bold)))
 
-    ;; Hide markers
-    (setq org-hide-emphasis-markers t)
+    (add-to-list 'org-emphasis-alist
+        '("/" (:inherit italic :family "Monospace")))
 #+END_SRC
 
 Bigger LaTeX previews
@@ -934,27 +925,19 @@ Load programming languages
 #+BEGIN_SRC emacs-lisp
     (org-babel-do-load-languages 'org-babel-load-languages '(
       (python . t)
-      (C . t)
       (emacs-lisp . t)
-      (gnuplot . t)
-      (haskell . t)
       (shell . t)
     ))
 #+END_SRC
 
-Add support for IPython/Jupyter
-#+BEGIN_SRC emacs-lisp
-(require 'ob-ipython)
-#+END_SRC
-
 Configure org-capture
 #+BEGIN_SRC emacs-lisp
-(setq org-default-notes-file "~/1.Working/0.notes.org")
+;(setq org-default-notes-file "~/1.Working/0.notes.org")
 #+END_SRC
 
 Configure org-agenda
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-files "~/1.Working/0.organizer.org")
+;(setq org-agenda-files "~/1.Working/0.organizer.org")
 #+END_SRC
 
 Handle referencing while using LaTeX preview

@@ -2,40 +2,210 @@
 
 Because I'll never leave [[http://www.vim.org/][Vim]] style =)
 
-This configuration is meant for use with [[http://vim.spf13.com/][spf13-vim]], which is for vim what [[http://spacemacs.org/][spacemacs]] is to [[https://www.gnu.org/software/emacs/][emacs]].
-
-** =.vimrc.bundles.local=
+** =.vimrc=
 :PROPERTIES:
-:TANGLE: vim/vimrc.bundles.local
+:TANGLE: vim/vimrc
 :PADLINE: no
 :MKDIRP: yes
 :END:
 
-This file list additional bundles for install
+*** Vundle
 
-*** Org-mode
+[[http://github.com/VundleVim/Vundle.Vim][Vundle]] is a plug-in manager for Vim  
 
-I can never leave the awesome [[http://orgmode.org/][org-mode]], even inside vim!
+**** Initialization
+
+To use it we need to set the runtime path to include Vundle and initialize
 
 #+BEGIN_SRC sh
-Bundle 'jceb/vim-orgmode'
-Bundle 'tpope/vim-speeddating'
-Bundle 'Konfekt/FastFold'
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
 #+END_SRC
 
-*** Additional themes
+**** Plugins
 
+We now add some plugins. The first (and mandatory), is Vundle itself:
 #+BEGIN_SRC sh
-Bundle 'joshdick/onedark.vim'
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
 #+END_SRC
 
-** =.vimrc.local=
-:PROPERTIES:
-:TANGLE: vim/vimrc.local
-:PADLINE: no
-:MKDIRP: yes
-:END:
+Then we can add here our plugins:
+#+BEGIN_SRC sh
+Plugin 'tpope/vim-speeddating'
+Plugin 'joshdick/onedark.vim'
+Plugin 'jceb/vim-orgmode'
+#+END_SRC
+
+**** Finish Vundle
+
+We can now tell we are done with Vundle
+#+BEGIN_SRC sh
+call vundle#end()            " required
+filetype plugin indent on    " required
+#+END_SRC
+
+*** General settings
+**** Views, Backups, Swap, Info and Undo files
+#+BEGIN_SRC sh
+scriptencoding utf-8
+
+" Use SPACE for <leader>. Need to map this early so references to <leader>
+" below use the new mapping
+let mapleader = ' '
+
+set viminfo+=n~/.vim/viminfo " Store the viminfo file in ~/.vim/
+set history=1000             " Store a ton of history (default is 20)
+
+set backup                   " Store backups of files
+set undofile                 " Store undo history in a file
+set undolevels=1000          " Maximum number of changes that can be undone
+set undoreload=10000         " Maximum number lines to save for undo on a buffer reload
+
+" Make directories for backups, swap, views, and undo
+" Also set appropriate settings to use those dirs
+function! InitializeDirectories()
+    let base_dir = $HOME . '/.vim'
+    let dir_list = {
+        \ 'backups': 'backupdir',
+        \ 'views': 'viewdir',
+        \ 'swaps': 'directory',
+        \ 'undos': 'undodir' }
+
+    for [dirname, settingname] in items(dir_list)
+        let directory = base_dir . '/' . dirname . '/'
+        if exists("*mkdir")
+            if !isdirectory(directory)
+                call mkdir(directory)
+            endif
+        endif
+        if !isdirectory(directory)
+            echo "Warning: Unable to create backup directory: " . directory
+            echo "Try: mkdir -p " . directory
+        else
+            let directory = substitute(directory, " ", "\\\\ ", "g")
+            exec "set " . settingname . "=" . directory
+        endif
+    endfor
+endfunction
+call InitializeDirectories()
+
+" Guarda posicao do cursor e historico da linha de comando
+set viminfo='10,\"30,:40,%,n~/.vim/viminfo
+au BufReadPost * if line("'\"")|execute("normal `\"")|endif
+#+END_SRC
+
+**** Text Formatting
 
 #+BEGIN_SRC sh
+function! SetTabWidth(width)
+    exec "set shiftwidth=" . a:width
+    exec "set tabstop=" . a:width
+    exec "set softtabstop=" . a:width
+endfunction
+
+set autoindent      " Indent at the same level of the previous line
+set expandtab       " Tabs are spaces, not tabs
+call SetTabWidth(4) " Typically I want columns of 4 spaces
+
+let custom_width_filetypes = {
+    \ 'tex' : 2,
+    \ 'org' : 2}
+    
+for [ft, width] in items(custom_width_filetypes)
+    exec "autocmd FileType " . ft . " call SetTabWidth(" . width . ")"
+endfor
+
+" Use list and listchars to highlight undesired whitespace
+set list
+set listchars=tab:›\ ,trail:•,extends:#,nbsp:.
+
+" Mostra os espaços em branco inúteis no final da linha 
+au BufNewFile,BufRead * syn match brancomala '\s\+$' | hi brancomala ctermbg=red
+#+END_SRC
+
+**** Search
+
+#+BEGIN_SRC sh
+set incsearch                   " Find as you type search
+set hlsearch                    " Highlight search terms
+set ignorecase                  " Case insensitive search
+set smartcase                   " Case sensitive when upper case characters are present
+#+END_SRC
+
+Hit backspace in normal mode to clear hlsearch
+#+BEGIN_SRC sh
+nmap <silent> <BS> :nohlsearch<CR>
+#+END_SRC
+
+**** Misc
+#+BEGIN_SRC sh
+set number
+set mouse=a
+set pastetoggle=<F12> " Sane indentation on pastes
+set nospell " Spell checking off
 colorscheme onedark
 #+END_SRC
+
+***** Colors
+
+#+BEGIN_SRC sh
+syntax on
+set colorcolumn=81 " Provide visual indicator on column 120 for long lines
+colorscheme onedark
+#+END_SRC
+
+**** Mappings and macros
+
+To keep your sanity
+#+BEGIN_SRC sh
+cab W w| cab Q q| cab Wq wq| cab wQ wq| cab WQ wq
+#+END_SRC
+
+Makes search results appear in the center of screen
+#+BEGIN_SRC sh
+nmap n nzz
+nmap N Nzz
+nmap * *zz
+nmap # #zz
+nmap g* g*zz
+nmap g# g#zz
+#+END_SRC
+
+Visual shifting (does not exit Visual mode)
+#+BEGIN_SRC sh
+vnoremap < <gv
+vnoremap > >gv
+#+END_SRC
+
+Just close this buffer, dang it
+#+BEGIN_SRC sh
+nmap <leader>bd :bd!<cr>
+#+END_SRC
+
+***** Python
+
+#+BEGIN_SRC sh
+au FileType python set ts=8 tw=80 noet
+au FileType python syn match pythonTAB '\t\+'
+au FileType python hi pythonTAB ctermbg=blue
+au FileType python hi pythonString ctermfg=lightgreen
+au FileType python hi pythonRawString ctermfg=lightgreen
+#+END_SRC
+
+
+
+
+
+
+
+
+
+
+
+
+
+

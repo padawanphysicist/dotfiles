@@ -32,7 +32,6 @@ function clean {
             ;;
         vim)
             rm -frv ${HOME}/.vim*
-            rm -frv ${HOME}/.spf13-vim-3
             ;;
         emacs)
             rm -frv ${HOME}/.emacs.d
@@ -138,11 +137,11 @@ function setup {
                 fi
                 ;;
             vim)
-                if [ ! -d "${HOME}/.spf13-vim-3" ]; then
-                    printf "Installing spf3-vim...\n"
-                    curl "http://j.mp/spf13-vim3" -L -o - | sh
+                if [ ! -d "${HOME}/.vim/bundle/Vundle.vim" ]; then
+                    printf "Installing Vundle...\n"
+                    git clone "https://github.com/VundleVim/Vundle.vim.git" "${HOME}/.vim/bundle/Vundle.vim"
                 else
-                    printf "spf13-vim exists."
+                    printf "Vundle exists."
                 fi
                 ;;
             *)
@@ -161,26 +160,25 @@ function symlink {
     case ${RULE_NAME} in
         bash)
             printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/bash/bashrc ${HOME}/.bashrc
-            ln -sfv ${DOTFILES_ROOT}/bash/inputrc ${HOME}/.inputrc
+            ln -sfv "${DOTFILES_ROOT}/bash/bashrc" "${HOME}/.bashrc"
+            ln -sfv "${DOTFILES_ROOT}/bash/inputrc" "${HOME}/.inputrc"
             ;;
         emacs)
             printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/emacs/spacemacsrc ${HOME}/.spacemacs
+            ln -sfv "${DOTFILES_ROOT}/emacs/spacemacsrc" "${HOME}/.spacemacs"
             ;;
         vim)
             printf "Symlinking "
-            ln -sfv "${DOTFILES_ROOT}/vim/vimrc.bundles.local" "${HOME}/.vimrc.bundles.local"
-            ln -sfv "${DOTFILES_ROOT}/vim/vimrc.local" "${HOME}/.vimrc.local"
+            ln -sfv "${DOTFILES_ROOT}/vim/vimrc" "${HOME}/.vimrc"
             printf ""
             ;;
         tmux)
             printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/tmux/tmux.conf ${HOME}/.tmux.conf
+            ln -sfv "${DOTFILES_ROOT}/tmux/tmux.conf" "${HOME}/.tmux.conf"
             ;;
         git)
             printf "Symlinking "
-            ln -sfv ${DOTFILES_ROOT}/git/gitconfig ${HOME}/.gitconfig
+            ln -sfv "${DOTFILES_ROOT}/git/gitconfig" "${HOME}/.gitconfig"
             ;;
 
         *)
@@ -193,15 +191,14 @@ function postprocess {
     local RULE_NAME=$1
     case ${RULE_NAME} in
         bash)
-            printf "Running bash-it.\n"
-            echo "y" | ${HOME}/.bash_it/install.sh
+            printf ""
             ;;
         emacs)
             printf "Opening emacs for installing remaining packages. Close when done.\n"
             emacs&
             ;;
         vim)
-            echo "vim +BundleInstall! +BundleClean +qa" | sh
+            echo "vim +PluginInstall! +qall" | sh
             reset
             ;;
         *)

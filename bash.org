@@ -1,6 +1,6 @@
 * Bash configuration
 
-This configuration is built over [[https://github.com/Bash-it/bash-it][bash-it]], a collection of community Bash commands and scripts, /a là/ [[https://github.com/robbyrussell/oh-my-zsh][oh-my-zsh]].
+[[https://www.gnu.org/software/bash/][GNU Bash]] is the GNU Project's [[https://en.wikipedia.org/wiki/Shell_(computing)][shell]], distributed as the default shell on the major [[https://en.wikipedia.org/wiki/Linux][Linux]] distributions and [[https://en.wikipedia.org/wiki/OS_X][OS X]].
 
 ** =bashrc=
 :PROPERTIES:
@@ -8,6 +8,9 @@ This configuration is built over [[https://github.com/Bash-it/bash-it][bash-it]]
 :PADLINE: no
 :MKDIRP: yes
 :END:
+
+This file is a shell script that Bash runs whenever it is started interactively. You can put any command in that file that you could type at the command prompt. This is the place where you can set up variables, functions and aliases, define your (PS1) prompt and define other settings that you want to use every start you open a new terminal window
+
 *** Theme for =ls=
 
 I like a lot [[http://ethanschoonover.com/solarized][solarized]] colorscheme, so I was lucky to find [[https://github.com/seebi/dircolors-solarized][this]].
@@ -16,34 +19,36 @@ I like a lot [[http://ethanschoonover.com/solarized][solarized]] colorscheme, so
 eval `dircolors ${HOME}/.dircolors-solarized/dircolors.256dark`
 #+END_SRC
 
-*** =$PATH= configuration
+*** Path configuration
 **** Special folders
 ***** =0.Inbox=
 
 Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =0.sandbox= to =1.docs=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
+
 #+BEGIN_SRC sh
 INBOX=${HOME}/0.Inbox/
 #+END_SRC
 
-***** =1.Documents=
+***** =1.Working=
 
-Is the big kahuna(*) of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
+Is the big kahuna [fn:: Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.] of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but (to keep you sanity) don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
 
-(*) Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.
 #+BEGIN_SRC sh
-DOCS=${HOME}/1.Documents/
+DOCS=${HOME}/1.Working/
 #+END_SRC
 
-***** =2.Archive*=
+***** =2.Archive=
 
 Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
+
 #+BEGIN_SRC sh
 ARCHIVE=${HOME}/2.Archive/
 #+END_SRC
 
 ***** =3.Media=
 
-Multimedia files (games, pictures and movies)
+Multimedia files (games, pictures and movies). This is a file that usually I don't mind to keep a backup.
+
 #+BEGIN_SRC sh
 ARCHIVE=${HOME}/3.Media/
 #+END_SRC
@@ -51,25 +56,46 @@ ARCHIVE=${HOME}/3.Media/
 ***** =4.Opt=
 
 Third-party software, not present among the official packages.
+
 #+BEGIN_SRC sh
 OPT=${HOME}/4.Opt
 #+END_SRC
 
-***** Put everything together
+***** =$PATH=
+
+The =PATH= environment variable is a colon-delimited list of directories that your shell searches through when you enter a command.
+
+Program files (executables) are kept in many different places on the Unix system. Your =PATH= tells the Unix shell where to look on the system when you request a particular program. Having more directories in your path will reduce the number of times you get "Command not found" errors, but might put you at greater risk of activating a Trojan horse.
+
+Most of my additional commands/scripts remain centralized in =${HOME}/4.Opt/bin=, which I link to =${HOME}/.bin=.
 
 #+BEGIN_SRC sh
-export PATH=${OPT}/bin:${HOME}/.bin:${HOME}/.local/bin:${PATH}
+export PATH=${HOME}/.bin:${HOME}/.local/bin:${PATH}
 #+END_SRC
 
-*** Eternal bash history
+*** Shell options
+
 
 #+BEGIN_SRC sh
-export HISTSIZE=
-export HISTFILESIZE=
-export HISTTIMEFORMAT="[%F %T] "
-export HISTCONTROL=erasedups
-export HISTFILE="${HOME}/.bash_eternal_history"
-PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+shopt -s histappend # Append to history, don't overwrite it
+shopt -s extglob    # Extended pattern matching
+#+END_SRC
+
+*** Unlimited bash history
+
+I like to have my bash history file unlimited, so I can always go back and see how I built/configured something, or what that nifty command was, or how some command broke something weeks ago.
+
+#+BEGIN_SRC sh
+export HISTCONTROL=ignoreboth:erasedups  # No duplicate entries
+export HISTIGNORE="?:??:???:$HISTIGNORE" # Ignore too short commands, like `ls'
+export HISTSIZE=-1                       # Unlimited history list
+export HISTFILESIZE=-1                   # Unlimited history file size
+export HISTFILE="${HOME}/.bash_history"  # File to store bash history
+#+END_SRC
+
+I just found [[http://lpetr.org/blog/archives/preserve-bash-history][this]] here, so I preserve history across multiple sessions
+#+BEGIN_SRC sh
+export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
 #+END_SRC
 
 *** Powerline configuration
@@ -88,6 +114,8 @@ fi
 #+END_SRC
 
 *** Tmux terminal setting
+
+Set 256 colors 
 
 #+BEGIN_SRC sh
 export TERM=xterm-256color
@@ -116,6 +144,9 @@ alias emacx="emacsclient -t"
 :PADLINE: no
 :MKDIRP: yes
 :END:
+
+=inputrc= deals with the mapping of the keyboard for certain situations. This file is the start-up file used by [[http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html][readline]], the input related library used by bash and most other shells.
+
 #+BEGIN_SRC sh
 set show-all-if-ambiguous on
 set menu-complete-display-prefix on

@@ -92,7 +92,6 @@ List of additional packages that will be installed without being wrapped in a la
       spaceline
       ob-ipython
       google-translate
-      visual-fill-column
       deft
       pkgbuild-mode
     )
@@ -718,16 +717,9 @@ Configuration to be done AFTER load org
   (with-eval-after-load 'org
 #+END_SRC
 
-[[https://github.com/joostkremers/visual-fill-column][Visual Fill Column]] is a minor mode which mimics the effect of fill-column in visual-line-mode: instead of wrapping lines at window edge, it wraps at fill-column
+Enable visual line mode
 #+BEGIN_SRC emacs-lisp
-  (require 'visual-fill-column)
-
-  ;; Enable visual line mode
   (add-hook 'org-mode-hook 'visual-line-mode)
-
-  ;; Soft-wrap at column 80
-  (setq visual-fill-column-width 80)
-  (add-hook 'org-mode-hook 'visual-fill-column-mode)
 #+END_SRC
 
 <<cdlatex>>
@@ -861,9 +853,14 @@ Configure org-agenda
 ;(setq org-agenda-files "~/1.Working/0.organizer.org")
 #+END_SRC
 
-Handle referencing while using LaTeX preview
+List of default LaTeX packages to be inserted in the header. The last item of the cell is a snippet-flag: if non-nil, the package is also included when compiling LaTeX snippets into images for inclusion into non-LaTeX output.
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'org-latex-packages-alist '("" "vct-showkeys" t))
+(setq org-latex-default-packages-alist
+      '(
+        ("" "org-pkgs" t) ;; Custom packages goes into this external package,
+                          ;; so there is no need to modify here anymore, unless
+                          ;; I ran into serious package clash
+      ))
 #+END_SRC
 
 Closing =with-eval-after-load 'org=

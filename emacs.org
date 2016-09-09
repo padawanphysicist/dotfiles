@@ -471,11 +471,10 @@ Configuration function for user code. This function is called at the very end of
 
 Sometimes it's nice to have a timestamp in your files
 #+BEGIN_SRC emacs-lisp
-(require 's)
 (setq
   time-stamp-active t
   time-stamp-time-zone "UTC"
-  time-stamp-format (s-concat "%:y%02m%02d%02H%02M%02S" (format-time-string "%3N" (current-time) t))
+  time-stamp-format "%:y%02m%02d%02H%02M%02S"
   time-stamp-pattern "10/MODIFIED: %%$"
 )
 (add-hook 'before-save-hook 'time-stamp) ; update when saving

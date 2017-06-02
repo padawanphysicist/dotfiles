@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# -*- mode: bash -*-
+#
+# bootstrap files to their places.
+#
+# The script assumes you have emacs+org-mode installed, and GNU stow for
+# symlinking.
+#
+
+SCRIPT_NAME="$0"
+DOTFILES_ROOT=$(pwd -P)
+MAX_DEPTH=3
+
+# Hash table with GitLab snippets
+declare -A gitlab_emacs_snippets
+declare -A gitlab_bash_snippets
+gitlab_emacs_snippets=(["23753"]="heartbeat-cursor.el" ["1655100"]="coconut-mode.el")
+gitlab_bash_snippets=(["1655104"]="virtualenv-auto-activate.sh")
+
+# Show help message if no arguments are given to the script
+function usage {
+  printf "Help message\n"
+}
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
+
+# Tangle configuration file (org -> file)
+function tangle {
+  local RULE=$1
+  local ORG_FILE="${RULE}.org"
+
+  if [ -f ${ORG_FILE} ]; then
+    ./org-tangle ${ORG_FILE} 2>&1 | grep Tangled
+  else
+    printf "Warning. File does not exists. ${ORG_FILE}\n"
+  fi
+}
+
+# Symlink configuration files to ${HOME}
+function symlink {
+  local RULE=$1
+  local MODE=$2
+
+  printf "Symlinking ${RULE}...\n"
+
+  case ${MODE} in
+    I) stow -v ${RULE};;
+    R) stow -v --restow ${RULE};;
+    D) stow -v --delete ${RULE};;
+    *);;
+  esac
+}
+
+# Clone remote git repository to a local directory
+function git_clone {
+  local NAME=$1
+  local FROM=$2
+  local TO=$3
+  local PROMPT="true"
+
+  if [ -n "$4" ]; then
+    PROMPT="false"
+  fi
+  if [ "${PROMPT}" == "true" ]; then
+    printf "Installing ${NAME}...\n"
+  fi
+  if [ -d "${TO}" ]; then
+    while true; do
+      read -p "${TO} exists. Do you want to overwrite [y/N]? " ans
+      case ${ans} in
+        [Yy]* ) rm -rvf "${TO}"; git_clone "${NAME}" "${FROM}" "${TO}" "false";
+                break;;
+        [Nn]* ) break;;
+        *) printf "Please, answer yes or no.";;
+      esac
+    done
+  else
+    git clone "${FROM}" "${TO}"
+  fi
+}
+
+# Download remote address to a local file
+function download {
+  local NAME=$1
+  local FROM=$2
+  local TO=$3
+
+  printf "Downloading ${NAME}...\n"
+  curl -L "${FROM}" -o "${TO}"
+}
+
+
+# Install dependencies for `${RULE}'
+function preprocess {
+  local RULE=$1
+  local RULE_DIR=${DOTFILES_ROOT}/${RULE}
+
+  mkdir -p ${RULE_DIR}
+
+  printf "Setting up ${RULE} dependencies...\n"
+
+  case ${RULE} in
+    bash)
+      # Script which allows to see repository status in the prompt
+      wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh -O "${RULE_DIR}/.git-prompt.sh"
+      git_clone "dircolors-solarized" "https://github.com/seebi/dircolors-solarized" "${RULE_DIR}/.dircolors-solarized"
+      printf "Downloading custom snippets...\n"
+      for snippet in "${!gitlab_bash_snippets[@]}"; do
+        filename=".${gitlab_bash_snippets[${snippet}]}"
+        wget "https://gitlab.com/snippets/${snippet}/raw" -O "${RULE_DIR}/${filename}"
+      done
+      ;;
+    zsh)
+      git_clone "oh-my-zsh" "https://github.com/robbyrussell/oh-my-zsh" "${RULE_DIR}/.oh-my-zsh"
+      ;;
+    vim)
+      mkdir -p "${RULE_DIR}/.config/nvim/bundle"
+      git_clone "Vundle" "https://github.com/VundleVim/Vundle.vim.git" "${RULE_DIR}/.config/nvim/bundle/Vundle.vim"
+      ;;
+    emacs)
+      git_clone "Spacemacs" "https://github.com/syl20bnr/spacemacs" "${RULE_DIR}/.emacs.d"
+      printf "Downloading custom snippets...\n"
+      mkdir -p "${RULE_DIR}/.elisp"
+      for snippet in "${!gitlab_emacs_snippets[@]}"; do
+        filename="${gitlab_emacs_snippets[${snippet}]}"
+        wget "https://gitlab.com/snippets/${snippet}/raw" -O "${RULE_DIR}/.elisp/${filename}"
+      done
+      git_clone "Org-wiki" "https://github.com/caiorss/org-wiki" "${RULE_DIR}/.elisp/org-wiki"
+      download "Clip.jar" "https://github.com/caiorss/clip.jar/blob/build/Clip.jar?raw=true" "${HOME}/4.Opt/bin/Clip.jar"
+      git_clone "vct-html" "https://padawanphysicist@gitlab.com/padawanphysicist/vct-html.git" "${RULE_DIR}/.elisp/vct-html"
+      ;;
+    *) ;;
+  esac
+  printf "Done.\n"
+}
+
+function postprocess {
+  local RULE=$1
+  printf "Post-configuration for ${RULE}...\n"
+
+  # Installing dependencies
+  case ${RULE} in
+    bash)
+      ;;
+    zsh)
+      ;;
+    emacs)
+      printf "Opening emacs for installing remaining packages. Close when done.\n"
+      emacs&
+      ;;
+    vim)
+      echo "nvim +PluginInstall! +qall" | sh
+      ;;
+    *)
+      printf ""
+      ;;
+  esac
+  printf "Done.\n"
+}
+
+function update {
+  local RULE=$1
+
+  tangle $RULE
+  symlink ${RULE} "R"
+}
+
+function install {
+  local RULE=$1
+
+  preprocess ${RULE}
+  update ${RULE}
+  symlink ${RULE} "I"
+  postprocess ${RULE}
+}
+
+function upgrade {
+  local RULE=$1
+  #
+  # Not implemented
+  #
+}
+
+function clean {
+  local RULE=$1
+
+  symlink ${RULE} "D"
+  rm -rvf ${RULE}
+
+  case ${RULE} in
+    vim) rm -rfv ~/.vim;;
+    *);;
+  esac
+}
+
+#
+# Bootstraping rules: by default, all of them are set to false
+#   - INSTALL: Install dependencies, tangle and symlink
+#   - UPDATE: Tangle and symlink
+#   - UPGRADE: Upgrade dependencies (Not implemented yet)
+#
+INSTALL="false"
+UPDATE="false"
+UPGRADE="false"
+
+while getopts i:u:U:c: option
+do
+  case "${option}"
+    in
+      i) install ${OPTARG};;
+      u) update ${OPTARG};;
+      U) upgrade ${OPTARG};;
+      c) clean ${OPTARG};;
+  esac
+done
+
+# vim: set ft=sh ts=2 sw=2 sts=2 et:

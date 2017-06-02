@@ -1,8 +1,10 @@
-* Git configuration
+#+TITLE: Git configuration
+
+[[https://git-scm.com/][Git]] is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency
 
 ** =.gitconfig=
 :PROPERTIES:
-:TANGLE: git/gitconfig
+:TANGLE: git/.gitconfig
 :PADLINE: no
 :MKDIRP: yes
 :END:
@@ -20,7 +22,7 @@
 
 #+BEGIN_SRC sh
 [core]
-    editor = vim
+    editor = nvim
 #+END_SRC
 
 *** LaTeX diff
@@ -29,7 +31,7 @@
 [difftool.latex]
     cmd = ldiff "$LOCAL" "$REMOTE" "$MERGED"
 #+END_SRC
-
+    
 *** Identity
 
 #+BEGIN_SRC sh
@@ -43,4 +45,14 @@
 #+BEGIN_SRC sh
 [color]
     ui = true
+#+END_SRC
+
+*** GUI
+
+**** Add options for rebasing in git gui
+
+#+BEGIN_SRC sh
+[guitool "Rebase interactive"]
+   cmd = EDITOR=ecw git rebase -i $REVISION
+   revprompt = yes
 #+END_SRC

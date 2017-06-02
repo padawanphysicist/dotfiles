@@ -1,107 +1,134 @@
-* Tmux configuration
+#+TITLE: Tmux configuration
 
 [[https://tmux.github.io/][tmux]] gives you terminal some superpowers.
 
 ** =.tmux.conf=
 :PROPERTIES:
-:TANGLE: tmux/tmux.conf
+:TANGLE: tmux/.tmux.conf
 :PADLINE: no
 :MKDIRP: yes
 :END:
 
-*** Changing prefix
+*** General settings
+**** 256 colors
+
+#+BEGIN_SRC sh
+set-option -g default-terminal "screen-256color"
+#+END_SRC
+
+**** Pass keys through to its terminals
+
+#+BEGIN_SRC sh
+setw -g xterm-keys on
+#+END_SRC
+
+**** Fastest command sequences
+
+#+BEGIN_SRC sh
+set -s escape-time 0
+#+END_SRC
+
+**** Increase repeat timeout
+
+#+BEGIN_SRC sh
+set -sg repeat-time 600
+#+END_SRC
+
+**** Set focus events
+
+#+BEGIN_SRC sh
+set -s focus-events on
+#+END_SRC
+
+**** Changing prefix
 
 The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. Following [[https://www.gnu.org/software/screen/][GNU Screen]] prefix, we change the default prefix to C-a.
 
-First we release the default prefix...
+***** Release the default prefix
+
 #+BEGIN_SRC sh
 unbind C-b
 #+END_SRC
 
-...and then we define a new prefix
+***** Define a new prefix
+
 #+BEGIN_SRC sh
 set -g prefix C-a
 bind-key C-a send-prefix
 #+END_SRC
 
-*** General options
 
+**** Boost history
+
+#+BEGIN_SRC sh
+set -g history-limit 5000
+#+END_SRC
+
+*** Display
 **** Window indexing
 
 Start window indexing at one instead of zero. Then it will be more like the keyboard layout
+
+***** Start windows numbering at 1
+
 #+BEGIN_SRC sh
 set -g base-index 1
+#+END_SRC
+
+***** Make pane numbering consistent with windows
+
+#+BEGIN_SRC sh
 setw -g pane-base-index 1
 #+END_SRC
 
-**** Window configuration
+***** Rename window to reflect current program
 
-***** Bell
-
-Ring the bell if any background window rang a bell
 #+BEGIN_SRC sh
-set -g bell-action any
+setw -g automatic-rename on
 #+END_SRC
 
-***** 256 colors
+***** Renumber windows when a window is closed
 
 #+BEGIN_SRC sh
-set-option -g default-terminal "screen-256color"
-#+end_src
-
-***** Keybindings
-
-Use emacs keybindings for tmux command line input.
-#+BEGIN_SRC sh
-set -gw status-keys emacs
+set -g renumber-windows on
 #+END_SRC
 
-Use vi keybindings in copy and choice modes
+***** Set terminal title
+
 #+BEGIN_SRC sh
-setw -g mode-keys vi
+set -g set-titles on
+set -g set-titles-string '#h ❐ #S ● #I #W'
 #+END_SRC
 
-Setup 'v' to begin selection as in Vim
+***** Slightly longer pane indicators display time
+
 #+BEGIN_SRC sh
-bind-key -t vi-copy v begin-selection
-bind-key -t vi-copy y copy-pipe "xclip"
-bind -n M-p run "tmux set-buffer \"$(xclip -o)\"; tmux paste-buffer"
+set -g display-panes-time 800
 #+END_SRC
 
-Allows for faster key repetition
+***** Slightly longer status messages display time
+
 #+BEGIN_SRC sh
-set -s escape-time 0
+set -g display-time 1000
 #+END_SRC
 
-Rather than constraining window size to the maximum size of any client connected to the =session=, constrain window size to the maximum size of any client connected to =that window=. Much more reasonable.
+***** Redraw status line every 10 seconds
+
 #+BEGIN_SRC sh
-setw -g aggressive-resize on
+set -g status-interval 10
 #+END_SRC
 
-**** Pane switching
+***** Activity
 
-For pane switching it will be used the combination `Alt+<arrow key>`
 #+BEGIN_SRC sh
-bind -n M-Left select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up select-pane -U
-bind -n M-Down select-pane -D
+set -g monitor-activity on
+set -g visual-activity off
 #+END_SRC
 
-In the case of multiple opened windows, you will get notified when something happens inside the other windows. The commands below will cause tmux to write a message and highlight the window inside of which the activity took place
-#+BEGIN_SRC sh
-setw -g monitor-activity on
-set -g visual-activity on
-#+END_SRC
+*** Navigation
+**** Pane navigation
+***** Horizontal splits with `s` or `^S`
 
-Auto window rename
-#+BEGIN_SRC sh
-set-window-option -g automatic-rename off
-#+END_SRC
-
-**** Pane management/navigation
-
-Horizontal splits with `s` or `^S`
 #+BEGIN_SRC sh
 unbind s
 unbind ^S
@@ -109,7 +136,8 @@ bind-key s split-window
 bind-key ^S split-window
 #+END_SRC
 
-Vertical split with `v` or `^V`
+***** Vertical split with `v` or `^V`
+
 #+BEGIN_SRC sh
 unbind v
 unbind ^V
@@ -117,12 +145,14 @@ bind-key v split-window -h
 bind-key ^V split-window -h
 #+END_SRC
 
-Mouse mode on by default
+***** Mouse mode on by default
+
 #+BEGIN_SRC sh
 set -g -q mouse on
 #+END_SRC
 
-Toggle mouse on/off
+***** Toggle mouse on/off
+
 #+BEGIN_SRC sh
 bind m \
     set -g -q mouse on \;\
@@ -132,89 +162,225 @@ bind M \
     display 'Mouse: OFF'
 #+END_SRC
 
-copy-mode -e: This allows you to press page up in normal mode and have it scroll back into the history. If you page down back to the bottom of the history, it automatically exits copy mode. If there is an alternate screen (i.e. a full screen app like vim, less, mutt, etc) then it does not enter copy mode, but passes through the key press. This is because alternate screen apps usually handle page up/down itself and also will have no scroll back.
+***** Pane switching
+
+For pane switching it will be used the combination `Alt+<arrow key>`
+
 #+BEGIN_SRC sh
-bind-key -T root PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -e; send-keys PPage"
-bind-key -t vi-copy PPage page-up
-bind-key -t vi-copy NPage page-down
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
 #+END_SRC
 
+***** Move to last active window
+
+#+BEGIN_SRC sh
+bind Tab last-window
+#+END_SRC
+
+***** Left click on a window name in status bar to select it
+
+#+BEGIN_SRC sh
+bind -T root MouseDown1Status select-window -t= 
+#+END_SRC
+
+***** Left click on a pane selects it
+
+#+BEGIN_SRC sh
+bind -T root MouseDown1Pane select-pane -t=
+#+END_SRC
+
+***** Draging on border resizes pane
+
+#+BEGIN_SRC sh
+bind -T root MouseDrag1Border resize-pane -M
+#+END_SRC
+
+***** Middle click on a window name in status bar to kill it
+
+#+BEGIN_SRC sh
+bind -T root MouseDown2Status kill-window
+#+END_SRC
+
+***** Middle click in a pane to paste
+
+#+BEGIN_SRC sh
+bind -T root MouseDown2Pane run -b "exec </dev/null; xclip -o | awk 1 ORS=' ' | tmux load-buffer - ; tmux paste-buffer"
+#+END_SRC
+
+*** Copy mode
+
 Behaviour very similar to page up, except for the mouse wheel. i.e. I just scroll back and forward and if I scroll to the end of the history, copy mode automatically exits. Again, just pass through the click for alternate screens - they often handle the mouse themselves.
+
 #+BEGIN_SRC sh
 bind -n WheelUpPane   select-pane -t= \; copy-mode -e \; send-keys -M
 bind -n WheelDownPane select-pane -t= \;                 send-keys -M
 #+END_SRC
 
-Left click on a window name in status bar to select it
-#+BEGIN_SRC sh
-bind -T root MouseDown1Status select-window -t= # default
-#+END_SRC
+*** Window configuration
+**** Bell
 
-Left click on a pane selects it
-#+BEGIN_SRC sh
-bind -T root MouseDown1Pane select-pane -t=
-#+END_SRC
-
-Draging on border resizes pane
-#+BEGIN_SRC sh
-bind -T root MouseDrag1Border resize-pane -M
-#+END_SRC
-
-Middle click on a window name in status bar to kill it
-#+BEGIN_SRC sh
-bind -T root MouseDown2Status kill-window
-#+END_SRC
-
-Middle click in a pane to paste
-#+BEGIN_SRC sh
-bind -T root MouseDown2Pane run -b "exec </dev/null; xclip -o | awk 1 ORS=' ' | tmux load-buffer - ; tmux paste-buffer"
-#+END_SRC
-
-**** Colors
-
-***** Active window style
-#+BEGIN_SRC sh
-set-window-option -g window-style 'bg=#181818'
-set-window-option -g window-active-style 'bg=#262626'
-#+END_SRC
-
-***** Pane border
-#+BEGIN_SRC sh
-set-option -g pane-border-fg colour235 #base02
-set-option -g pane-active-border-fg '#dd0055'#colour240 #base01
-#+END_SRC
-
-***** Message text
-# BEGIN_SRC sh
-set-option -g message-bg colour235 #base02
-set-option -g message-fg colour166 #orange
-# END_SRC
-
-*** Misc settings
+Ring the bell if any background window rang a bell
 
 #+BEGIN_SRC sh
-set -g status-interval 1
-set -g status-justify centre # center align window list
-set -g status-left-length 20
-set -g status-right-length 140
-set -g status-left '#[fg=green]#H #[fg=black]• #[fg=green,bright]#(uname -r | cut -c 1-6)#[default]'
-set -g status-right '#[fg=green,bg=default,bright]#(tmux-mem-cpu-load 1) #[fg=red,dim,bg=default]#(uptime | cut -f 4-5 -d " " | cut -f 1 -d ",") #[fg=white,bg=default]%a%l:%M:%S %p#[default] #[fg=blue]%Y-%m-%d'
+set -g bell-action any
 #+END_SRC
 
-Solves slight delay when switching modes in vim
+**** Keybindings
+***** Use emacs keybindings for tmux command line input.
+
 #+BEGIN_SRC sh
-set -sg escape-time 0
+set -gw status-keys emacs
 #+END_SRC
 
-Open panel with the same folder as current panel
+***** Use vi keybindings in copy and choice modes
+
+#+BEGIN_SRC sh
+setw -g mode-keys vi
+#+END_SRC
+
+***** Setup 'v' to begin selection as in Vim
+
+#+BEGIN_SRC sh
+bind-key -Tcopy-mode-vi 'v' send -X begin-selection
+bind-key -Tcopy-mode-vi 'y' send -X copy-selection
+bind -n M-p run "tmux set-buffer \"$(xclip -o)\"; tmux paste-buffer"
+#+END_SRC
+
+***** Aggressive resize
+
+Rather than constraining window size to the maximum size of any client connected to the =session=, constrain window size to the maximum size of any client connected to =that window=. Much more reasonable.
+
+#+BEGIN_SRC sh
+setw -g aggressive-resize on
+#+END_SRC
+
+**** Open panel with the same folder as current panel
+
 #+BEGIN_SRC sh
 bind c new-window -c "#{pane_current_path}"
 bind '"' split-window -c "#{pane_current_path}"
 bind % split-window -h -c "#{pane_current_path}"
 #+END_SRC
 
-**** Powerline configuration
+*** Colors
+
+This configuration was stolen from [[http://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf/][here]]
+
+**** Panes
 
 #+BEGIN_SRC sh
-source ${HOME}/.local/lib/python3.5/site-packages/powerline/bindings/tmux/powerline.conf
+set -g pane-border-fg black
+set -g pane-active-border-fg brightred
 #+END_SRC
+
+**** Status bar design 
+***** Status line
+
+#+BEGIN_SRC sh
+set -g status-justify left
+set -g status-bg default
+set -g status-fg colour12
+set -g status-interval 2
+#+END_SRC
+
+***** Messaging
+
+#+BEGIN_SRC sh
+set -g message-fg black
+set -g message-bg yellow
+set -g message-command-fg blue
+set -g message-command-bg black
+#+END_SRC
+
+***** Window mode
+
+#+BEGIN_SRC sh
+setw -g mode-bg colour6
+setw -g mode-fg colour0
+#+END_SRC
+
+***** Window status
+
+#+BEGIN_SRC sh
+setw -g window-status-format " #F#I:#W#F "
+setw -g window-status-current-format " #F#I:#W#F "
+setw -g window-status-format "#[fg=magenta]#[bg=black] #I #[bg=cyan]#[fg=colour8] #W "
+setw -g window-status-current-format "#[bg=brightmagenta]#[fg=colour8] #I #[fg=colour8]#[bg=colour14] #W "
+setw -g window-status-current-bg colour0
+setw -g window-status-current-fg colour11
+setw -g window-status-current-attr dim
+setw -g window-status-bg green
+setw -g window-status-fg black
+setw -g window-status-attr reverse
+#+END_SRC
+
+***** Info on left (I don't have a session display for now)
+
+#+BEGIN_SRC sh
+set -g status-left ''
+#+END_SRC
+
+***** Loud or quiet?
+
+#+BEGIN_SRC sh
+set-option -g visual-activity off
+set-option -g visual-bell off
+set-option -g visual-silence off
+set-window-option -g monitor-activity off
+#+END_SRC
+
+***** The modes
+
+#+BEGIN_SRC sh
+setw -g clock-mode-colour colour135
+setw -g mode-attr bold
+setw -g mode-fg colour196
+setw -g mode-bg colour238
+#+END_SRC
+
+***** The panes
+
+#+BEGIN_SRC sh
+set -g pane-border-bg colour235
+set -g pane-border-fg colour238
+set -g pane-active-border-bg colour236
+set -g pane-active-border-fg colour51
+#+END_SRC
+
+***** The statusbar
+
+#+BEGIN_SRC sh
+set -g status-position bottom
+set -g status-bg colour234
+set -g status-fg colour137
+set -g status-attr dim
+set -g status-left ''
+set -g status-right '#[fg=colour233,bg=colour241,bold] %d/%m #[fg=colour233,bg=colour245,bold] %H:%M:%S '
+set -g status-right-length 50
+set -g status-left-length 20
+
+setw -g window-status-current-fg colour81
+setw -g window-status-current-bg colour238
+setw -g window-status-current-attr bold
+setw -g window-status-current-format ' #I#[fg=colour250]:#[fg=colour255]#W#[fg=colour50]#F '
+
+setw -g window-status-fg colour138
+setw -g window-status-bg colour235
+setw -g window-status-attr none
+setw -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#[fg=colour244]#F '
+
+setw -g window-status-bell-attr bold
+setw -g window-status-bell-fg colour255
+setw -g window-status-bell-bg colour1
+#+END_SRC
+
+***** The messages
+
+#+BEGIN_SRC sh
+set -g message-attr bold
+set -g message-fg colour232
+set -g message-bg colour166
+#+END_SRC
+

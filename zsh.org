@@ -1,15 +1,15 @@
-#+TITLE: Bash configuration
+#+TITLE: Zsh configuration
 
-[[https://www.gnu.org/software/bash/][GNU Bash]] is the GNU Project's [[https://en.wikipedia.org/wiki/Shell_(computing)][shell]], distributed as the default shell on the major [[https://en.wikipedia.org/wiki/Linux][Linux]] distributions and [[https://en.wikipedia.org/wiki/OS_X][OS X]].
+[[http://www.zsh.org/][Zsh]] is an extended Bourne shell designed for interactive use, although it is also a powerful scripting language. Since Zsh can be considered as "bash on steroids", most of the following configuration comes from [[./bash.org]]
 
-** =bashrc=
+** =zshrc=
 :PROPERTIES:
-:TANGLE: bash/.bashrc
+:TANGLE: zsh/.zshrc
 :PADLINE: no
 :MKDIRP: yes
 :END:
 
-This file is a shell script that Bash runs whenever it is started interactively. You can put any command in that file that you could type at the command prompt. This is the place where you can set up variables, functions and aliases, define your (PS1) prompt and define other settings that you want to use every start you open a new terminal window
+This file is a shell script that Zsh runs whenever it is started interactively. You can put any command in that file that you could type at the command prompt. This is the place where you can set up variables, functions and aliases, define your (PS1) prompt and define other settings that you want to use every start you open a new terminal window
 
 *** Theme for =ls=
 
@@ -74,65 +74,35 @@ export PATH=${OPT}/bin:${HOME}/.local/bin:${PATH}
 #+END_SRC
 
 *** Shell options
-**** Append to history, don't overwrite it
+**** Path to oh-my-zsh
 
 #+BEGIN_SRC sh
-shopt -s histappend
+export ZSH=${HOME}/.oh-my-zsh
 #+END_SRC
 
-**** Extended pattern matching
+**** Theme for zsh
 
 #+BEGIN_SRC sh
-shopt -s extglob
+ZSH_THEME="agnoster"
 #+END_SRC
 
-*** Unlimited bash history
-
-I like to have my bash history file unlimited, so I can always go back and see how I built/configured something, or what that nifty command was, or how some command broke something weeks ago.
-
-**** No duplicate entries
+**** Case sensitive completion
 
 #+BEGIN_SRC sh
-export HISTCONTROL=ignoreboth:erasedups
+CASE_SENSITIVE="true"
 #+END_SRC
 
-**** Ignore too short commands, like =ls=
+**** Red dots while waiting completion
 
 #+BEGIN_SRC sh
-export HISTIGNORE="?:??:???:$HISTIGNORE"
+COMPLETION_WAITING_DOTS="true"
 #+END_SRC
 
-**** Unlimited history list
+**** Zsh plugins
 
 #+BEGIN_SRC sh
-export HISTSIZE=-1
-#+END_SRC
-
-**** Unlimited history file size
-
-#+BEGIN_SRC sh
-export HISTFILESIZE=-1
-#+END_SRC
-
-**** File to keep history
-
-#+BEGIN_SRC sh
-export HISTFILE="${HOME}/.bash_history"
-#+END_SRC
-
-**** Preserve history across multiple sessions
-
-I just found this [[http://lpetr.org/blog/archives/preserve-bash-history][here]]
-
-#+BEGIN_SRC sh
-export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
-#+END_SRC
-
-*** Tmux terminal setting
-**** Set 256 colors 
-
-#+BEGIN_SRC sh
-export TERM=xterm-256color
+plugins=(git archlinux python tmux virtualenvwrapper)
+source $ZSH/oh-my-zsh.sh
 #+END_SRC
 
 *** Aliases
@@ -148,7 +118,7 @@ alias ae='aunpack'
 
 **** Colored =ls=
 
-Because sometimes bash likes to see life in black and white.
+Because sometimes zsh might like to see life in black and white.
 
 #+BEGIN_SRC sh
 alias ls="ls --color=always"
@@ -197,50 +167,3 @@ else
 fi
 #+END_SRC
 
-*** Git-aware prompt
-
-This allows you to see repository status in your prompt
-
-**** Include the main script
-
-you can find this script [[https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh][here]]
-
-#+BEGIN_SRC sh
-source ${HOME}/.git-prompt.sh
-#+END_SRC
-
-**** Option for git-prompt.sh to show branch name in color
-
-#+BEGIN_SRC sh
-export GIT_PS1_SHOWCOLORHINTS=true 
-#+END_SRC
-
-**** Change prompt
-
-Now we redefine the =PS1= prompt
-
-#+BEGIN_SRC sh
-PS1='\[\033[90m\]\u@\[\033[94m\]\w\[\033[33m\]$(__git_ps1 " (%s)")\[\033[90m\] >>\[\033[0m\] '
-#+END_SRC
-
-*** Automatic Python environments
-
-#+BEGIN_SRC sh
-source ~/.virtualenv-auto-activate.sh
-#+END_SRC
-
-** =inputrc=
-:PROPERTIES:
-:TANGLE: bash/.inputrc
-:PADLINE: no
-:MKDIRP: yes
-:END:
-
-=inputrc= deals with the mapping of the keyboard for certain situations. This file is the start-up file used by [[http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html][readline]], the input related library used by bash and most other shells.
-
-#+BEGIN_SRC sh
-set show-all-if-ambiguous on
-set menu-complete-display-prefix on
-set bell-style audible
-Tab: menu-complete
-#+END_SRC

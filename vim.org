@@ -1,10 +1,10 @@
-* Vim configuration
+#+TITLE: Vim configuration
 
 Because I'll never leave [[http://www.vim.org/][Vim]] style =)
 
-** =.vimrc=
+** =init.vim=
 :PROPERTIES:
-:TANGLE: vim/vimrc
+:TANGLE: vim/.config/nvim/init.vim
 :PADLINE: no
 :MKDIRP: yes
 :END:
@@ -17,38 +17,89 @@ Because I'll never leave [[http://www.vim.org/][Vim]] style =)
 
 To use it we need to set the runtime path to include Vundle and initialize
 
-#+BEGIN_SRC sh
-set nocompatible              " be iMproved, required
-filetype off                  " required
+***** Disable (temporarily) filetype detection
+Even if it's not strictly necessary, disable loading of indent scripts and filetype plugins
 
-set rtp+=~/.vim/bundle/Vundle.vim
+#+BEGIN_SRC sh
+filetype off
+filetype plugin indent off
+#+END_SRC
+
+***** Set runtimepath
+
+#+BEGIN_SRC sh
+set rtp+=~/.config/nvim/bundle/Vundle.vim
+#+END_SRC
+
+***** Start vundle
+
+#+BEGIN_SRC sh
 call vundle#begin()
 #+END_SRC
 
 **** Plugins
 
-We now add some plugins. The first (and mandatory), is Vundle itself:
+We now add some plugins. You can find a nice list of plugins at [[http://vimawesome.com/][vimawesome]]
+
+***** Vundle
+
+The first plugin (and mandatory), is Vundle itself
+
 #+BEGIN_SRC sh
-" let Vundle manage Vundle, required
-Plugin 'VundleVim/Vundle.vim'
+Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 #+END_SRC
+
+***** OneDark
+
+[[https://github.com/joshdick/onedark.vim][onedark.vim]] is a dark Vim color scheme inspired by Atom's One Dark syntax theme
 
 Then we can add here our plugins:
 #+BEGIN_SRC sh
-Plugin 'tpope/vim-speeddating'
 Plugin 'joshdick/onedark.vim'
+#+END_SRC
+
+***** Speeddating
+
+Necessary for vim-orgmode
+
+#+BEGIN_SRC sh
+Plugin 'tpope/vim-speeddating'
+#+END_SRC
+
+
+***** Org-mode
+
+What?! Org-mode in Vim? The plugin aims to bring some of the funcionality of org-mode for Vim.
+
+#+BEGIN_SRC sh
 Plugin 'jceb/vim-orgmode'
+#+END_SRC
+
+***** EasyMotion
+
+Vim motions on speed!
+
+#+BEGIN_SRC sh
+Plugin 'easymotion/vim-easymotion'
 #+END_SRC
 
 **** Finish Vundle
 
 We can now tell we are done with Vundle
 #+BEGIN_SRC sh
-call vundle#end()            " required
-filetype plugin indent on    " required
+call vundle#end()
 #+END_SRC
 
-*** General settings
+**** Reenable file detection
+
+#+BEGIN_SRC sh
+filetype plugin indent on
+#+END_SRC
+
+*** TODO General settings
+
+The following settings came from my old =vimrc=. Still need to clean this code.
+
 **** Views, Backups, Swap, Info and Undo files
 #+BEGIN_SRC sh
 scriptencoding utf-8

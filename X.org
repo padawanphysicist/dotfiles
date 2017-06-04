@@ -1,0 +1,124 @@
+#+TITLE: X configuration
+
+* X init
+
+#+BEGIN_SRC conf :tangle X/.xinitrc :noweb yes :mkdirp yes
+xrdb -merge ~/.Xresources
+exec openbox-session
+#+END_SRC
+
+* X resources
+
+*Xresources* is a user-level configuration dotfile, typically located at ~~/.Xresources~. It can be used to set the configuration parameters for X client applications like:
+- configure terminal preferences (e.g. terminal colors)
+- set DPI, anti-aliasing, hinting and other X font settings
+- change the Xcursor theme
+- theme *XScreenSaver*
+- configure low-level X applications like: ~xorg-xclock~, ~xpdf~, ~xterm~
+
+The file is structured as follows:
+
+#+BEGIN_SRC conf :tangle X/.Xresources :noweb yes :mkdirp yes
+emacs.geometry: 100x40
+
+<<xterm-configuration>>
+<<rofi-configuration>>
+#+END_SRC
+
+** Xterm configuration
+
+~xterm~ is the standard terminal emulator for the X Window System. It is highly configurable and has many useful features.
+
+The first thing I like to change is the default font. Also, I disable bold fonts:
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+XTerm*faceName: xft:Monego
+XTerm*faceSize: 15
+XTerm*renderFont: true
+XTerm*boldMode: false
+#+END_SRC
+
+Since I'm constantly changing the font size, it's interesting to change the font size using the keyboard. I've got a nice solution [[https://blog.rot13.org/2010/03/change-font-size-in-xterm-using-keyboard.html][here]].
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+XTerm.VT100.translations: #override \
+      Meta <Key> minus: smaller-vt-font() \n\
+      Meta <Key> plus: larger-vt-font() \n\
+      Meta <Key> KP_Subtract: smaller-vt-font() \n\
+      Meta <Key> KP_Add: larger-vt-font() \n\
+      Super <Key> minus: smaller-vt-font() \n\
+      Super <Key> plus: larger-vt-font() \n\
+      Super <Key> KP_Subtract: smaller-vt-font() \n\
+      Super <Key> KP_Add: larger-vt-font() \n
+#+END_SRC
+
+The default colors are worth changing too!
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+XTerm*background:#232629
+XTerm*foreground:#cfcfc2
+#+END_SRC
+
+I put some keybindings to copy/paste in the terminal in a way similar to konsole:
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+XTerm*VT100.Translations: #override \
+      Shift Ctrl<Key>V: insert-selection(CLIPBOARD) \n\
+      Shift Ctrl<Key>V: insert-selection(PRIMARY) \n\
+      Shift<Btn1Down>: select-start() \n\
+      Shift<Btn1Motion>: select-extend() \n\
+      Shift<Btn1Up>: select-end(CLIPBOARD)
+XTerm*selectToClipboard: true
+#+END_SRC
+
+Also, I *HATE* the audio bell. I like the visual bell much more:
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+XTerm*visualBell: true
+#+END_SRC
+
+The rest of the options are summarized below:
+#+BEGIN_SRC conf :noweb-ref xterm-configuration
+xterm*dynamicColors: true
+XTerm*metaSendsEscape: true
+XTerm*highlightSelection: true
+XTerm*trimSelection: true
+XTerm*scrollTtyOutput: false
+#+END_SRC
+
+** Rofi configuration
+
+[[https://github.com/davatorium/rofi][Rofi]] is a window switcher, application launcher and dmenu replacement.
+
+#+BEGIN_SRC conf :noweb-ref rofi-configuration
+rofi.terminal:                       termite
+rofi.ssh-client:                     ssh
+rofi.ssh-command:                    {terminal} -e "{ssh-client} {host}"
+rofi.opacity:                        100
+rofi.width:                          50
+rofi.lines:                          8
+rofi.columns:                        1
+rofi.font:                           SFNS Display 18
+rofi.fg:                             #5294E2
+rofi.bg:                             #5d729f
+rofi.fg-active:                      #34405a
+rofi.fg-urgent:                      #34405a
+rofi.hlfg-active:                    #5e73a0
+rofi.hlfg-urgent:                    #5e73a0
+rofi.bg-active:                      #34405a
+rofi.bg-urgent:                      #34405a
+rofi.hlbg-active:                    #5d729f
+rofi.hlbg-urgent:                    #5d729f
+rofi.hlbg:                           #34405a
+rofi.bc:                             #789ee1
+! State:           'bg',     'fg',     'bgalt',  'hlbg',   'hlfg'
+rofi.color-normal: #353944,  #FFFFFF,  #353944,  #5294E2,  #FFFFFF
+!                  'background', 'border'
+rofi.color-window: #353944,      #404552
+rofi.bw:                             10
+rofi.location:                       0
+rofi.padding:                        20
+rofi.levenshtein-sort:               true
+rofi.case-sensitive:                 false
+rofi.fuzzy:                          false
+rofi.line-margin:                    2
+rofi.separator-style:                solid
+rofi.hide-scrollbar:                 true
+rofi.markup-rows:                    false
+rofi.scrollbar-width:                8
+ #+END_SRC

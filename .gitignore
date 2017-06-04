@@ -1,2 +1,12 @@
-*/
 *.bkp
+*~
+ltximg/
+shell/
+git/
+tmux/
+dunst/
+polybar/
+ranger/
+openbox/
+emacs/
+X/

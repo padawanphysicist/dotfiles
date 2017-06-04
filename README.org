@@ -24,26 +24,27 @@ then enter the directory,
 $ cd ~/.dotfiles
 #+END_SRC
 
+tangle the files
+#+begin_src sh
+emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$FILE\"))"
+#+end_src
+
 and link the important files to your =$HOME= directory:
 #+BEGIN_SRC sh
-$ ./bootstrap -i all # This will bootstrap all configuration process
-#+END_SRC
-
-** Selective installation
-
-If you do not wish to install all files, you can select by category. For example, if you need to install only vim configuration, you can issue the command
-#+BEGIN_SRC sh
-$ ./bootstrap -i vim # Bootstrap configuration process for Vim only
+$ stow <folder>
 #+END_SRC
 
 * Configuration files
 
-- [[bash.org]]: Bash configuration file.
-- [[zsh.org][zsh.org]]: Zsh configuration file.
-- [[vim.org]]: Vim configuration file.
-- [[emacs.org]]: Emacs configuration file.
-- [[tmux.org]]: Tmux configuration file.
-- [[git.org]]: Git configuration file.
+- [[dunst.org]]
+- [[emacs.org]]
+- [[git.org]]
+- [[openbox.org]]
+- [[polybar.org]]
+- [[ranger.org]]
+- [[shell.org]]
+- [[tmux.org]]
+- [[X.org]]
 
 * Thanks
 

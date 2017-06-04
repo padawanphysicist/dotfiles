@@ -1,58 +1,113 @@
-#+TITLE: Git configuration
+#+TITLE:  Git configuration
 
 [[https://git-scm.com/][Git]] is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency
 
-** =.gitconfig=
-:PROPERTIES:
-:TANGLE: git/.gitconfig
-:PADLINE: no
-:MKDIRP: yes
-:END:
+Git comes with a tool called ~git config~ that lets you get and set configuration variables that control all aspects of how Git looks and operates. These variables can be stored in three different places:
 
-*** Aliases
+1. ~/etc/gitconfig~ :: Contains values applied to every user on the system and all their repositories. If you pass the option --system to git config, it reads and writes from this file specifically. (Because this is a system configuration file, you would need administrative or superuser privilege to make changes to it.)
+2. ~~/.gitconfig~ or ~~/.config/git/config~ :: Values specific personally to you, the user. You can make Git read and write to this file specifically by passing the --global option, and this affects all of the repositories you work with on your system.
+3. ~config~ file in the Git directory (that is, ~.git/config~) of whatever repository you’re currently using: Specific to that single repository. You can force Git to read from and write to this file with the --local option, but that is in fact the default. (Unsurprisingly, you need to be located somewhere in a Git repository for this option to work properly.)
 
-#+BEGIN_SRC sh
-[alias]
-    gl = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
-    wdiff = diff --color-words --ignore-all-space
-    ldiff = difftool -y -t latex
+Therefore I will use ~~/.config/git/config~ as the configuration file.
+
+#+CAPTION: Source listing for ~~/.config/git/config~.
+#+BEGIN_SRC conf :tangle git/.config/git/config :noweb yes :mkdirp yes
+<<git-config>>
 #+END_SRC
 
-*** Tools
+* Identity
 
-#+BEGIN_SRC sh
+The first thing you should do when you install Git is to set your user name and email address. This is important because every Git commit uses this information, and it’s immutably baked into the commits you start creating:
+
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
+[user]
+    email = victor_santos@fisica.ufc.br
+    name = Victor Santos (vct)
+#+END_SRC
+
+* Editor
+
+Now that your identity is set up, you can configure the default text editor that will be used when Git needs you to type in a message. If not configured, Git uses your system’s default editor.
+
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
 [core]
-    editor = nvim
+    editor = vim
 #+END_SRC
 
-*** LaTeX diff
+* Aliases
 
-#+BEGIN_SRC sh
+Git doesn’t automatically infer your command if you type it in partially. If you don’t want to type the entire text of each of the Git commands, you can easily set up an alias.
+
+** Git log tree
+
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
+[alias]
+    ls = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --branches
+    filelog = log -u
+    logx = log --all --graph --decorate=short --color --format=format:'%C(bold blue)%h%C(reset)+%C(dim black)(%cr)%C(reset)+%C(auto)%d%C(reset)++\n+++       %C(bold black)%an%C(reset)%C(black): %s%C(reset)'
+    vtree = !bash -c '"                                                                             \
+        while IFS=+ read -r hash time branch message; do                                            \
+            timelength=$(echo \"$time\" | sed -r \"s:[^ ][[]([0-9]{1,2}(;[0-9]{1,2})?)?m::g\");     \
+            timelength=$(echo \"16+${#time}-${#timelength}\" | bc);                                 \
+            printf \"%${timelength}s    %s %s %s\n\" \"$time\" \"$hash\" \"$branch\" \"$message\";  \
+        done < <(git logx && echo);"'
+    f = "!git ls-files | grep -i"
+    grep = grep -Ii
+    br = branch
+    wdiff = diff --color-words --ignore-all-space
+    ldiff = difftool -t latex
+    #quick look at all repo
+    loggsa = log --color --date-order --graph --oneline --decorate --simplify-by-decoration --all
+    #quick look at active branch (or refs pointed)
+    loggs  = log --color --date-order --graph --oneline --decorate --simplify-by-decoration
+    #extend look at all repo
+    logga  = log --color --date-order --graph --oneline --decorate --all
+    #extend look at active branch
+    logg   = log --color --date-order --graph --oneline --decorate
+    #Look with date
+    logda  = log --color --date-order --date=local --graph --format=\"%C(auto)%h%Creset %C(blue bold)%ad%Creset %C(auto)%d%Creset %s\" --all
+    logd   = log --color --date-order --date=local --graph --format=\"%C(auto)%h%Creset %C(blue bold)%ad%Creset %C(auto)%d%Creset %s\"        
+    #Look with relative date
+    logdra = log --color --date-order --graph --format=\"%C(auto)%h%Creset %C(blue bold)%ar%Creset %C(auto)%d%Creset %s\" --all
+    logdr = log --color --date-order --graph --format=\"%C(auto)%h%Creset %C(blue bold)%ar%Creset %C(auto)%d%Creset %s\"  
+
+    loga   = log --graph --color --decorate --all
+
+    # For repos without subject body commits (vim repo, git-svn clones)
+    logt  = log --graph --color --format=\"%C(auto)%h %d %<|(100,trunc) %s\"
+    logta  = log --graph --color --format=\"%C(auto)%h %d %<|(100,trunc) %s\" --all        
+    logtsa = log --graph --color --format=\"%C(auto)%h %d %<|(100,trunc) %s\" --all --simplify-by-decoration 
+#+END_SRC
+
+* LaTeX diff
+
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
+[difftool]
+        prompt = false
 [difftool.latex]
     cmd = ldiff "$LOCAL" "$REMOTE" "$MERGED"
 #+END_SRC
-    
-*** Identity
 
-#+BEGIN_SRC sh
-[user]
-    email = victor_santos@fisica.ufc.br
-    name = Victor Santos
-#+END_SRC
+* GUI
+** Color UI
 
-*** Color UI
-
-#+BEGIN_SRC sh
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
 [color]
     ui = true
 #+END_SRC
 
-*** GUI
+** Add options for rebasing in git gui
 
-**** Add options for rebasing in git gui
-
-#+BEGIN_SRC sh
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
 [guitool "Rebase interactive"]
    cmd = EDITOR=ecw git rebase -i $REVISION
    revprompt = yes
+#+END_SRC
+
+** Configure Grep
+
+#+BEGIN_SRC conf :noweb-ref git-config :noweb-sep "\n"
+[grep]
+	extendRegexp = true
+	lineNumber = true
 #+END_SRC

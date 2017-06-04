@@ -1,538 +1,111 @@
 #+TITLE: Emacs configuration
 
-** =.spacemacs=
-*** Configuration layers
+[[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
-Example of useful layers you may want to use right away. Uncomment some layer names and press =<SPC f e R>= (Vim style) or =<M-m f e R>= (Emacs style) to install them.
+I use it through [[http://spacemacs.org/][Spacemacs]], a sophisticated and polished set-up focused on ergonomics, mnemonics and consistency.
 
-#+NAME: dotspacemacs-configuration-layers
-#+BEGIN_SRC emacs-lisp
-helm
-(auto-completion :variables auto-completion-private-snippets-directory "~/.snippets")
-better-defaults
-(c-c++ :variables c-c++-default-mode-for-headers 'c++-mode)
-(colors :variables colors-colorize-identifiers 'all)
-emacs-lisp
-deft
-git
-haskell
-html
-latex
-markdown
-(org :variables org-enable-reveal-js-support t)
-pdf-tools
-(python :variables python-sort-imports-on-save t)
-(spell-checking :variables spell-checking-enable-auto-dictionary t)
-syntax-checking
-version-control
+The first thing to do is to install Spacemacs. If you don't have Babel configured, execute this block of code to enable shell commands to be executed:
+
+#+BEGIN_SRC emacs-lisp :results silent
+(org-babel-do-load-languages 'org-babel-load-languages '((shell . t)))
 #+END_SRC
 
-*** Additional packages
-
-List of additional packages that will be installed without being wrapped in a layer. If you need some configuration for these packages, then consider creating a layer. You can also put the configuration in `dotspacemacs/user-config'.
-
-#+NAME: dotspacemacs-additional-packages
-#+BEGIN_SRC emacs-lisp
-cdlatex
-spaceline
-deft
+#+BEGIN_SRC sh :results silent
+mkdir -p ~/.dotfiles/emacs
+git clone https://github.com/syl20bnr/spacemacs ~/.dotfiles/emacs/.emacs.d
 #+END_SRC
 
-*** Frozen packages
+The ~~/.spacemacs~ file is your main starting point for configuring Spacemacs. If you don’t have this file you can install a template pressing ~SPC : dotspacemacs/install RET~ in Spacemacs, where ~SPC~ is space and ~RET~ is the enter key. At any time you can press ~SPC f e d~ to edit this file.
 
-A list of packages that cannot be updated.
+The template comes with many variables that you can customize and use to set things like font sizes and window preferences. Once you are done editing, save the file and either press ~SPC f e R~ in the file to reload it or just restart Spacemacs.
 
-#+NAME: dotspacemacs-frozen-packages
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
+Some parts of this file are more important than others:
 
-*** Excluded packages
-
-A list of packages that will not be installed and loaded.
-
-#+NAME: dotspacemacs-excluded-packages
-#+BEGIN_SRC emacs-lisp
-org-bullets
-#+END_SRC
-
-*** User init
-
-Initialization function for user code. It is called immediately after `dotspacemacs/init', before layer configuration executes.
-
-This function is mostly useful for variables that need to be set before packages are loaded. If you are unsure, you should try in setting them in `dotspacemacs/user-config' first.
-
-#+NAME: dotspacemacs-user-init
-#+BEGIN_SRC emacs-lisp
-#+END_SRC
-
-*** User config
-
-Configuration function for user code. This function is called at the very end of Spacemacs initialization after layers configuration.
-
-This is the place where most of your configurations should be done. Unless it is explicitly specified that a variable should be set before a package is loaded, you should place your code here.
-
-**** General configuration
-
-This section contains configuration which is not related to any specific major mode.
-
-***** User-defined elisp directory
-
-Add custom user elisp code directory to emacs' =PATH=
-
-****** Define here the directory
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(setq custom-elisp "~/.elisp/")
-#+END_SRC
-
-****** Add subdirectories to =PATH=
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'load-path custom-elisp)
-
-(let ((default-directory custom-elisp))
-    (normal-top-level-add-subdirs-to-load-path))
-#+END_SRC
-
-***** Timestamp
-
-Sometimes it's nice to have a timestamp in your files
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(setq
-  time-stamp-active t
-  time-stamp-time-zone "UTC"
-  time-stamp-format "%:y%02m%02d%02H%02M%02S"
-  time-stamp-pattern "10/MODIFIED: %%$")
-(add-hook 'before-save-hook 'time-stamp) ; update when saving
-#+END_SRC
-
-***** Abbreviations
-
-Nice abbreviations for people like me who forget sometimes and keep pressing Shift key while typing.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(eval-after-load 'evil-ex '(evil-ex-define-cmd "W[rite]" 'save-buffer))
-(eval-after-load 'evil-ex '(evil-ex-define-cmd "Wq" 'evil-save-and-close))
-(eval-after-load 'evil-ex '(evil-ex-define-cmd "wQ" 'evil-save-and-close))
-(eval-after-load 'evil-ex '(evil-ex-define-cmd "WQ" 'evil-save-and-close))
-#+END_SRC
-
-***** Heartbeat cursor
-
-I really liked [[http://stackoverflow.com/questions/13625080/looking-forward-a-way-to-make-cursor-blinks-like-a-heartbeat-in-emacs][this]] when I found it, then I took the code as a library, so I could customize it.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(use-package heartbeat-cursor)
-(heartbeat-cursor-mode)
-#+END_SRC
-
-***** Powerline
-
-The default old spacemacs modeline was moved to a separate project, [[https://github.com/TheBB/spaceline][spaceline]], and therefore you must include it separately:
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(require 'spaceline-config)
-(spaceline-spacemacs-theme)
-(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-(setq powerline-default-separator 'wave)
-(spaceline-compile)
-#+END_SRC
-
-***** Enable visual line mode
-
-Enable visual line mode for org-modes only.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
-#+END_SRC
-
-***** Fringe indicators
-
-Fringe indicators for visual line mode
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(setq visual-line-fringe-indicators
-    '(left-curly-arrow right-curly-arrow))
-#+END_SRC
-
-***** Navigation
-
-Fixing visual lines navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down operate in screen lines instead of logical lines, both in normal state and visual mode.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(define-key evil-normal-state-map "j" 'evil-next-visual-line)
-(define-key evil-normal-state-map (kbd "<down>" ) 'evil-next-visual-line)
-(define-key evil-normal-state-map "k" 'evil-previous-visual-line)
-(define-key evil-normal-state-map (kbd "<up>" ) 'evil-previous-visual-line)
-(define-key evil-visual-state-map "j" 'evil-next-visual-line)
-(define-key evil-visual-state-map (kbd "<down>" ) 'evil-next-visual-line)
-(define-key evil-visual-state-map "k" 'evil-previous-visual-line)
-(define-key evil-visual-state-map (kbd "<up>" ) 'evil-previous-visual-line)
-#+END_SRC
-
-***** Copy/Paste in terminal
-
-Enable clipboard in emacs when running in terminal, as a client.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(defun copy-to-clipboard ()
-  "Copies selection to x-clipboard."
-  (interactive)
-  (if (display-graphic-p)
-      (progn
-        (message "Yanked region to x-clipboard!")
-        (call-interactively 'clipboard-kill-ring-save)
-        )
-    (if (region-active-p)
-        (progn
-          (shell-command-on-region (region-beginning) (region-end) "xsel -i -b")
-          (message "Yanked region to clipboard!")
-          (deactivate-mark))
-      (message "No region active; can't yank to clipboard!"))))
-
-(defun paste-from-clipboard ()
-  "Pastes from x-clipboard."
-  (interactive)
-  (if (display-graphic-p)
-      (progn
-        (clipboard-yank)
-        (message "graphics active")
-        )
-    (insert (shell-command-to-string "xsel -o -b"))
-    )
-  )
-(spacemacs/set-leader-keys "oy" 'copy-to-clipboard)
-(spacemacs/set-leader-keys "op" 'paste-from-clipboard)
-#+END_SRC
-
-**** Python configuration
-
-Python programming setup.
-
-***** Coconut mode
-
-[[http://coconut-lang.org/][Coconut]] is functional programming language that compiles to Python. Since all valid Python is valid Coconut, using Coconut will only extend and enhance what you're already capable of in Python.
-
-#+NAME: general-configuration
-#+BEGIN_SRC emacs-lisp
-(use-package coconut-mode)
-#+END_SRC
-
-**** Org-mode configuration
-
-[[http://orgmode.org/][Org mode]] is for keeping notes, maintaining TODO lists, planning projects, and authoring documents with a fast and effective plain-text system.
-
-Its configuration comprises most of my emacs configuration (Since it is the main reason I use Emacs actually); therefore it is sane to keep it structured in different sections.
-
-***** Load packages
-
-We load the necessary packages for the proper functioning of org-mode.
-
-#+NAME: org-packages
-#+BEGIN_SRC emacs-lisp
-(require 'ox)       ;; Export backends
-(require 'ox-latex) ;; LaTeX export backend
-(require 'ob)       ;; Babel
-#+END_SRC
-
-***** General configuration
-****** Adjust size of figures in buffer
-
-Fix the size for images shown in buffer, to avoid too large pictures.
-
-This set the size to a third of the window width.
-
-#+NAME: org-general
-#+BEGIN_SRC emacs-lisp
-(setq org-image-actual-width (/ (display-pixel-width) 3))
-#+END_SRC
-
-****** Font settings for tags
-
-Usually tags are shown with the same color as the header, which turn them
-hard to spot.
-
-#+NAME: org-general
-#+BEGIN_SRC emacs-lisp
-(custom-set-faces
-  '(org-tag ((t (:foreground "DarkOrange3" :background "gray13" :box t :height 100)))))
-#+END_SRC
-
-****** Clean view
-******* Enable visual line mode
-
-#+NAME: org-general
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-mode-hook 'turn-on-visual-line-mode)
-#+END_SRC
-
-******* Indentation
-
-Org's default outline with stars and no indents can become too cluttered for short documents. For book-like long documents, the effect is not as noticeable. Org provides an alternate indentation scheme: it uses only one star and indents text to line with the heading.
-
-#+NAME: org-general
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-mode-hook (lambda () (org-indent-mode t)) t)
-#+END_SRC
-
-***** Babel
-
-[[http://orgmode.org/worg/org-contrib/babel/][Babel]] is Org-mode's ability to execute source code within Org-mode documents.
-
-Through extending Org-mode with several features for editing exporting and executing source code Babel turns Org-mode into a tool for both /Literate Programming/ and /Reproducible Research/.
-
-#+NAME: org-babel
-#+BEGIN_SRC emacs-lisp
-(org-babel-do-load-languages 'org-babel-load-languages '(
-  (C . t)
-  (emacs-lisp . t)
-  (fortran . t)
-  (gnuplot . t)
-  (haskell . t)
-  (python . t)
-  (sed . t)
-  (sh . t)))
-#+END_SRC
-
-***** LaTeX configuration
-
-This section take care of LaTeX formatting/previewing in org-mode.
-
-****** Fragment preview folder location
-
-By default, org-mode keeps image files of the formula previews in a subdirectory called `ltxpng' in the directory where the org file resides.
-
-I find this annoying, and I like to keep them in the =/tmp= folder, which is wiped after reboot
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq org-latex-preview-ltxpng-directory "/tmp/")
-#+END_SRC
-
-****** Fragment preview size
-
-I find the default preview size of org-mode too small.
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.7))
-#+END_SRC
-
-****** Syntax highlighting
-
-Unfortunately org-mode does not highlight LaTeX syntax nicely, so I have to handle by hand
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(font-lock-add-keywords 'org-mode
-  '(("\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
-     (1 'font-lock-keyword-face)
-     (2 'font-lock-function-name-face))
-    ("\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
-     (1 'font-lock-keyword-face)
-     (2 'font-lock-constant-face))
-    ("\\(\\\\textrm\\|\\\\frac\\|\\\\mathrm\\)"
-     (1 'font-lock-keyword-face))
-))
-#+END_SRC
-
-****** Quick insertion of LaTeX environments
-
-Speedup insertion of LaTeX environments with [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/][CDLaTeX]]:
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-#+END_SRC
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq cdlatex-env-alist '(
-  ("vct-eqn" "\\begin{equation}\n?\n\\end{equation}\n" nil)
-  ("vct-alg" "\\begin{align}\n?\n\\end{align}\n" nil)
-  ("vct-pmatrix" "\\begin{pmatrix}\n?\n\\end{pmatrix}\n" nil)
-  ("vct-bmatrix" "\\begin{bmatrix}\n?\n\\end{bmatrix}\n" nil)))
-(setq cdlatex-command-alist '(
-  ("equation" "Insert non-labeled equation" "" cdlatex-environment ("vct-eqn") t nil)
-  ("equat" "Insert non-labeled equation" "" cdlatex-environment ("vct-eqn") t nil)
-  ("align" "Insert non-labeled align" "" cdlatex-environment ("vct-alg") t nil)
-  ("alig" "Insert non-labeled align" "" cdlatex-environment ("vct-alg") t nil)
-  ("pmatrix" "Insert pmatrix environment" "" cdlatex-environment ("vct-pmatrix") t nil)
-  ("bmatrix" "Insert bmatrix environment" "" cdlatex-environment ("vct-bmatrix") t nil)))
-#+END_SRC
-
-****** PDF exporting
-
-Uses latexmk for exporting
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq org-latex-pdf-process '("latexmk -pdf %f"))
-#+END_SRC
-
-****** Custom export classes
-
-For this we need to load some libraries first
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(require 'ox)
-(require 'ox-extra)
-(require 'ox-latex)
-
-;; Sections tagged with 'ignore' are... ignored.
-(ox-extras-activate '(ignore-headlines))
-#+END_SRC
-
-******* org-report
-
-Class for reports (uses abntex2)
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq org-export-latex-listings t)
-(add-to-list 'org-latex-classes
-          '("org-report"
-             "\\documentclass{abntex2}
-             [DEFAULT-PACKAGES]
-             [PACKAGES]
-             [EXTRA]"
-             ("\\chapter{%s}" . "\\chapter*{%s}")
-             ("\\section{%s}" . "\\section*{%s}")
-             ("\\subsection{%s}" . "\\subsection*{%s}")
-             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-#+END_SRC
-
-******* org-preprint
-
-This is a custom class for general-purpose LaTeX exporting.
-
-#+NAME: org-latex
-#+BEGIN_SRC emacs-lisp
-(setq org-export-latex-listings t)
-(add-to-list 'org-latex-classes
-          '("org-preprint"
-             "\\documentclass{preprint}
-             [DEFAULT-PACKAGES]
-             [PACKAGES]
-             [EXTRA]"
-             ("\\section{%s}" . "\\section*{%s}")
-             ("\\subsection{%s}" . "\\subsection*{%s}")
-             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-#+END_SRC
-
-***** Source code structure
-
-#+NAME: org-mode-settings
-#+BEGIN_SRC emacs-lisp
-(with-eval-after-load 'org
-  ;;===========================================================================80
-  ;; Package including
-  ;;===========================================================================80
-  <<org-packages>>
-
-  ;;===========================================================================80
-  ;; General configuration
-  ;;===========================================================================80
-  <<org-general>>
-
-  ;;===========================================================================80
-  ;; Org babel
-  ;;===========================================================================80
-  <<org-babel>>
-
-  ;;===========================================================================80
-  ;; LaTeX configuration
-  ;;===========================================================================80
-  <<org-latex>>
-  )
-#+END_SRC
-
-**** Annotations configuration
-***** Deft
-
-[[jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by [[notational.net][Notational Velocity]]. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
-
-#+NAME: annotations-deft
-#+BEGIN_SRC emacs-lisp
-(require 'deft)
-
-(setq deft-default-extension "org")
-(setq deft-extensions '("org"))
-(setq deft-directory "~/1.Working/Wiki")
-(setq deft-recursive t)
-(setq deft-use-filename-as-title nil)
-(setq deft-use-filter-string-for-filename t)
-(setq deft-file-naming-rules '((noslash . "-")
-                               (nospace . "-")
-                               (case-fn . downcase)))
-(setq deft-text-mode 'org-mode)
-#+END_SRC
-
-***** Org-Wiki
-
-[[https://github.com/caiorss/org-wiki][Org Wiki]] is an org mode extension that provides tools to manage and build a desktop wiki.
-
-#+NAME: org-wiki
-#+BEGIN_SRC emacs-lisp
-;; Load package
-(use-package org-wiki)
-
-;; Set root folder of the Wiki
-(setq org-wiki-location "~/1.Working/Wiki/")
-#+END_SRC
-
-For pasting images in emacs. Requires [[https://github.com/caiorss/clip.jar][Clip.jar]].
-#+NAME: org-wiki
-#+BEGIN_SRC emacs-lisp
-;; Set folder of Clip.jar
-(setq org-wiki-clip-jar-path "~/.bin/Clip.jar")
-#+END_SRC
-***** Structure
-
-#+NAME: annotations-settings
-#+BEGIN_SRC emacs-lisp
-<<annotations-deft>>
-<<org-wiki>>
-#+END_SRC
-
-**** Source code structure
-
-Since the user configuration can grow quite a lot, I think it's better to
-keep it organized on its own structure.
-
-#+NAME: dotspacemacs-user-config
-#+BEGIN_SRC emacs-lisp
-<<general-configuration>>
-<<python-settings>>
-<<org-mode-settings>>
-<<annotations-settings>>
-#+END_SRC
-
-*** Source code structure
-
-This is the only section which might have major rewritings, since it is based on the default file generated by spacemacs, and may change across different versions.
-
-#+BEGIN_SRC emacs-lisp :noweb tangle :tangle emacs/.spacemacs
+#+BEGIN_SRC emacs-lisp :tangle emacs/.spacemacs :noweb yes :mkdirp yes
 ;; -*- mode: emacs-lisp -*-
+;; vim: set filetype=lisp foldenable foldmethod=marker:
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
+<<dotspacemacs-layers>>
+<<dotspacemacs-init>>
+<<dotspacemacs-user-init>>
+<<dotspacemacs-user-config>>
+
+;; EOF
+#+END_SRC
+
+* Layers
+
+Configuration Layers declaration. You should not put any user code in this function besides modifying the variable values.
+ 
+** Configuration Layers
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref configuration-layers :noweb-sep "\n"
+themes-megapack
+(spell-checking :variables 
+    spell-checking-enable-by-default nil ;; Disable spelling by default
+    spell-checking-enable-auto-dictionary t ;; Try autodetect language 
+    enable-flyspell-auto-completion nil)
+(org :variables 
+    org-enable-reveal-js-support t)
+bibtex
+deft
+pdf-tools
+(colors :variables
+    colors-enable-nyan-cat-progress-bar t)
+(latex :variables 
+    latex-build-command "LatexMk" 
+    latex-enable-folding t)
+git
+python
+(auto-completion :variables
+    auto-completion-return-key-behavior nil
+    auto-completion-tab-key-behavior nil
+    auto-completion-complete-with-key-sequence "jk"
+    auto-completion-private-snippets-directory "~/.snippets"
+    auto-completion-enable-snippets-in-popup t
+    auto-completion-complete-with-key-sequence-delay 0.1)
+(ruby :variables 
+    ruby-enable-enh-ruby-mode t)
+helm
+(syntax-checking :variables 
+    syntax-checking-enable-by-default nil)
+(shell :variables 
+    shell-default-shell 'ansi-term 
+    shell-default-term-shell "/bin/bash")
+version-control
+html
+ess
+emacs-lisp
+(scheme :variables 
+    geiser-active-implementations '(chicken) 
+    geiser-scheme-implementation 'chicken)
+#+END_SRC
+
+** Additional Packages
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref additional-packages :noweb-sep "\n\n"
+cdlatex
+regex-tool
+yasnippet-snippets
+sed-mode
+#+END_SRC
+
+** Excluded Packages
+ 
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref excluded-packages :noweb-sep "\n\n"
+org-present
+org-projectile
+org-pomodoro
+toc-org
+org-brain
+ox-reveal
+#+END_SRC
+
+** dotspacemacs/layers
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref dotspacemacs-layers :noweb-sep "\n\n"
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -559,29 +132,29 @@ values."
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
    dotspacemacs-configuration-layer-path '()
-   ;; List of configuration layers to load.
+
+   ; List of configuration layers to load. {{{1
    dotspacemacs-configuration-layers
    '(
-     <<dotspacemacs-configuration-layers>>
-     )
+      <<configuration-layers>>
+    )
+     ; 1}}}
+
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages
+   dotspacemacs-additional-packages 
    '(
-     <<dotspacemacs-additional-packages>>
-   )
+      <<additional-packages>>
+    )
    ;; A list of packages that cannot be updated.
-   dotspacemacs-frozen-packages
-   '(
-     <<dotspacemacs-frozen-packages>>
-   )
+   dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages
+   dotspacemacs-excluded-packages 
    '(
-     <<dotspacemacs-excluded-packages>>
-   )
+      <<excluded-packages>>
+    )
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -590,12 +163,18 @@ values."
    ;; them if they become unused. `all' installs *all* packages supported by
    ;; Spacemacs and never uninstall them. (default is `used-only')
    dotspacemacs-install-packages 'used-only))
+#+END_SRC
 
+* Init
+
+This function is called at the very startup of spacemacs initialization before layers configuration. you should not put any user code in there besides modifying the variable values.
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref dotspacemacs-init :noweb-sep "\n\n"
 (defun dotspacemacs/init ()
   "Initialization function.
-This function is called at the very startup of Spacemacs initialization
+this function is called at the very startup of spacemacs initialization
 before layers configuration.
-You should not put any user code in there besides modifying the variable
+you should not put any user code in there besides modifying the variable
 values."
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
@@ -649,14 +228,14 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '(spacemacs-dark spacemacs-light)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Inconsolata"
-                               :size 14
+   ;dotspacemacs-default-font '("Source Code Pro"
+   dotspacemacs-default-font '("Monego"
+                               :size 15
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -740,7 +319,7 @@ values."
    ;; If non nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
-   dotspacemacs-loading-progress-bar t
+   dotspacemacs-loading-progress-bar nil
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
    ;; (Emacs 24.4+ only)
    dotspacemacs-fullscreen-at-startup nil
@@ -764,18 +343,29 @@ values."
    ;; If non nil show the color guide hint for transient state keys. (default t)
    dotspacemacs-show-transient-state-color-guide t
    ;; If non nil unicode symbols are displayed in the mode line. (default t)
-   dotspacemacs-mode-line-unicode-symbols t
+   dotspacemacs-mode-line-unicode-symbols nil
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
    dotspacemacs-smooth-scrolling t
-   ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
-   ;; derivatives. If set to `relative', also turns on relative line numbers.
+   ;; Control line numbers activation.
+   ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
+   ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
+   ;; This variable can also be set to a property list for finer control:
+   ;; '(:relative nil
+   ;;   :disabled-for-modes dired-mode
+   ;;                       doc-view-mode
+   ;;                       markdown-mode
+   ;;                       org-mode
+   ;;                       pdf-view-mode
+   ;;                       text-mode
+   ;;   :size-limit-kb 1000)
    ;; (default nil)
    dotspacemacs-line-numbers nil
+
    ;; Code folding method. Possible values are `evil' and `origami'.
    ;; (default 'evil)
-   dotspacemacs-folding-method 'evil
+   dotspacemacs-folding-method 'origami
    ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode nil
@@ -803,9 +393,12 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
-   ))
+   dotspacemacs-whitespace-cleanup nil))
+#+END_SRC
 
+* User Init
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref dotspacemacs-user-init :noweb-sep "\n\n"
 (defun dotspacemacs/user-init ()
   "Initialization function for user code.
 It is called immediately after `dotspacemacs/init', before layer configuration
@@ -813,9 +406,14 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  <<dotspacemacs-user-init>>
   )
+#+END_SRC
 
+* User Config
+
+Configuration function for user code. This function is called at the very end of Spacemacs initialization after layers configuration. This is the place where most of your configurations should be done. Unless it is explicitly specified that a variable should be set before a package is loaded, you should place your code here. The function is structured as follows:
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref dotspacemacs-user-config :noweb-sep "\n\n"
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
@@ -823,41 +421,445 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  <<dotspacemacs-user-config>>
+  <<general-configuration>>
+
+  (with-eval-after-load 'org
+    <<org-mode-configuration>>
   )
-
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
+  (with-eval-after-load 'org-agenda
+    <<org-agenda-configuration>>
+  )
+)
 #+END_SRC
 
-# vim:set nowrap:
-** Snippets
-:PROPERTIES:
-:MKDIRP: yes
-:END:
-*** mu4e-compose-mode
-**** Informal mail in portuguese
+** General configuration
 
-#+BEGIN_SRC emacs-lisp :noweb tangle :tangle emacs/.snippets/mu4e-compose-mode/portugues
-#key: portugues
-#name: Modelo de e-mail simples, informal, em português
-#contributor: Victor Santos <victor_santos@fisica.ufc.br>
-# --
-#+OPTIONS: toc:nil ^:nil
+This section holds configuration which are common to most major modes
 
-att,
-Victor.
+*** Make tooltips appear in a pop-up window
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n\n"
+(tooltip-mode t)
 #+END_SRC
 
-**** Informal mail in english
+*** Spaceline config
 
-#+BEGIN_SRC emacs-lisp :noweb tangle :tangle emacs/.snippets/mu4e-compose-mode/english
-#key: english
-#name: Template for simple, informal email in english
-#contributor: Victor Santos <victor_santos@fisica.ufc.br>
-# --
-#+OPTIONS: toc:nil ^:nil
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration
+(use-package spaceline-config
+    :config
+    (spaceline-spacemacs-theme)
+    (setq powerline-default-separator 'wave)
+    (spaceline-compile))
+#+END_SRC
 
-Cheers,
-Victor.
+*** Copy/Paste in terminal
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n\n"
+(defun copy-to-clipboard ()
+  "Copies selection to x-clipboard."
+  (interactive)
+  (if (display-graphic-p)
+      (progn
+        (message "Yanked region to x-clipboard!")
+        (call-interactively 'clipboard-kill-ring-save)
+        )
+    (if (region-active-p)
+        (progn
+          (shell-command-on-region (region-beginning) (region-end) "xsel -i -b")
+          (message "Yanked region to clipboard!")
+          (deactivate-mark))
+      (message "No region active; can't yank to clipboard!"))))
+
+(defun paste-from-clipboard ()
+  "Pastes from x-clipboard."
+  (interactive)
+  (if (display-graphic-p)
+      (progn
+        (clipboard-yank)
+        (message "graphics active")
+        )
+    (insert (shell-command-to-string "xsel -o -b"))
+    )
+  )
+(spacemacs/declare-prefix "o" "user-prefix")
+(spacemacs/set-leader-keys "oy" 'copy-to-clipboard)
+(spacemacs/set-leader-keys "op" 'paste-from-clipboard)
+#+END_SRC
+
+*** Wiki configuration
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n\n"
+(spacemacs/declare-prefix "aow" "wiki")
+(spacemacs/set-leader-keys "aoww" 'deft)
+(setq deft-directory "~/.wiki")
+(setq deft-default-extension "org")
+(setq deft-extensions '("org"))
+(setq deft-recursive t)
+(setq deft-use-filename-as-title nil)
+(setq deft-use-filter-string-for-filename nil)
+(setq deft-file-naming-rules '((noslash . "-")
+                               (nospace . "-")
+                               (case-fn . downcase)))
+(setq deft-text-mode 'org-mode)
+(setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
+(setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
+#+END_SRC
+
+*** Visual line navigation
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n"
+(global-visual-line-mode t)
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+;; Make evil-mode up/down operate in screen lines instead of logical lines
+(define-key evil-normal-state-map (kbd "<down>") 'evil-next-visual-line)
+(define-key evil-normal-state-map (kbd "<up>") 'evil-previous-visual-line)
+#+END_SRC
+
+Since emacs 26 has native support to line numbering, we enable it:
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n"
+(setq-default display-line-numbers-type 'visual
+              display-line-numbers-current-absolute t
+              display-line-numbers-width 4
+              display-line-numbers-widen t)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+#+END_SRC
+
+*** Misc
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n\n"
+(defun vct/quick-calc ()
+  "Quickly compute mathematical expression and return the result within current buffer."
+  (interactive "p")
+  (let ((expr (read-from-minibuffer "Calc: ")))
+    (insert (calc-eval expr))))
+
+(use-package evil-ex
+  :config
+  (evil-ex-define-cmd "W[rite]" 'save-buffer)
+  (evil-ex-define-cmd "Wq" 'evil-save-and-close)
+  (evil-ex-define-cmd "wQ" 'evil-save-and-close)
+  (evil-ex-define-cmd "WQ" 'evil-save-and-close))
+#+END_SRC
+
+** Org mode configuration
+
+Org configuration is the largest part of my spacemacs configuration (Probably because I use emacs mainly because of it!)
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-mode-configuration :noweb-sep "\n\n"
+    ;; Babel settings
+    (setq org-src-preserve-indentation t)
+    (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (lisp . t)
+        (python . t)
+        (gnuplot . t)
+        (R . t)
+        (ruby . t)
+        (C . t)
+        (makefile . t)
+        (shell . t)
+        (sql . t)))
+    ;;<<easy-templates>>
+    (require 'org-tempo)
+    (setq org-babel-uppercase-example-markers t)
+    (add-to-list 'org-structure-template-alist '("r" . "SRC R :session :results output"))
+
+    (setq-default org-display-custom-times t)
+    (setq org-time-stamp-custom-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
+
+    ; Automatic update of time-stamps {{{
+    (setq time-stamp-active t)
+    (setq time-stamp-format "<%:y-%02m-%02d %3a %02H:%02M>")
+    (setq time-stamp-pattern "10/^#\\+MODIFIED: %%$")
+    (add-hook 'before-save-hook 'time-stamp) ; Update timestamp on saving
+    ; }}}
+
+    (setq org-cycle-emulate-tab 'white)
+
+    (setq org-tags-column 0)
+
+    (custom-set-faces
+      '(org-tag ((t (:background "orange" :foreground "black" :box t)))))
+    (defun my/org-mode-hook ()
+      "Stop the org-level headers from increasing in height relative to the other text."
+      (dolist (face '(org-level-1
+                      org-level-2
+                      org-level-3
+                      org-level-4
+                      org-level-5))
+        (set-face-attribute face nil :weight 'normal :height 1.0)))
+
+    (add-hook 'org-mode-hook 'my/org-mode-hook)
+    
+    ;(add-to-list 'org-latex-default-packages-alist
+    ;             '("" "siunitx" t))
+    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+    ;; Fix width of inline images 
+    (setq org-image-actual-width 400)
+
+    ; Fix numbering in LaTeX preview {{{2
+    ;; In org-mode we can use LaTeX equations, and toggle an overlay that shows
+    ;; what the rendered equation will look like. However, each fragment is
+    ;; created in isolation, meaning that numbering is almost always wrong, and
+    ;; typically with each numbered equation starting with =(1)=. This hack,
+    ;; stolen from
+    ;; [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][John
+    ;; Kitchin]], solves this in a nice way for my purposes.
+    (defun org-renumber-environment (orig-func &rest args)
+      "Improve equation numbering"
+      (let ((results '())
+            (counter -1)
+            (numberp))
+        (setq results (loop for (begin .  env) in
+                            (org-element-map (org-element-parse-buffer) 'latex-environment
+                              (lambda (env)
+                                (cons
+                                 (org-element-property :begin env)
+                                 (org-element-property :value env))))
+                            collect
+                            (cond
+                             ((and (string-match "\\\\begin{equation}" env)
+                                   (not (string-match "\\\\tag{" env)))
+                              (incf counter)
+                              (cons begin counter))
+                             ((string-match "\\\\begin{align}" env)
+                              (prog2
+                                  (incf counter)
+                                  (cons begin counter)
+                                (with-temp-buffer
+                                  (insert env)
+                                  (goto-char (point-min))
+                                  ;; \\ is used for a new line. Each one leads to a number
+                                  (incf counter (count-matches "\\\\$"))
+                                  ;; unless there are nonumbers.
+                                  (goto-char (point-min))
+                                  (decf counter (count-matches "\\nonumber")))))
+                             (t
+                              (cons begin nil)))))
+        (when (setq numberp (cdr (assoc (point) results)))
+          (setf (car args)
+                (concat
+                 (format "\\setcounter{equation}{%s}\n" numberp)
+                 (car args)))))
+      (apply orig-func args))
+
+    (advice-add 'org-create-formula-image :around #'org-renumber-environment)
+    (setq org-latex-prefer-user-labels t)
+    ; 2}}}
+    ; Automatic LaTeX preview numbering {{{2
+    ; This solution (found
+    ; [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]])
+    ; enables org-mode LaTeX preview images when the cursor is over the
+    ; equation.
+    (defvar kk/org-latex-fragment-last nil
+        "Holds last fragment/environment you were on.")
+    
+      (defun kk/org-in-latex-fragment-p ()
+        "Return the point where the latex fragment begins, if inside
+      a latex fragment. Else return false"
+        (let* ((el (org-element-context))
+               (el-type (car el)))
+          (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+              (org-element-property :begin el))))
+    
+      (defun kk/org-latex-fragment-toggle ()
+        "Toggle a latex fragment image "
+        (and (eq 'org-mode major-mode)
+    	 (let ((begin (kk/org-in-latex-fragment-p)))
+               (cond
+                ;; were on a fragment and now on a new fragment
+                ((and
+                  ;; fragment we were on
+                  kk/org-latex-fragment-last
+                  ;; and are on a fragment now
+                  begin
+    
+                  ;; but not on the last one this is a little tricky. as you edit the
+                  ;; fragment, it is not equal to the last one. We use the begin
+                  ;; property which is less likely to change for the comparison.
+                  (not (and kk/org-latex-fragment-last
+    			(= begin
+    			   kk/org-latex-fragment-last))))
+                 ;; go back to last one and put image back, provided there is still a fragment there
+                 (save-excursion
+                   (goto-char kk/org-latex-fragment-last)
+                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
+    
+                   ;; now remove current image
+                   (goto-char begin)
+                   (let ((ov (loop for ov in (org--list-latex-overlays)
+                                   if
+                                   (and
+    				(<= (overlay-start ov) (point))
+    				(>= (overlay-end ov) (point)))
+                                   return ov)))
+    		 (when ov
+                       (delete-overlay ov)))
+                   ;; and save new fragment
+                   (setq kk/org-latex-fragment-last begin)))
+    
+                ;; were on a fragment and now are not on a fragment
+                ((and
+                  ;; not on a fragment now
+                  (not begin)
+                  ;; but we were on one
+                  kk/org-latex-fragment-last)
+                 ;; put image back on, provided that there is still a fragment here.
+                 (save-excursion
+                   (goto-char kk/org-latex-fragment-last)
+                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+    
+                 ;; unset last fragment
+                 (setq kk/org-latex-fragment-last nil))
+    
+                ;; were not on a fragment, and now are
+                ((and
+                  ;; we were not one one
+                  (not kk/org-latex-fragment-last)
+                  ;; but now we are
+                  begin)
+                 ;; remove image
+                 (save-excursion
+                   (goto-char begin)
+                   (let ((ov (loop for ov in (org--list-latex-overlays)
+                                   if
+                                   (and
+    				(<= (overlay-start ov) (point))
+    				(>= (overlay-end ov) (point)))
+                                   return ov)))
+    		 (when ov
+                       (delete-overlay ov))))
+                 (setq kk/org-latex-fragment-last begin))))))
+    
+    (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
+    ; 2}}}
+    ; Quick insertion of LaTeX environments {{{2
+    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+    (setq cdlatex-math-symbol-alist '((?m ("\\mu" "\\mathrm{?}"))))
+    (define-key evil-normal-state-map (kbd ", e q") 'org-ref-helm-insert-ref-link)
+    (setq cdlatex-env-alist '(
+       ("eqn" "\\begin{equation}\n?\n\\end{equation}" nil)  ;; Numbered equation
+       ("eqnn" "\\begin{equation*}\n?\n\\end{equation*}" nil) ;; Non-numbered equation
+       ("alg" "\\begin{align}\n?\n\\end{align}" nil)
+       ("algn" "\\begin{align*}\n?\n\\end{align*}" nil)
+      )
+    )
+    (setq cdlatex-command-alist '(
+        ("equation" "Insert non-labeled equation" "" cdlatex-environment ("eqn") t nil)
+        ("equation*" "Insert non-labeled equation" "" cdlatex-environment ("eqnn") t nil)
+        ("align" "Insert non-labeled align" "" cdlatex-environment ("alg") t nil)
+        ("align*" "Insert non-labeled align" "" cdlatex-environment ("algn") t nil)
+      )
+    )
+    ; 2}}}
+    ; Exporting {{{2
+    (setq org-latex-pdf-process '("latexmk -pdf %f"))
+
+    (with-eval-after-load 'ox
+      (use-package ox-extra
+        :config
+        ;; Sections tagged with 'ignore' are... ignored.
+        (ox-extras-activate '(ignore-headlines))))
+
+    (setq org-highlight-latex-and-related '(latex script entities))
+    ; 2}}}
+    ; Syntax highlight for LaTeX fragments {{{2
+    (font-lock-add-keywords 'org-mode
+            '(
+            ("\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)" 
+            (1 'font-lock-keyword-face)
+            (2 'font-lock-function-name-face)
+            )
+            (
+            "\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\|\\\\ref\\|\\\\cite\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
+            (1 'font-lock-keyword-face)
+            (2 'font-lock-constant-face)
+            )
+            ("\\(\\\\textrm\\|\\\\frac\\|\\\\mathrm\\)" (1 'font-lock-keyword-face))
+            ))
+    ; 2}}}
+    ; Capture templates {{{2 
+    (setq org-capture-templates
+          (quote (("t" "Todo" entry (file+headline "~/.wiki/capture/todos.org" "Tasks")
+                   "* TODO %^{Task}%?\n%U\n" :clock-in t :clock-resume t)
+                  ("p" "Project" entry (file+headline "~/.wiki/capture/projects.org" "Projects")
+                   "* TODO %^{Project} :PROJECT:\n%U\n%a\n%?" :clock-in t :clock-resume t)
+                  ("n" "Note" entry (file+headline "~/.wiki/capture/notes.org" "Notes")
+                   "* %^{Note} :NOTE:\n%U\n%a\n%?" :clock-in t :clock-resume t)
+                  ("i" "Idea" entry (file+headline "~/.wiki/capture/notes.org")
+                   "* %^{Idea} :IDEA: \n%u\n%?" :clock-in t :clock-resume t)
+                  ("j" "Journal" entry (file+datetree "~/.wiki/capture/journal.org")
+                   "* %^{Heading}\n%U\n%?" :clock-in t :clock-resume t)
+                  ;("w" "org-protocol" entry (file vct-archive-file)
+                  ; "* TODO Review %c\n%U\n" :immediate-finish t)
+                  )))
+#+END_SRC
+
+** Org agenda configuration
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-agenda-configuration :noweb-sep "\n\n"
+  ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
+    (setq org-agenda-files '("~/.wiki/capture/"))
+
+    (defun air-org-skip-subtree-if-priority (priority)
+      "Skip an agenda subtree if it has a priority of PRIORITY.
+
+    PRIORITY may be one of the characters ?A, ?B, or ?C."
+      (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+            (pri-value (* 1000 (- org-lowest-priority priority)))
+            (pri-current (org-get-priority (thing-at-point 'line t))))
+        (if (= pri-value pri-current)
+            subtree-end
+          nil)))
+    (defun air-org-skip-subtree-if-habit ()
+      "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
+      (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+        (if (string= (org-entry-get nil "STYLE") "habit")
+            subtree-end
+          nil)))
+
+    (setq org-agenda-custom-commands
+          '(("c" "Simple agenda view"
+             ((tags "PRIORITY=\"A\""
+                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
+              (agenda "")
+              (alltodo ""
+                       ((org-agenda-skip-function
+                         '(or (air-org-skip-subtree-if-priority ?A)
+                              (org-agenda-skip-if nil '(scheduled deadline))))))))
+            ("d" "Daily agenda and all TODOs"
+             ((tags "PRIORITY=\"A\""
+                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
+              (agenda "" ((org-agenda-ndays 1)))
+              (alltodo ""
+                       ((org-agenda-skip-function '(or (air-org-skip-subtree-if-habit)
+                                                       (air-org-skip-subtree-if-priority ?A)
+                                                       (org-agenda-skip-if nil '(scheduled deadline))))
+                        (org-agenda-overriding-header "ALL normal priority tasks:"))))
+             ((org-agenda-compact-blocks t)))))
+
+    (setq org-archive-location "~/.wiki/capture/archive.org::")
+
+    ;; TODO: Used to indicate tasks and projects which need to be done
+    ;; STARTED: Used to indicate that a task or project is already started
+    ;; WAITING: Whenever I have a task that is waiting on someone else, I'll assign it this keyword 
+    ;; INACTIVE: signify that I'd like to come back to it eventually and I'll occasionally search my files for "INACTIVE" projects when I have time.
+    (setq org-todo-keywords '((sequence "TODO(t)" "STARTED(s)" "|"  "WAITING(w)" "INACTIVE(l)" "CANCELED(c)" "DONE(d)")))
+
+    (setq org-todo-keyword-faces
+          '(("TODO" . (:foreground "GoldenRod" :weight bold))
+            ("STARTED" . (:foreground "OrangeRed" :weight bold))
+            ("WAITING" . (:foreground "coral" :weight bold)) 
+            ("INACTIVE" . (:foreground "LimeGreen" :weight bold))
+            ("CANCELED" . (:foreground "LimeGreen" :weight bold))))
+
+    (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                     (org-agenda-files :maxlevel . 9))))
+    (setq org-outline-path-complete-in-steps nil)         ; Refile in a single go
+    (setq org-refile-use-outline-path t)                  ; Show full paths for refiling
 #+END_SRC

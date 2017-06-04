@@ -1,0 +1,867 @@
+#+TITLE:  Shell configuration
+
+This shell configuration is similar to that described in the article [[https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789#.a9jfn51ix][Getting Started With Dotfiles]].
+
+* Configuration Files
+
+Shell configuration is done in three files, whose semantics are described below:
+
+- ~.profile~ :: This file is sourced by a login shell, which is the root process of almost everything run by the user (with the exception of Systemd units and cron jobs, which are run from a daemon not spawned from the login shell). Because all shells, not just Bash, source this file, we want to avoid anything Bash-specific here.
+- ~.bashrc~ :: This file is sourced by interactive Bash shells *that are not login shells*, so it should contain only configuration that we use while interacting with a shell (as opposed to, for example, configuration that might affect shell scripts).  These are mostly conveniences, and are necessarily Bash-specific.
+- ~.bash_profile~ :: This file is sourced by Bash in priority to ~.profile~ for login shells, but is otherwise the same.
+
+The above descriptions lead to the following plan: Use ~.profile~ for one-time configuration for each login, such as environment variables that are needed by every program; ~.bashrc~ will contain Bash-specific configuration that is sourced by every new interactive shell (things like aliases and functions, which aren't inherited by subshells anyway); ~.bash_profile~ will simply source both ~.profile~ and ~.bashrc~, which means interactive Bash login shells will have both the non-Bash-specific configurations and the Bash-specific configurations.
+
+So, let's take a look at these three configuration files:
+
+#+CAPTION: Source listing for ~.profile~.
+#+BEGIN_SRC sh :tangle shell/.profile :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
+# Source installed login shell configurations:
+<<shell-profile>>
+#+END_SRC
+
+#+CAPTION: Source listing for ~.bashrc~.
+#+BEGIN_SRC sh :tangle shell/.bashrc :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
+# Source installed interactive shell configurations:
+<<shell-bashrc>>
+#+END_SRC
+
+#+CAPTION: Source listing for ~.bash_profile~.
+#+BEGIN_SRC sh :tangle shell/.bash_profile :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
+# Source login shell configuration:
+. ~/.profile
+
+# Only source .bashrc when shell is interactive:
+case "$-" in *i*) . ~/.bashrc ;; esac
+#+END_SRC
+
+* XDG Base Directories
+
+The XDG Base Directory variables define where configuration, cache, and data files for the user should be stored. While this has the nice effect of cleaning up the home directory, moving dotfiles into subdirectories, it has an even more important benefit: because it separates configuration files, cache files, and important data files into separate folders, it greatly simplifies backup and recovery of these files. Migrating to a new laptop, for instance, should be as simple as installing the software and copying over the configuration and data. With the typical dotfiles approach, there's nothing that prevents cached data (data that isn't essential and could potentially contain system-specific data that would not transfer well) from being written straight to the home directory. In essence, this mirrors quite closely how UNIX systems break the file system into directories that store configuration (~/etc~), cached data (~/var~), shared data (~/usr/share~), and so forth.
+
+Let's create a file ~$HOME/.config/shell/xdg~ that, when sourced, sets these variables correctly. The full listing of this file is shown below:
+
+#+CAPTION: Source listing for ~.config/shell/xdg~.
+#+BEGIN_SRC sh   :tangle shell/.config/shell/xdg  :noweb yes  :shebang "#!/bin/sh\n" :mkdirp yes
+<<shell-xdg>>
+#+END_SRC
+
+We also want this to be sourced by our ~.profile~, so we add the following line there:
+
+#+BEGIN_SRC sh   :noweb-ref shell-profile   :noweb-sep "\n"
+[ -r $HOME/.config/shell/xdg ] && . $HOME/.config/shell/xdg
+#+END_SRC
+
+What are the variables we need to configure? The [[https://theos.kyriasis.com/~kyrias/basedir-spec.html][XDG Base Directory specification]] lists the following environment variables:
+
+#+BEGIN_QUOTE
+- There is a single base directory relative to which user-specific data files should be written. This directory is defined by the environment variable ~$XDG_DATA_HOME~.
+- There is a single base directory relative to which user-specific configuration files should be written. This directory is defined by the environment variable ~$XDG_CONFIG_HOME~.
+- There is a single base directory relative to which user-specific executable files should be written. This directory is defined by the environment variable ~$XDG_BIN_HOME~.
+- There is a single base directory relative to which user-specific architecture-independent library files shoule be written. This directory is defined by the environment variable ~$XDG_LIB_HOME~.
+- There is a set of preference ordered base directories relative to which executable files should be searched. This set of directories is defined by the environment variable ~$XDG_BIN_DIRS~.
+- There is a set of preference ordered base directories relative to which library files should be searched. This set of directories is defined by the environment variable ~$XDG_LIB_DIRS~.
+- There is a set of preference ordered base directories relative to which data files should be searched. This set of directories is defined by the environment variable ~$XDG_DATA_DIRS~.
+- There is a set of preference ordered base directories relative to which configuration files should be searched. This set of directories is defined by the environment variable ~$XDG_CONFIG_DIRS~.
+- There is a single base directory relative to which user-specific non-essential (cached) data should be written. This directory is defined by the environment variable ~$XDG_CACHE_HOME~.
+- There is a single base directory relative to which user-specific runtime files and other file objects should be placed. This directory is defined by the environment variable ~$XDG_RUNTIME_DIR~.
+#+END_QUOTE
+
+The variables ~$XDG_BIN_DIRS~, ~$XDG_LIB_DIRS~, ~$XDG_DATA_DIRS~, and ~$XDG_CONFIG_DIRS~ contain system paths, and they should be set by the system (or applications should use the defaults defined in the specification). Furthermore, [[http://www.freedesktop.org/software/systemd/man/pam_systemd.html][~$XDG_RUNTIME_DIR~ is set by the Systemd PAM module]], so we don't need, or want, to set it by ourselves.
+
+The remaining variables (namely, ~$XDG_DATA_HOME~, ~$XDG_CONFIG_HOME~, ~$XDG_BIN_HOME~, ~$XDG_LIB_HOME~, and ~$XDG_CACHE_HOME~), though, should be set in our shell configuration.  I use the following, which happen to be the defaults anyway:
+
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n"   :exports none
+# XDG Basedir variables
+#+END_SRC
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n\n"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_BIN_HOME="$HOME/.local/bin"
+export XDG_LIB_HOME="$HOME/.local/lib"
+export XDG_CACHE_HOME="$HOME/.cache"
+#+END_SRC
+
+As a note, we have to be careful, as the [[https://theos.kyriasis.com/~kyrias/basedir-spec.html][XDG Base Directory Specification]] requires us to use absolute paths.  Here, we do this by using double-quoting, which interpolates the ~$HOME~ variable into the path for us. Because ~$HOME~ is an absolute path, the resulting paths will all be absolute, too.
+
+The semantics of these environment variables naturally lead us to a backup and recovery strategy:
+
+- ~$XDG_DATA_HOME~ contains user-specific data, so we generally want to back it up. Not all of the data in this directory is important, but some is. This may contain sensitive information, so we should encrypt our backups.
+- ~$XDG_CONFIG_HOME~ contains user-specific configuration, which we want to back up. Hopefully, this contains no sensitive information, but I don't trust that no passwords or secrets will make it into this, so we encrypt the backups just in case.
+- ~$XDG_BIN_HOME~ and ~$XDG_LIB_HOME~ are for user-installed software that may be system-specific, so we don't want to back it up. To recover, we need to reinstall the software.
+- ~$XDG_CACHE_HOME~ is non-essential data, files that store information locally for performance. These can be deleted at any time, and could go out-of-date, so there is no point in backing them up. Software that uses these should regenerate them on its own.
+
+While just configuring this should be enough, it's not.  There is an annoying
+amount of software that does not use these directories properly, or at all.
+We do our best here to configure the problematic software to use them, but we
+can't get all of it.
+
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n"   :exports none
+# XDG User directories
+#+END_SRC
+
+We also add a few more directories, handled by [[https://www.freedesktop.org/wiki/Software/xdg-user-dirs/][xdg-user-dirs]]
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n\n"   :exports none
+export XDG_DESKTOP_DIR="$HOME/0.inbox"
+export XDG_DOWNLOAD_DIR="$HOME/0.inbox"
+export XDG_TEMPLATES_DIR="$HOME/0.inbox"
+export XDG_PUBLICSHARE_DIR="$HOME/0.inbox"
+export XDG_DOCUMENTS_DIR="$HOME/1.working"
+export XDG_MUSIC_DIR="$HOME/3.media/music"
+export XDG_PICTURES_DIR="$HOME/3.media/pictures"
+export XDG_VIDEOS_DIR="$HOME/3.media/videos"
+#+END_SRC
+
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n"   :exports none
+# Per-software configuration to use XDG basedirs
+#+END_SRC
+
+TeX stores its cache right under the home directory by default, so we set the
+following environment variable to move it to the cache directory:
+
+#+BEGIN_SRC sh   :noweb-ref shell-xdg   :noweb-sep "\n"
+export TEXMFVAR="$XDG_CACHE_HOME/texmf-var"
+#+END_SRC
+
+* Miscellaneous Environment Variables
+
+The remaining environment variables are either set in or conditionally sourced from ~$HOME/.config/shell/env~. A full listing of this file is shown below:
+
+#+CAPTION: Source listing for ~.config/shell/env~.
+#+BEGIN_SRC sh :tangle shell/.config/shell/env :noweb yes :shebang "#!/bin/sh\n"
+<<shell-env>>
+#+END_SRC
+
+We want these environment variables to be available in all sessions, so we want to source it from our ~.profile~, as well. We add the following line there to do that:
+
+#+BEGIN_SRC sh :noweb-ref shell-profile :noweb-sep "\n"
+[ -r $HOME/.config/shell/env ] && . $HOME/.config/shell/env
+#+END_SRC
+
+I also set another file for environment variables, containing any variables specific to the machine, and that do not need to be backed up:
+
+#+BEGIN_SRC sh :noweb-ref shell-profile :noweb-sep "\n"
+[ -r $HOME/.env ] && . $HOME/.env
+#+END_SRC
+
+
+** Special folders
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+# Special Folders
+#+END_SRC
+*** =0.inbox=
+
+Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =0.sandbox= to =1.docs=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+export INBOX="${HOME}/0.inbox"
+#+END_SRC
+
+*** =1.working=
+
+Is the big kahuna [fn:: Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.] of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but (to keep you sanity) don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+export WORKING="${HOME}/1.working"
+#+END_SRC
+
+*** =2.archive=
+
+Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+export ARCHIVE="${HOME}/2.archive"
+#+END_SRC
+
+*** =3.media=
+
+Multimedia files (games, pictures and movies). This is a file that usually I don't mind to keep a backup.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+export MEDIA="${HOME}/3.media"
+#+END_SRC
+
+*** =4.opt=
+
+Third-party software, not present among the official packages.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+export OPT="${HOME}/4.opt"
+#+END_SRC
+
+** Local Installation Tree
+
+In addition to (or perhaps complementary to) the [[*XDG Base Directories][XDG Base Directories]], we also use the ~.local~ tree as an install path for user-local software. Because ~.local~ mirrors ~/usr~, this works very well.  It's not quite as simple as adding the binary path to ~$PATH~, though.  There are a number of variables we need to set for the software to work correctly.
+
+#+BEGIN_SRC sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+# Add software installed under `~/.local` tree.
+#+END_SRC
+#+BEGIN_SRC sh :noweb-ref shell-env   :noweb-sep "\n\n"
+LOCAL_PREFIX="$HOME/.local"
+export PATH="$LOCAL_PREFIX/bin:$PATH"
+export MANPATH="$LOCAL_PREFIX/share/man:$MANPATH"
+export CFLAGS="-I$LOCAL_PREFIX/include $CFLAGS"
+export CXXFLAGS="-I$LOCAL_PREFIX/include $CXXFLAGS"
+export LDFLAGS="-L$LOCAL_PREFIX/lib -Wl,-rpath,$LOCAL_PREFIX/lib $LDFLAGS"
+export LD_RUNPATH="$LOCAL_PREFIX/lib:$LD_RUNPATH"
+export PKG_CONFIG_PATH="$LOCAL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+export ACLOCAL_FLAGS="-I $LOCAL_PREFIX/share/aclocal/"
+unset LOCAL_PREFIX
+#+END_SRC
+
+* Aliases
+
+I store aliases in the ~$HOME/.config/shell/alias~ file. These aliases apply only to interactive shells, not to scripts, so all these aliases are only to help me in interactive shells. Here is a full listing of that file:
+
+#+CAPTION: Source listing for ~.config/shell/alias~.
+#+BEGIN_SRC sh :tangle shell/.config/shell/alias :noweb yes :shebang "#!/bin/sh\n"
+<<shell-alias>>
+#+END_SRC
+
+We also want to make sure to source this file from ~.bashrc~:
+
+#+BEGIN_SRC sh :noweb-ref shell-bashrc :noweb-sep "\n"
+[ -r $HOME/.config/shell/alias ] && . $HOME/.config/shell/alias
+#+END_SRC
+
+** ~ls~ usability
+The default ~ls~ does not automatically print its results in color when the terminal supports it, and it gives rather unhelpful values for file sizes. For usability, we change the default in interactive shells to use color whenever the output terminal supports it and to display file sizes in human-readable format (e.g., ~1K~, ~234M~, ~2G~). Once we've done that, we can also add the common and useful ~ll~ alias, which displays a long listing format, sorted with directories first.
+
+#+BEGIN_SRC sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+# ls usability aliases
+#+END_SRC
+#+BEGIN_SRC sh :noweb-ref shell-alias :noweb-sep "\n\n"
+alias ls="ls -h --color=auto"
+alias ll="ls -lv --group-directories-first"
+#+END_SRC
+
+** Archive Extracter
+
+Linux provides various tools for archiving and compressing files such as [[https://en.wikipedia.org/wiki/Zip_(file_format)][zip]], [[https://en.wikipedia.org/wiki/Bzip2][bzip]], [[https://en.wikipedia.org/wiki/Gzip][gzip]], [[https://en.wikipedia.org/wiki/Tar_(computing)][tar]], [[https://en.wikipedia.org/wiki/RAR_(file_format)][rar]], /etc/. There are more tools that are not native to Linux, but provide good archiving and compressing abilities. With such a large number of tools at hand, sometimes it becomes difficult to remember all the commands. '[[http://www.nongnu.org/atool/][atool]]' allows you to manage these different file archives with a single command.
+
+=ae= is a mnemonic for Archive Extracter.
+
+#+BEGIN_SRC sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+alias ae='aunpack' 
+#+END_SRC
+
+** Human readable disk usage
+
+The =df= command displays the amount of disk space available on the file system. However, the default setting is to show the usage in KB, which is quite hard to eye-read.
+
+#+BEGIN_SRC sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+alias df="df -H"
+#+END_SRC
+
+** Human readable file size
+
+The =du= command displays the estimate file space usage. Like =df=, the default setting is to show the usage in KB.
+
+#+BEGIN_SRC sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+alias du="du -h"
+#+END_SRC
+
+** Emacs
+
+ Now, so we can easily connect to the Emacs server from an interactive terminal, we define some shorthand shell aliases.  I can never remember the command-line arguments to ~emacsclient~, and ~emacsclient~ itself is a pretty hefty command name, so these aliases find a lot of use.  ~em~ opens its argument in an existing frame, ~emnew~ opens its argument in a new frame, and ~emtty~ opens its argument in the current terminal.
+
+#+BEGIN_SRC sh   :noweb-ref shell-alias   :noweb-sep "\n"   :exports none
+# Emacsclient aliases
+#+END_SRC
+#+BEGIN_SRC sh   :noweb-ref shell-alias   :noweb-sep "\n\n"
+alias em="emacsclient -n $@"
+alias emnew="emacsclient -c -n $@"
+alias emtty="emacsclient -t $@"
+#+END_SRC
+
+For each of these aliases, I used to have the ~--alternative-editor~ flag, which I could use to set an editor to select if Emacs was not running.  There is no case when that happens, and if there's some problem where Emacs is not running, I'd like to be warned so I use ~vi~ explicitly and not get confused.
+
+Finally, we set Emacs as our default editor for the session.  We want the behavior to be "open a new buffer for the existing Emacs session.  If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it."  Setting ~$VISUAL~ and ~$EDITOR~ to ~emacsclient~ accomplishes the first part, and setting ~$ALTERNATIVE_EDITOR~ to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
+
+#+BEGIN_SRC sh   :noweb-ref shell-env   :noweb-sep "\n"   :exports none
+# Use emacsclient as the editor.
+#+END_SRC
+#+BEGIN_SRC sh   :noweb-ref shell-env   :noweb-sep "\n\n"
+export EDITOR="emacsclient"
+export VISUAL="emacsclient"
+export ALTERNATIVE_EDITOR=""
+#+END_SRC
+
+* Functions
+
+In addition to aliases, I use some shell functions for functionality that is more complicated than what aliases can provide but not complicated enough to warrant a separate shell script.  These functions are stored in ~$HOME/.config/shell/function~, reproduced below:
+
+#+CAPTION: Source listing for ~.config/shell/function~.
+#+BEGIN_SRC sh :tangle shell/.config/shell/function :noweb yes :shebang "#!/bin/sh\n"
+<<shell-function>>
+#+END_SRC
+
+Again, we source it from ~.bashrc~:
+
+#+BEGIN_SRC sh   :noweb-ref shell-bashrc   :noweb-sep "\n"
+[ -r $HOME/.config/shell/function ] && . $HOME/.config/shell/function
+#+END_SRC
+
+The functions I use most commonly manage my ~$PATH~ variable, the environment variable that contains a colon-separated list of directories in which to look for a command to be executed.  Modifying it manually—especially removing directories from it—is tedious and error-prone; these functions, which I found on [[https://stackoverflow.com/questions/370047/][a StackOverflow question]], have served we well:
+
+#+BEGIN_SRC sh   :noweb-ref shell-function   :noweb-sep "\n"   :exports none
+# $PATH management functions
+#+END_SRC
+#+BEGIN_SRC sh   :noweb-ref shell-function   :noweb yes   :noweb-sep "\n\n"
+path_append()  { path_remove $1; export PATH="$PATH:$1";   }
+path_prepend() { path_remove $1; export PATH="$1:$PATH";   }
+path_remove()  { export PATH=`<<shell-function-pathremove>>`; }
+#+END_SRC
+
+The ~path_append()~ and ~path_prepend()~ functions are rather self-explanatory, but the ~path_remove()~ function may not be.  In fact, it's slightly modified from the version in the StackOverflow question linked above.  Let's break it down.  Our goal is to export the ~$PATH~ variable to a new value, so let's look inside the backtick-quoted string to see what is run:
+
+1. First, we print out the current ~$PATH~, which we will use as input.  The ~$PATH~ variable should not end in a newline, which gives us two options: ~echo -n~, which is not completely portable, or ~printf~. In the name of portability, we will choose the later.
+   #+BEGIN_SRC sh   :noweb-ref shell-function-pathremove   :noweb-sep " | "
+   printf '%s' "$PATH"
+   #+END_SRC
+2. We want to parse this output into a series of records separated by colons. To this, we turn to awk.  The awk [[http://www.grymoire.com/Unix/Awk.html#uh-19][~RS~ variable]] stores the line/record separator used in parsing, and the [[http://www.grymoire.com/Unix/Awk.html#uh-20][~ORS~ variable]] stores the line/record separator used in printing.  We can use these two variables to piggyback on awk's parsing capabilities, setting both of them to colons.  Awk can then loop over these parsed directory names to determine whether any of them are the directory we are trying to remove.  If they are, we ignore them.
+   #+BEGIN_SRC sh   :noweb-ref shell-function-pathremove   :noweb-sep " | "
+   awk -v RS=: -v ORS=: '$0 != "'$1'"'
+   #+END_SRC
+   The expression here used to filter is a little opaque, but works as follows:
+   - We have an initial, single-quoted string in which the ~$0~ is an _awk_ variable meaning "this record."  This string ends with a double quote.
+   - Then, we have a _shell_ variable that interpolates to the first argument to our function.
+   - Finally, we have a third string that closes the opening quote from the first string.
+3. Unfortunately, awk outputs the value of ~ORS~ at the end of the string, too, so we need to chop it off.  The following sed invocation does that:
+   #+BEGIN_SRC sh   :noweb-ref shell-function-pathremove   :noweb-sep " | "
+   sed 's/:$//'
+   #+END_SRC
+
+* Bash Prompt
+
+In order to configure our Bash prompt I use a new file, ~$HOME/.config/shell/prompt~. This file's job is simply to set the prompt as we want when it sourced.
+
+Bash prompt configuration is contained within the ~$PS1~ environment variable, which is extremely terse and hard to work with. The following is my ~$PS1~ configuration:
+
+#+CAPTION: Source listing for ~.config/shell/prompt~.
+#+BEGIN_SRC sh :tangle shell/.config/shell/prompt :noweb yes :shebang "#!/bin/bash\n"
+source "/usr/share/git/git-prompt.sh" # Default when installing Git
+
+# Configure `__git_ps1` to tell us as much as possible
+export GIT_PS1_SHOWDIRTYSTATE=1 GIT_PS1_SHOWSTASHSTATE=1 GIT_PS1_SHOWUNTRACKEDFILES=1
+export GIT_PS1_SHOWUPSTREAM=verbose GIT_PS1_DESCRIBE_STYLE=branch GIT_PS1_SHOWCOLORHINTS=1
+export GIT_PS1_HIDE_IF_PWD_IGNORED=1
+
+# Colorful prompt for Bash!
+export PS1='\w\[\e[0;33m\]$(__git_ps1 " (%s)")\[\e[0m\]>> '
+ 
+# Unrelated but useful: avoid auto-édit on successful merges, starting with Git 2.0
+export GIT_MERGE_AUTOEDIT=no
+#+END_SRC
+
+Now that we've set the prompt, let's make sure to source this configuration from ~.bashrc~:
+
+#+BEGIN_SRC sh :noweb-ref shell-bashrc :noweb-sep "\n"
+[ -r $HOME/.config/shell/prompt ] && . $HOME/.config/shell/prompt
+#+END_SRC
+
+* Miscellaneous Interactive Shell Customizations
+
+Finally, we're left with some interactive shell customizations that don't fit under any other heading.  These are either set in or conditionally sourced from ~$HOME/.config/shell/interactive~, which is listed below:
+
+#+CAPTION: Source listing for ~.config/shell/interactive~.
+#+BEGIN_SRC sh :tangle shell/.config/shell/interactive :noweb yes :shebang "#!/bin/bash\n"
+<<shell-interactive>>
+#+END_SRC
+
+As these are interactive, Bash-specific customizations, we want to source it from our ~.bashrc~ by adding the following line to that file:
+
+#+BEGIN_SRC sh :noweb-ref shell-bashrc :noweb-sep "\n"
+[ -r $HOME/.config/shell/interactive ] && . $HOME/.config/shell/interactive
+#+END_SRC
+
+** Bash Completion
+
+To enable completion in Bash, we source one of two files:
+
+#+BEGIN_SRC sh   :noweb-ref shell-interactive   :noweb-sep "\n"   :exports none
+  # Enable interactive Bash completion
+#+END_SRC
+#+BEGIN_SRC sh   :noweb-ref shell-interactive   :noweb-sep "\n\n"
+if [ -r /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+elif [ -r /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+#+END_SRC
+
+This configuration is taken from the default ~.bashrc~ shipped with Debian; the former path is the path that the ~bash-completion~ package installs to. This can actually be modified [[https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html][programmatically]] by packages.
+
+** Bash History
+
+Bash has command history support that allows you to recall previously run commands and run them again at a later session. Command history is stored both in memory and in a special file written to disk, ~$HOME/.bash_history~.
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
+# History configuration
+#+END_SRC
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n"
+export HISTFILE="${HOME}/.bash_history"
+#+END_SRC
+
+When saving command history in memory, I want to prevent two things from being added: lines beginning with whitespace (in case we have a reason to run a command and not remember it) and duplicate lines (which are just a nuisance to scroll through).  This can be done by setting the ~$HISTCONTROL~ environment variable to ~ignoreboth~.  We don't want this environment variable to leak into subshells (especially noninteractive subshells), so we don't ~export~ it.
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n"
+HISTCONTROL=ignoreboth:erasedups
+#+END_SRC
+
+I also ignore too short commands, like ~ls~.
+
+#+BEGIN_SRC sh   :noweb-ref shell-interactive   :noweb-sep "\n\n"
+export HISTIGNORE="?:??:???:$HISTIGNORE"
+#+END_SRC
+
+I also like to keep an unlimited history list
+#+BEGIN_SRC sh   :noweb-ref shell-interactive   :noweb-sep "\n\n"
+export HISTSIZE=
+export HISTFILESIZE=
+#+END_SRC
+
+I also want to set a few shell options to control how history is stored as well:
+
+- ~cmdhist~ saves all lines in a multi-line command in the history file,
+  which makes it easy to modify multi-line commands that we've run.
+- ~histreedit~ allows a user to re-edit a failed history substitution
+  instead of clearing the prompt.
+- ~histappend~ append to history, not overwrite it.
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n"
+shopt -s cmdhist
+shopt -s histreedit
+shopt -s histappend
+#+END_SRC
+
+I use this to preserve the history across tmux sessions
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n\n"
+export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -n; history -c; history -r"
+#+END_SRC
+
+*** Miscellaneous Configuration
+
+Finally, we have the following configuration options that don't fit anywhere else.
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
+# Miscellaneous configuration items
+#+END_SRC
+
+I tend to use the extended pattern matching
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
+shopt -s extglob
+#+END_SRC
+
+We want to check the size of the terminal window after each command and, if
+necessary, update the values of ~$LINES~ and ~$COLUMNS~.  If any command
+uses the size of the terminal window to intelligently format output (think
+~ls~ selecting the number of columns to output filenames in), this will give
+it up-to-date information on the terminal size. The shell option
+~checkwinsize~ does this for us.
+
+#+BEGIN_SRC sh   :noweb-ref shell-interactive   :noweb-sep "\n\n"
+shopt -s checkwinsize
+#+END_SRC
+
+** Pager
+
+Set the default pager
+
+#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n"
+export PAGER="less -R"
+#+END_SRC
+
+These options will make =less= more friendly:
+- =-i= :: =less= will ignore case when searching. However, if your search pattern contains upper-case letters, the ignore-case feature will be automatically disabled;
+- =-F= :: Causes =less= to automatically exit if the entire file can be displayed on the first screen;
+- =-g= :: =less= will not highlight all strings matching the last search command, but only the last one. According to the manual, this will cause =less= to run faster than the default;
+- =-z-4= :: Change the default scrolling size to 4 lines fewer than the current screen size, so always keep 4 lines overlapping with previous screen when scrolling with the =space= key;
+- =-R= :: =less= will display ANSI "color" escape sequences like =ESC [ ... m=, preserving then =ls= colors for example.
+
+#+BEGIN_SRC sh :tangle shell/.lesskey :noweb yes
+#env
+LESS = -i -F -g -z-4 -R
+#+END_SRC
+
+* Readline
+
+[[https://cnswww.cns.cwru.edu/php/chet/readline/rltop.html][GNU Readline]] is a library used by many programs for interactive command editing and recall.  Most importantly for my purposes, it is used by Bash, so this could be considered as an extension of our [[*Shell][shell configuration]].
+
+Let's start off by moving the configuration to the correct XDG Basedir by adding this to the ~xdg~ script we detail in the [[*XDG Base Directories][XDG Basedirs section]].
+
+#+BEGIN_SRC sh   :noweb-ref shell-xdg  :noweb-sep "\n"
+export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
+#+END_SRC
+
+The actual ~$XDG_CONFIG_HOME/readline/inputrc~ file is shown and described below:
+
+#+CAPTION: Source listing for ~.config/readline/inputrc~.
+#+BEGIN_SRC conf :tangle shell/.config/readline/inputrc :noweb yes :mkdirp yes
+$include /etc/inputrc
+<<inputrc>>
+#+END_SRC
+
+Our first configuration is to make ~TAB~ autocomplete regardless of the case of the input. This is somewhat of a trade-off, because it gives worse completion when the case of a prefix really does disambiguate. I find, in practice, this is rather rare, and even rarer in my primary Readline application, Bash.
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+set completion-ignore-case on
+#+END_SRC
+
+I find the default behavior of Readline with regard to ambiguous completion to be very annoying. By default, Readline will beep at you when you attempt to complete an ambiguous prefix and wait for you to press ~TAB~ again to see the alternatives; if the completion is ambiguous, I want to be told of the possible alternatives immediately. Enabling the ~show-all-if-ambiguous~ setting accomplishes this.
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+set show-all-if-ambiguous on
+#+END_SRC
+
+Another setting we want to make sure is set is to not autocomplete hidden files unless the pattern explicitly begins with a dot. Usually I don't want to deal with hidden files, so this is a good trade-off.
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+set match-hidden-files off
+#+END_SRC
+
+Also, we want to normalize the handling of directories and symlinks to directories, so there appears to be no difference. The following setting immediately adds a trailing slash when autocompleting symlinks to directories.
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+set mark-symlinked-directories on
+#+END_SRC
+
+Here I add more intelligent ~UP~/~DOWN~ behavior, using the text that has already been typed as the prefix for searching through command history.
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+# Ensure that Left-Right arrows keep working correctly
+"\e[C": forward-char
+"\e[D": backward-char
+#+END_SRC
+
+This enhanve menu completion
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+Tab: menu-complete
+"\e[Z": menu-complete-backward
+#+END_SRC
+
+#+BEGIN_SRC conf :noweb-ref inputrc :noweb-sep "\n"
+set colored-stats on
+set visible-stats on
+set menu-complete-display-prefix on
+#+END_SRC
+
+* Dircolors
+
+#+BEGIN_SRC sh :noweb-ref shell-bashrc :noweb-sep "\n"
+eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#+END_SRC
+
+#+BEGIN_SRC sh :tangle shell/.config/shell/dir_colors :noweb yes
+# Dark 256 color solarized theme for the color GNU ls utility.
+# Used and tested with dircolors (GNU coreutils) 8.5
+#
+# @author  {@link http://sebastian.tramp.name Sebastian Tramp}
+# @license http://sam.zoy.org/wtfpl/  Do What The Fuck You Want To Public License (WTFPL)
+#
+# More Information at
+# https://github.com/seebi/dircolors-solarized
+
+# Term Section
+TERM Eterm
+TERM ansi
+TERM color-xterm
+TERM con132x25
+TERM con132x30
+TERM con132x43
+TERM con132x60
+TERM con80x25
+TERM con80x28
+TERM con80x30
+TERM con80x43
+TERM con80x50
+TERM con80x60
+TERM cons25
+TERM console
+TERM cygwin
+TERM dtterm
+TERM dvtm
+TERM dvtm-256color
+TERM eterm-color
+TERM fbterm
+TERM gnome
+TERM gnome-256color
+TERM jfbterm
+TERM konsole
+TERM konsole-256color
+TERM kterm
+TERM linux
+TERM linux-c
+TERM mach-color
+TERM mlterm
+TERM putty
+TERM putty-256color
+TERM rxvt
+TERM rxvt-256color
+TERM rxvt-cygwin
+TERM rxvt-cygwin-native
+TERM rxvt-unicode
+TERM rxvt-unicode256
+TERM rxvt-unicode-256color
+TERM screen
+TERM screen-16color
+TERM screen-16color-bce
+TERM screen-16color-s
+TERM screen-16color-bce-s
+TERM screen-256color
+TERM screen-256color-bce
+TERM screen-256color-s
+TERM screen-256color-bce-s
+TERM screen-256color-italic
+TERM screen-bce
+TERM screen-w
+TERM screen.linux
+TERM screen.xterm-256color
+TERM st
+TERM st-meta
+TERM st-256color
+TERM st-meta-256color
+TERM tmux
+TERM tmux-256color
+TERM vt100
+TERM xterm
+TERM xterm-16color
+TERM xterm-256color
+TERM xterm-256color-italic
+TERM xterm-88color
+TERM xterm-color
+TERM xterm-debian
+TERM xterm-termite
+
+## Documentation
+#
+# standard colors
+#
+# Below are the color init strings for the basic file types. A color init
+# string consists of one or more of the following numeric codes:
+# Attribute codes:
+# 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+# Text color codes:
+# 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+# Background color codes:
+# 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+#
+#
+# 256 color support
+# see here: http://www.mail-archive.com/bug-coreutils@gnu.org/msg11030.html)
+#
+# Text 256 color coding:
+# 38;5;COLOR_NUMBER
+# Background 256 color coding:
+# 48;5;COLOR_NUMBER
+
+## Special files
+
+NORMAL 00;38;5;244 # no color code at all
+#FILE 00 # regular file: use no color at all
+RESET 0 # reset to "normal" color
+DIR 00;38;5;33 # directory 01;34
+LINK 00;38;5;37 # symbolic link. (If you set this to 'target' instead of a
+ # numerical value, the color is as for the file pointed to.)
+MULTIHARDLINK 00 # regular file with more than one link
+FIFO 48;5;230;38;5;136;01 # pipe
+SOCK 48;5;230;38;5;136;01 # socket
+DOOR 48;5;230;38;5;136;01 # door
+BLK 48;5;230;38;5;244;01 # block device driver
+CHR 48;5;230;38;5;244;01 # character device driver
+ORPHAN 48;5;235;38;5;160 # symlink to nonexistent file, or non-stat'able file
+SETUID 48;5;160;38;5;230 # file that is setuid (u+s)
+SETGID 48;5;136;38;5;230 # file that is setgid (g+s)
+CAPABILITY 30;41 # file with capability
+STICKY_OTHER_WRITABLE 48;5;64;38;5;230 # dir that is sticky and other-writable (+t,o+w)
+OTHER_WRITABLE 48;5;235;38;5;33 # dir that is other-writable (o+w) and not sticky
+STICKY 48;5;33;38;5;230 # dir with the sticky bit set (+t) and not other-writable
+# This is for files with execute permission:
+EXEC 00;38;5;64
+
+## Archives or compressed (violet + bold for compression)
+.tar    00;38;5;61
+.tgz    00;38;5;61
+.arj    00;38;5;61
+.taz    00;38;5;61
+.lzh    00;38;5;61
+.lzma   00;38;5;61
+.tlz    00;38;5;61
+.txz    00;38;5;61
+.zip    00;38;5;61
+.z      00;38;5;61
+.Z      00;38;5;61
+.dz     00;38;5;61
+.gz     00;38;5;61
+.lz     00;38;5;61
+.xz     00;38;5;61
+.bz2    00;38;5;61
+.bz     00;38;5;61
+.tbz    00;38;5;61
+.tbz2   00;38;5;61
+.tz     00;38;5;61
+.deb    00;38;5;61
+.rpm    00;38;5;61
+.jar    00;38;5;61
+.rar    00;38;5;61
+.ace    00;38;5;61
+.zoo    00;38;5;61
+.cpio   00;38;5;61
+.7z     00;38;5;61
+.rz     00;38;5;61
+.apk    00;38;5;61
+.gem    00;38;5;61
+
+# Image formats (yellow)
+.jpg    00;38;5;136
+.JPG    00;38;5;136 #stupid but needed
+.jpeg   00;38;5;136
+.gif    00;38;5;136
+.bmp    00;38;5;136
+.pbm    00;38;5;136
+.pgm    00;38;5;136
+.ppm    00;38;5;136
+.tga    00;38;5;136
+.xbm    00;38;5;136
+.xpm    00;38;5;136
+.tif    00;38;5;136
+.tiff   00;38;5;136
+.png    00;38;5;136
+.PNG    00;38;5;136
+.svg    00;38;5;136
+.svgz   00;38;5;136
+.mng    00;38;5;136
+.pcx    00;38;5;136
+.dl     00;38;5;136
+.xcf    00;38;5;136
+.xwd    00;38;5;136
+.yuv    00;38;5;136
+.cgm    00;38;5;136
+.emf    00;38;5;136
+.eps    00;38;5;136
+.CR2    00;38;5;136
+.ico    00;38;5;136
+
+# Files of special interest (base1)
+.tex             00;38;5;245
+.rdf             00;38;5;245
+.owl             00;38;5;245
+.n3              00;38;5;245
+.ttl             00;38;5;245
+.nt              00;38;5;245
+.torrent         00;38;5;245
+.xml             00;38;5;245
+*Makefile        00;38;5;245
+*Rakefile        00;38;5;245
+*Dockerfile      00;38;5;245
+*build.xml       00;38;5;245
+*rc              00;38;5;245
+*1               00;38;5;245
+.nfo             00;38;5;245
+*README          00;38;5;245
+*README.txt      00;38;5;245
+*readme.txt      00;38;5;245
+.md              00;38;5;245
+*README.markdown 00;38;5;245
+.ini             00;38;5;245
+.yml             00;38;5;245
+.cfg             00;38;5;245
+.conf            00;38;5;245
+.h               00;38;5;245
+.hpp             00;38;5;245
+.c               00;38;5;245
+.cpp             00;38;5;245
+.cxx             00;38;5;245
+.cc              00;38;5;245
+.objc            00;38;5;245
+.sqlite          00;38;5;245
+.go              00;38;5;245
+.sql             00;38;5;245
+.csv             00;38;5;245
+
+# "unimportant" files as logs and backups (base01)
+.log        00;38;5;240
+.bak        00;38;5;240
+.aux        00;38;5;240
+.lof        00;38;5;240
+.lol        00;38;5;240
+.lot        00;38;5;240
+.out        00;38;5;240
+.toc        00;38;5;240
+.bbl        00;38;5;240
+.blg        00;38;5;240
+*~          00;38;5;240
+*#          00;38;5;240
+.part       00;38;5;240
+.incomplete 00;38;5;240
+.swp        00;38;5;240
+.tmp        00;38;5;240
+.temp       00;38;5;240
+.o          00;38;5;240
+.pyc        00;38;5;240
+.class      00;38;5;240
+.cache      00;38;5;240
+
+# Audio formats (orange)
+.aac    00;38;5;166
+.au     00;38;5;166
+.flac   00;38;5;166
+.mid    00;38;5;166
+.midi   00;38;5;166
+.mka    00;38;5;166
+.mp3    00;38;5;166
+.mpc    00;38;5;166
+.ogg    00;38;5;166
+.opus   00;38;5;166
+.ra     00;38;5;166
+.wav    00;38;5;166
+.m4a    00;38;5;166
+# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+.axa    00;38;5;166
+.oga    00;38;5;166
+.spx    00;38;5;166
+.xspf   00;38;5;166
+
+# Video formats (as audio + bold)
+.mov    00;38;5;166
+.MOV    00;38;5;166
+.mpg    00;38;5;166
+.mpeg   00;38;5;166
+.m2v    00;38;5;166
+.mkv    00;38;5;166
+.ogm    00;38;5;166
+.mp4    00;38;5;166
+.m4v    00;38;5;166
+.mp4v   00;38;5;166
+.vob    00;38;5;166
+.qt     00;38;5;166
+.nuv    00;38;5;166
+.wmv    00;38;5;166
+.asf    00;38;5;166
+.rm     00;38;5;166
+.rmvb   00;38;5;166
+.flc    00;38;5;166
+.avi    00;38;5;166
+.fli    00;38;5;166
+.flv    00;38;5;166
+.gl     00;38;5;166
+.m2ts   00;38;5;166
+.divx   00;38;5;166
+.webm   00;38;5;166
+# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+.axv 00;38;5;166
+.anx 00;38;5;166
+.ogv 00;38;5;166
+.ogx 00;38;5;166
+#+END_SRC
+
+* File Variables
+
+# Local Variables:
+# mode: org
+# fill-column: 80
+# End:

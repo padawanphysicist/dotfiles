@@ -3011,3 +3011,8 @@ handle_fallback
 
 exit 1
 #+END_SRC
+
+We also need to set execution permission to ~scope.sh~:
+#+begin_src sh
+chmod +x ranger/.config/ranger/scope.sh
+#+end_src

@@ -507,12 +507,21 @@ This section holds configuration which are common to most major modes
 
 *** Visual line navigation
 
+This code fixes visual line navigation: I got this solution [[https://github.com/syl20bnr/spacemacs/pull/1446][here]]. Make evil-mode up/down and j/k operate over screen lines instead of logical lines, both in normal and visual mode.
+
 #+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n"
 (global-visual-line-mode t)
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 ;; Make evil-mode up/down operate in screen lines instead of logical lines
+
+(define-key evil-normal-state-map "j" 'evil-next-visual-line)
 (define-key evil-normal-state-map (kbd "<down>") 'evil-next-visual-line)
+(define-key evil-normal-state-map "k" 'evil-previous-visual-line)
 (define-key evil-normal-state-map (kbd "<up>") 'evil-previous-visual-line)
+(define-key evil-visual-state-map "j" 'evil-next-visual-line)
+(define-key evil-visual-state-map (kbd "<down>") 'evil-next-visual-line)
+(define-key evil-visual-state-map "k" 'evil-previous-visual-line)
+(define-key evil-visual-state-map (kbd "<up>") 'evil-previous-visual-line)
 #+END_SRC
 
 Since emacs 26 has native support to line numbering, we enable it:

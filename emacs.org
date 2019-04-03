@@ -553,71 +553,97 @@ Since emacs 26 has native support to line numbering, we enable it:
 
 ** Org mode configuration
 
-Org configuration is the largest part of my spacemacs configuration (Probably because I use emacs mainly because of it!)
+Org configuration is the largest part of my spacemacs configuration (Probably because I use emacs mainly because of it!). It is structured like this:
 
 #+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-mode-configuration :noweb-sep "\n\n"
-    ;; Babel settings
-    (setq org-src-preserve-indentation t)
-    (org-babel-do-load-languages
-      'org-babel-load-languages
-      '((emacs-lisp . t)
-        (lisp . t)
-        (python . t)
-        (gnuplot . t)
-        (R . t)
-        (ruby . t)
-        (C . t)
-        (makefile . t)
-        (shell . t)
-        (sql . t)))
-    ;;<<easy-templates>>
-    (require 'org-tempo)
-    (setq org-babel-uppercase-example-markers t)
-    (add-to-list 'org-structure-template-alist '("r" . "SRC R :session :results output"))
+<<org-babel-configuration>>
+<<easy-templates>>
+<<timestamp-configuration>>
+<<latex-fragment-numbering>>
+<<automatic-fragment-preview>>
+<<quick-insert-latex-environments>>
+<<latex-code-syntax-highlight>>
+<<capture-templates>>
+<<misc>>
+#+END_SRC
 
-    (setq-default org-display-custom-times t)
-    (setq org-time-stamp-custom-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
+*** Misc
 
-    ; Automatic update of time-stamps {{{
-    (setq time-stamp-active t)
-    (setq time-stamp-format "<%:y-%02m-%02d %3a %02H:%02M>")
-    (setq time-stamp-pattern "10/^#\\+MODIFIED: %%$")
-    (add-hook 'before-save-hook 'time-stamp) ; Update timestamp on saving
-    ; }}}
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref misc :noweb-sep "\n"
+;; Fix width of inline images 
+(setq org-image-actual-width 400)
 
-    (setq org-cycle-emulate-tab 'white)
+(setq org-cycle-emulate-tab 'white)
+(setq org-tags-column 0)
 
-    (setq org-tags-column 0)
+;(custom-set-faces '(org-tag ((t (:background "orange" :foreground "black" :box t)))))
 
-    (custom-set-faces
-      '(org-tag ((t (:background "orange" :foreground "black" :box t)))))
-    (defun my/org-mode-hook ()
-      "Stop the org-level headers from increasing in height relative to the other text."
-      (dolist (face '(org-level-1
-                      org-level-2
-                      org-level-3
-                      org-level-4
-                      org-level-5))
-        (set-face-attribute face nil :weight 'normal :height 1.0)))
+(defun my/org-mode-hook ()
+  "Stop the org-level headers from increasing in height relative to the other text."
+  (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4 org-level-5))
+    (set-face-attribute face nil :weight 'normal :height 1.0)))
 
-    (add-hook 'org-mode-hook 'my/org-mode-hook)
+(add-hook 'org-mode-hook 'my/org-mode-hook)
     
-    ;(add-to-list 'org-latex-default-packages-alist
-    ;             '("" "siunitx" t))
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+#+END_SRC
 
-    ;; Fix width of inline images 
-    (setq org-image-actual-width 400)
+*** Babel configuration
 
-    ; Fix numbering in LaTeX preview {{{2
-    ;; In org-mode we can use LaTeX equations, and toggle an overlay that shows
-    ;; what the rendered equation will look like. However, each fragment is
-    ;; created in isolation, meaning that numbering is almost always wrong, and
-    ;; typically with each numbered equation starting with =(1)=. This hack,
-    ;; stolen from
-    ;; [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][John
-    ;; Kitchin]], solves this in a nice way for my purposes.
-    (defun org-renumber-environment (orig-func &rest args)
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-babel-configuration :noweb-sep "\n"
+(setq org-src-preserve-indentation t)
+
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '((emacs-lisp . t)
+    (lisp . t)
+    (python . t)
+    (gnuplot . t)
+    (R . t)
+    (ruby . t)
+    (C . t)
+    (makefile . t)
+    (shell . t)
+    (sql . t)))
+#+END_SRC
+
+*** Easy templates
+
+With just a few keystrokes, [[https://orgmode.org/manual/Easy-templates.html][Org’s easy templates]] inserts empty pairs of structural elements, such as ~#+BEGIN_SRC~ and ~#+END_SRC~. Easy templates use an expansion mechanism, which is native to Org, in a process similar to yasnippet and other Emacs template expansion packages. 
+
+However, [[https://orgmode.org/Changes.html#org1b5e967][Org Mode 9.2 changed the mechanism of template expansion]], where org-structure-template-alist is only for blocks defined by ~#+BEGIN_~ and ~#+END_~ and entries like ~("p" ":PROPERTIES:?:END:")~ are no longer accepted.
+
+To activate the old behaviour we must use the ~org-tempo~ library:
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref easy-templates :noweb-sep "\n\n"
+(require 'org-tempo)
+#+END_SRC
+
+Then we can define the templates.
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref easy-templates :noweb-sep "\n\n"
+(tempo-define-template "vct-r-src-block" '("#+BEGIN_SRC R :session :results output\n" p "\n#+END_SRC" >) "<r" "Insert a R source code block")
+#+END_SRC
+
+*** Timestamp configuration
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref timestamp-configuration :noweb-sep "\n\n"
+(setq-default org-display-custom-times t)
+(setq org-time-stamp-custom-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
+
+; Automatic update of time-stamps
+(setq time-stamp-active t)
+(setq time-stamp-format "<%:y-%02m-%02d %3a %02H:%02M>")
+(setq time-stamp-pattern "10/^#\\+MODIFIED: %%$")
+(add-hook 'before-save-hook 'time-stamp) ; Update timestamp on saving
+#+END_SRC
+
+*** LaTeX equation numbering
+**** Fix numbering in LaTeX fragment preview
+In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with =(1)=. This hack, stolen from [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][John Kitchin]], solves this in a nice way for my purposes.
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref latex-fragment-numbering :noweb-sep "\n\n"
+(defun org-renumber-environment (orig-func &rest args)
       "Improve equation numbering"
       (let ((results '())
             (counter -1)
@@ -655,220 +681,205 @@ Org configuration is the largest part of my spacemacs configuration (Probably be
                  (car args)))))
       (apply orig-func args))
 
-    (advice-add 'org-create-formula-image :around #'org-renumber-environment)
-    (setq org-latex-prefer-user-labels t)
-    ; 2}}}
-    ; Automatic LaTeX preview numbering {{{2
-    ; This solution (found
-    ; [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]])
-    ; enables org-mode LaTeX preview images when the cursor is over the
-    ; equation.
-    (defvar kk/org-latex-fragment-last nil
-        "Holds last fragment/environment you were on.")
-    
-      (defun kk/org-in-latex-fragment-p ()
-        "Return the point where the latex fragment begins, if inside
-      a latex fragment. Else return false"
-        (let* ((el (org-element-context))
-               (el-type (car el)))
-          (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
-              (org-element-property :begin el))))
-    
-      (defun kk/org-latex-fragment-toggle ()
-        "Toggle a latex fragment image "
-        (and (eq 'org-mode major-mode)
-    	 (let ((begin (kk/org-in-latex-fragment-p)))
-               (cond
-                ;; were on a fragment and now on a new fragment
-                ((and
-                  ;; fragment we were on
-                  kk/org-latex-fragment-last
-                  ;; and are on a fragment now
-                  begin
-    
-                  ;; but not on the last one this is a little tricky. as you edit the
-                  ;; fragment, it is not equal to the last one. We use the begin
-                  ;; property which is less likely to change for the comparison.
-                  (not (and kk/org-latex-fragment-last
-    			(= begin
-    			   kk/org-latex-fragment-last))))
-                 ;; go back to last one and put image back, provided there is still a fragment there
-                 (save-excursion
-                   (goto-char kk/org-latex-fragment-last)
-                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
-    
-                   ;; now remove current image
-                   (goto-char begin)
-                   (let ((ov (loop for ov in (org--list-latex-overlays)
-                                   if
-                                   (and
-    				(<= (overlay-start ov) (point))
-    				(>= (overlay-end ov) (point)))
-                                   return ov)))
-    		 (when ov
-                       (delete-overlay ov)))
-                   ;; and save new fragment
-                   (setq kk/org-latex-fragment-last begin)))
-    
-                ;; were on a fragment and now are not on a fragment
-                ((and
-                  ;; not on a fragment now
-                  (not begin)
-                  ;; but we were on one
-                  kk/org-latex-fragment-last)
-                 ;; put image back on, provided that there is still a fragment here.
-                 (save-excursion
-                   (goto-char kk/org-latex-fragment-last)
-                   (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
-    
-                 ;; unset last fragment
-                 (setq kk/org-latex-fragment-last nil))
-    
-                ;; were not on a fragment, and now are
-                ((and
-                  ;; we were not one one
-                  (not kk/org-latex-fragment-last)
-                  ;; but now we are
-                  begin)
-                 ;; remove image
-                 (save-excursion
-                   (goto-char begin)
-                   (let ((ov (loop for ov in (org--list-latex-overlays)
-                                   if
-                                   (and
-    				(<= (overlay-start ov) (point))
-    				(>= (overlay-end ov) (point)))
-                                   return ov)))
-    		 (when ov
-                       (delete-overlay ov))))
-                 (setq kk/org-latex-fragment-last begin))))))
-    
-    (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
-    ; 2}}}
-    ; Quick insertion of LaTeX environments {{{2
-    (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-    (setq cdlatex-math-symbol-alist '((?m ("\\mu" "\\mathrm{?}"))))
-    (define-key evil-normal-state-map (kbd ", e q") 'org-ref-helm-insert-ref-link)
-    (setq cdlatex-env-alist '(
-       ("eqn" "\\begin{equation}\n?\n\\end{equation}" nil)  ;; Numbered equation
-       ("eqnn" "\\begin{equation*}\n?\n\\end{equation*}" nil) ;; Non-numbered equation
-       ("alg" "\\begin{align}\n?\n\\end{align}" nil)
-       ("algn" "\\begin{align*}\n?\n\\end{align*}" nil)
-      )
-    )
-    (setq cdlatex-command-alist '(
-        ("equation" "Insert non-labeled equation" "" cdlatex-environment ("eqn") t nil)
-        ("equation*" "Insert non-labeled equation" "" cdlatex-environment ("eqnn") t nil)
-        ("align" "Insert non-labeled align" "" cdlatex-environment ("alg") t nil)
-        ("align*" "Insert non-labeled align" "" cdlatex-environment ("algn") t nil)
-      )
-    )
-    ; 2}}}
-    ; Exporting {{{2
-    (setq org-latex-pdf-process '("latexmk -pdf %f"))
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
 
-    (with-eval-after-load 'ox
-      (use-package ox-extra
-        :config
-        ;; Sections tagged with 'ignore' are... ignored.
-        (ox-extras-activate '(ignore-headlines))))
+(setq org-latex-prefer-user-labels t)
+#+END_SRC
 
-    (setq org-highlight-latex-and-related '(latex script entities))
-    ; 2}}}
-    ; Syntax highlight for LaTeX fragments {{{2
-    (font-lock-add-keywords 'org-mode
-            '(
-            ("\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)" 
-            (1 'font-lock-keyword-face)
-            (2 'font-lock-function-name-face)
-            )
-            (
-            "\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\|\\\\ref\\|\\\\cite\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)"
-            (1 'font-lock-keyword-face)
-            (2 'font-lock-constant-face)
-            )
-            ("\\(\\\\textrm\\|\\\\frac\\|\\\\mathrm\\)" (1 'font-lock-keyword-face))
-            ))
-    ; 2}}}
-    ; Capture templates {{{2 
-    (setq org-capture-templates
-          (quote (("t" "Todo" entry (file+headline "~/.wiki/capture/todos.org" "Tasks")
-                   "* TODO %^{Task}%?\n%U\n" :clock-in t :clock-resume t)
-                  ("p" "Project" entry (file+headline "~/.wiki/capture/projects.org" "Projects")
-                   "* TODO %^{Project} :PROJECT:\n%U\n%a\n%?" :clock-in t :clock-resume t)
-                  ("n" "Note" entry (file+headline "~/.wiki/capture/notes.org" "Notes")
-                   "* %^{Note} :NOTE:\n%U\n%a\n%?" :clock-in t :clock-resume t)
-                  ("i" "Idea" entry (file+headline "~/.wiki/capture/notes.org")
-                   "* %^{Idea} :IDEA: \n%u\n%?" :clock-in t :clock-resume t)
-                  ("j" "Journal" entry (file+datetree "~/.wiki/capture/journal.org")
-                   "* %^{Heading}\n%U\n%?" :clock-in t :clock-resume t)
-                  ;("w" "org-protocol" entry (file vct-archive-file)
-                  ; "* TODO Review %c\n%U\n" :immediate-finish t)
-                  )))
+**** Automatic LaTeX fragment previewing toggle
+
+This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref automatic-fragment-preview :noweb-sep "\n\n"
+(defvar kk/org-latex-fragment-last nil
+    "Holds last fragment/environment you were on.")
+
+  (defun kk/org-in-latex-fragment-p ()
+    "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+    (let* ((el (org-element-context))
+           (el-type (car el)))
+      (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+          (org-element-property :begin el))))
+
+  (defun kk/org-latex-fragment-toggle ()
+    "Toggle a latex fragment image "
+    (and (eq 'org-mode major-mode)
+	 (let ((begin (kk/org-in-latex-fragment-p)))
+           (cond
+            ;; were on a fragment and now on a new fragment
+            ((and
+              ;; fragment we were on
+              kk/org-latex-fragment-last
+              ;; and are on a fragment now
+              begin
+
+              ;; but not on the last one this is a little tricky. as you edit the
+              ;; fragment, it is not equal to the last one. We use the begin
+              ;; property which is less likely to change for the comparison.
+              (not (and kk/org-latex-fragment-last
+			(= begin
+			   kk/org-latex-fragment-last))))
+             ;; go back to last one and put image back, provided there is still a fragment there
+             (save-excursion
+               (goto-char kk/org-latex-fragment-last)
+               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+               ;; now remove current image
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov)))
+               ;; and save new fragment
+               (setq kk/org-latex-fragment-last begin)))
+
+            ;; were on a fragment and now are not on a fragment
+            ((and
+              ;; not on a fragment now
+              (not begin)
+              ;; but we were on one
+              kk/org-latex-fragment-last)
+             ;; put image back on, provided that there is still a fragment here.
+             (save-excursion
+               (goto-char kk/org-latex-fragment-last)
+               (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+             ;; unset last fragment
+             (setq kk/org-latex-fragment-last nil))
+
+            ;; were not on a fragment, and now are
+            ((and
+              ;; we were not one one
+              (not kk/org-latex-fragment-last)
+              ;; but now we are
+              begin)
+             ;; remove image
+             (save-excursion
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov))))
+             (setq kk/org-latex-fragment-last begin))))))
+
+(add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
+#+END_SRC
+*** Quick insertion of LaTeX environment
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref quick-insert-latex-environments :noweb-sep "\n\n"
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+
+(define-key evil-normal-state-map (kbd ", e q") 'org-ref-helm-insert-ref-link)
+(setq cdlatex-math-symbol-alist '((?m ("\\mu" "\\mathrm{?}"))))
+(setq cdlatex-env-alist '(
+   ("eqn" "\\begin{equation}\n?\n\\end{equation}" nil)  ;; Numbered equation
+   ("eqnn" "\\begin{equation*}\n?\n\\end{equation*}" nil) ;; Non-numbered equation
+   ("alg" "\\begin{align}\n?\n\\end{align}" nil)
+   ("algn" "\\begin{align*}\n?\n\\end{align*}" nil)))
+(setq cdlatex-command-alist '(
+    ("equation" "Insert non-labeled equation" "" cdlatex-environment ("eqn") t nil)
+    ("equation*" "Insert non-labeled equation" "" cdlatex-environment ("eqnn") t nil)
+    ("align" "Insert non-labeled align" "" cdlatex-environment ("alg") t nil)
+    ("align*" "Insert non-labeled align" "" cdlatex-environment ("algn") t nil)))
+#+END_SRC
+
+*** LaTeX code syntax highlighting
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref latex-code-syntax-highlight :noweb-sep "\n\n"
+(setq org-highlight-latex-and-related '(latex script entities))
+
+(font-lock-add-keywords 'org-mode
+        '(("\\(\\\\begin\\|\\\\end\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)" (1 'font-lock-keyword-face) (2 'font-lock-function-name-face))
+          ("\\(\\\\eqref\\|\\\\ref\\|\\\\href\\|\\\\label\\|\\\\ref\\|\\\\cite\\)\\(?:\{\\)\\(.*\\)\\(?:\}\\)" (1 'font-lock-keyword-face) (2 'font-lock-constant-face))
+          ("\\(\\\\textrm\\|\\\\frac\\|\\\\mathrm\\)" (1 'font-lock-keyword-face))))
+#+END_SRC
+
+*** Capture templates
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref capture-templates :noweb-sep "\n\n"
+(setq org-capture-templates
+      (quote (("t" "Todo" entry (file+headline "~/.wiki/capture/todos.org" "Tasks")
+               "* TODO %^{Task}%?\n%U\n" :clock-in t :clock-resume t)
+              ("p" "Project" entry (file+headline "~/.wiki/capture/projects.org" "Projects")
+               "* TODO %^{Project} :PROJECT:\n%U\n%a\n%?" :clock-in t :clock-resume t)
+              ("n" "Note" entry (file+headline "~/.wiki/capture/notes.org" "Notes")
+               "* %^{Note} :NOTE:\n%U\n%a\n%?" :clock-in t :clock-resume t)
+              ("i" "Idea" entry (file+headline "~/.wiki/capture/notes.org")
+               "* %^{Idea} :IDEA: \n%u\n%?" :clock-in t :clock-resume t)
+              ("j" "Journal" entry (file+datetree "~/.wiki/capture/journal.org")
+               "* %^{Heading}\n%U\n%?" :clock-in t :clock-resume t))))
 #+END_SRC
 
 ** Org agenda configuration
 
 #+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-agenda-configuration :noweb-sep "\n\n"
-  ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
-    (setq org-agenda-files '("~/.wiki/capture/"))
+;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
+(setq org-agenda-files '("~/.wiki/capture/"))
 
-    (defun air-org-skip-subtree-if-priority (priority)
-      "Skip an agenda subtree if it has a priority of PRIORITY.
+(defun air-org-skip-subtree-if-priority (priority)
+  "Skip an agenda subtree if it has a priority of PRIORITY.
 
-    PRIORITY may be one of the characters ?A, ?B, or ?C."
-      (let ((subtree-end (save-excursion (org-end-of-subtree t)))
-            (pri-value (* 1000 (- org-lowest-priority priority)))
-            (pri-current (org-get-priority (thing-at-point 'line t))))
-        (if (= pri-value pri-current)
-            subtree-end
-          nil)))
-    (defun air-org-skip-subtree-if-habit ()
-      "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
-      (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-        (if (string= (org-entry-get nil "STYLE") "habit")
-            subtree-end
-          nil)))
+PRIORITY may be one of the characters ?A, ?B, or ?C."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+        (pri-value (* 1000 (- org-lowest-priority priority)))
+        (pri-current (org-get-priority (thing-at-point 'line t))))
+    (if (= pri-value pri-current)
+        subtree-end
+      nil)))
+(defun air-org-skip-subtree-if-habit ()
+  "Skip an agenda entry if it has a STYLE property equal to \"habit\"."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (string= (org-entry-get nil "STYLE") "habit")
+        subtree-end
+      nil)))
 
-    (setq org-agenda-custom-commands
-          '(("c" "Simple agenda view"
-             ((tags "PRIORITY=\"A\""
-                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
-              (agenda "")
-              (alltodo ""
-                       ((org-agenda-skip-function
-                         '(or (air-org-skip-subtree-if-priority ?A)
-                              (org-agenda-skip-if nil '(scheduled deadline))))))))
-            ("d" "Daily agenda and all TODOs"
-             ((tags "PRIORITY=\"A\""
-                    ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
-                     (org-agenda-overriding-header "High-priority unfinished tasks:")))
-              (agenda "" ((org-agenda-ndays 1)))
-              (alltodo ""
-                       ((org-agenda-skip-function '(or (air-org-skip-subtree-if-habit)
-                                                       (air-org-skip-subtree-if-priority ?A)
-                                                       (org-agenda-skip-if nil '(scheduled deadline))))
-                        (org-agenda-overriding-header "ALL normal priority tasks:"))))
-             ((org-agenda-compact-blocks t)))))
+(setq org-agenda-custom-commands
+      '(("c" "Simple agenda view"
+         ((tags "PRIORITY=\"A\""
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "High-priority unfinished tasks:")))
+          (agenda "")
+          (alltodo ""
+                   ((org-agenda-skip-function
+                     '(or (air-org-skip-subtree-if-priority ?A)
+                          (org-agenda-skip-if nil '(scheduled deadline))))))))
+        ("d" "Daily agenda and all TODOs"
+         ((tags "PRIORITY=\"A\""
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "High-priority unfinished tasks:")))
+          (agenda "" ((org-agenda-ndays 1)))
+          (alltodo ""
+                   ((org-agenda-skip-function '(or (air-org-skip-subtree-if-habit)
+                                                   (air-org-skip-subtree-if-priority ?A)
+                                                   (org-agenda-skip-if nil '(scheduled deadline))))
+                    (org-agenda-overriding-header "ALL normal priority tasks:"))))
+         ((org-agenda-compact-blocks t)))))
 
-    (setq org-archive-location "~/.wiki/capture/archive.org::")
+(setq org-archive-location "~/.wiki/capture/archive.org::")
 
-    ;; TODO: Used to indicate tasks and projects which need to be done
-    ;; STARTED: Used to indicate that a task or project is already started
-    ;; WAITING: Whenever I have a task that is waiting on someone else, I'll assign it this keyword 
-    ;; INACTIVE: signify that I'd like to come back to it eventually and I'll occasionally search my files for "INACTIVE" projects when I have time.
-    (setq org-todo-keywords '((sequence "TODO(t)" "STARTED(s)" "|"  "WAITING(w)" "INACTIVE(l)" "CANCELED(c)" "DONE(d)")))
+;; TODO: Used to indicate tasks and projects which need to be done
+;; STARTED: Used to indicate that a task or project is already started
+;; WAITING: Whenever I have a task that is waiting on someone else, I'll assign it this keyword 
+;; INACTIVE: signify that I'd like to come back to it eventually and I'll occasionally search my files for "INACTIVE" projects when I have time.
+(setq org-todo-keywords '((sequence "TODO(t)" "STARTED(s)" "|"  "WAITING(w)" "INACTIVE(l)" "CANCELED(c)" "DONE(d)")))
 
-    (setq org-todo-keyword-faces
-          '(("TODO" . (:foreground "GoldenRod" :weight bold))
-            ("STARTED" . (:foreground "OrangeRed" :weight bold))
-            ("WAITING" . (:foreground "coral" :weight bold)) 
-            ("INACTIVE" . (:foreground "LimeGreen" :weight bold))
-            ("CANCELED" . (:foreground "LimeGreen" :weight bold))))
+(setq org-todo-keyword-faces
+      '(("TODO" . (:foreground "GoldenRod" :weight bold))
+        ("STARTED" . (:foreground "OrangeRed" :weight bold))
+        ("WAITING" . (:foreground "coral" :weight bold)) 
+        ("INACTIVE" . (:foreground "LimeGreen" :weight bold))
+        ("CANCELED" . (:foreground "LimeGreen" :weight bold))))
 
-    (setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                     (org-agenda-files :maxlevel . 9))))
-    (setq org-outline-path-complete-in-steps nil)         ; Refile in a single go
-    (setq org-refile-use-outline-path t)                  ; Show full paths for refiling
+(setq org-refile-targets (quote ((nil :maxlevel . 9) (org-agenda-files :maxlevel . 9))))
+(setq org-outline-path-complete-in-steps nil) ; Refile in a single go
+(setq org-refile-use-outline-path t)          ; Show full paths for refiling
 #+END_SRC

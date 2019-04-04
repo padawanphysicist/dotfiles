@@ -700,6 +700,11 @@ redshift -l -3.7318616:-38.5266704 &
     <!-- Launch rofi -->
     <keybind key="A-F2">
       <action name="Execute">
+        <command>rofi -show run</command>
+      </action>
+    </keybind>
+    <keybind key="XF86Search">
+      <action name="Execute">
         <command>rofi -show drun</command>
       </action>
     </keybind>
@@ -746,17 +751,12 @@ redshift -l -3.7318616:-38.5266704 &
         <command>pamixer -t</command>
       </action>
     </keybind>
-    <!-- Maximize/Restore window -->
-    <keybind key="A-F10">
-      <action name="ToggleMaximize">
-        <to>left</to>
-        <wrap>no</wrap>
+    <keybind key="F8">
+      <action name="Execute">
+        <command>lxrandr</command>
       </action>
     </keybind>
-    <keybind key="W-0">
-        <action name="ToggleDecorations"/>
-    </keybind>
-
+    <<window-positioning-keybindings>>
   </keyboard>
   <mouse>
     <dragThreshold>1</dragThreshold>
@@ -1304,6 +1304,138 @@ redshift -l -3.7318616:-38.5266704 &
     </font>
   </theme>
 </openbox_config>
+#+END_SRC
+
+** Window positioning keybindings
+
+Working with development, we use to deal with many open windows and type all the time, so it is very useful to have keyboard bindings allowing more than only maximize or minimize windows.
+
+I will define the following keybindings ([[http://openbox.org/wiki/Help:Actions][Actions reference]]):
+
+- Super+A : decorate on/off
+- Alt+F10: Toggle Maximize
+- Super+0: Center window
+- Super+(Left|Right|Up|Down): Dock
+- Super+(PgUp,Home,PgDown,End): Quadrant
+- Super+Tab: List windows (as middle-click desktop)
+
+#+BEGIN_SRC xml :noweb yes :noweb-ref window-positioning-keybindings
+<!-- Maximize/Restore window -->
+<keybind key="A-F10">
+  <action name="ToggleMaximize">
+    <to>left</to>
+    <wrap>no</wrap>
+  </action>
+</keybind>
+<!-- Super+A = Toggle decoration -->
+<keybind key="W-a">
+	<action name="ToggleDecorations"/>
+</keybind>
+<!-- Super+0 = Restore to center -->
+<keybind key="W-0">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>center</x>
+		<y>center</y>
+		<height>70%</height>
+		<width>60%</width>
+	</action>
+</keybind>
+<!-- Super+Left = Dock undecorated left -->
+<keybind key="W-Left">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>0</x>
+		<y>0</y>
+		<height>100%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+Right = Dock undecorated right -->
+<keybind key="W-Right">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>50%</x>
+		<y>0</y>
+		<height>100%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+Up = Dock undecorated up -->
+<keybind key="W-Up">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>0</x>
+		<y>0</y>
+		<height>50%</height>
+		<width>100%</width>
+	</action>
+</keybind>
+<!-- Super+Down = Dock undecorated down -->
+<keybind key="W-Down">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>0</x>
+		<y>50%</y>
+		<height>50%</height>
+		<width>100%</width>
+	</action>
+</keybind>
+<!-- Super+Insert = Dock undecorated Quadrant 1 -->
+<keybind key="W-Insert">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>0</x>
+		<y>0</y>
+		<height>50%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+Home = Dock undecorated Quadrant 2 -->
+<keybind key="W-Delete">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>50%</x>
+		<y>0</y>
+		<height>50%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+Delete = Dock undecorated Quadrant 3 -->
+<keybind key="W-Home">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>0</x>
+		<y>50%</y>
+		<height>50%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+End = Dock undecorated Quadrant 4 -->
+<keybind key="W-End">
+	<action name="Unmaximize"/>
+	<action name="Undecorate"/>
+	<action name="MoveResizeTo">
+		<x>50%</x>
+		<y>50%</y>
+		<height>50%</height>
+		<width>50%</width>
+	</action>
+</keybind>
+<!-- Super+Tab = List Windows (same as middle-click desktop) -->
+<keybind key="W-Tab">
+  <action name="ShowMenu">
+	<menu>client-list-combined-menu</menu>
+  </action>
+</keybind>
 #+END_SRC
 
 * Environment configuration

@@ -551,6 +551,15 @@ Since emacs 26 has native support to line numbering, we enable it:
   (evil-ex-define-cmd "WQ" 'evil-save-and-close))
 #+END_SRC
 
+*** Completion
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref general-configuration :noweb-sep "\n\n"
+(with-eval-after-load 'company
+    (define-key company-active-map (kbd "M-j") 'company-select-next)
+    (define-key company-active-map (kbd "M-k") 'company-select-previous)
+    (define-key company-active-map (kbd "C-p") 'company-yasnippet-or-completion)
+    (define-key company-search-map (kbd "M-j") 'company-select-next)
+    (define-key company-search-map (kbd "M-k") 'company-select-previous))
+#+END_SRC
 ** Org mode configuration
 
 Org configuration is the largest part of my spacemacs configuration (Probably because I use emacs mainly because of it!). It is structured like this:

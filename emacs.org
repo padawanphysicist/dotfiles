@@ -60,8 +60,8 @@ pdf-tools
 git
 python
 (auto-completion :variables
-    auto-completion-return-key-behavior nil
-    auto-completion-tab-key-behavior nil
+    auto-completion-return-key-behavior 'complete
+    auto-completion-tab-key-behavior 'cycle
     auto-completion-complete-with-key-sequence "jk"
     auto-completion-private-snippets-directory "~/.snippets"
     auto-completion-enable-snippets-in-popup t
@@ -78,9 +78,7 @@ version-control
 html
 ess
 emacs-lisp
-(scheme :variables 
-    geiser-active-implementations '(chicken) 
-    geiser-scheme-implementation 'chicken)
+common-lisp
 #+END_SRC
 
 ** Additional Packages
@@ -556,7 +554,7 @@ Since emacs 26 has native support to line numbering, we enable it:
 (with-eval-after-load 'company
     (define-key company-active-map (kbd "M-j") 'company-select-next)
     (define-key company-active-map (kbd "M-k") 'company-select-previous)
-    (define-key company-active-map (kbd "C-p") 'company-yasnippet-or-completion)
+    ;(define-key company-active-map (kbd "C-p") 'company-yasnippet-or-completion)
     (define-key company-search-map (kbd "M-j") 'company-select-next)
     (define-key company-search-map (kbd "M-k") 'company-select-previous))
 #+END_SRC
@@ -632,6 +630,7 @@ Then we can define the templates.
 
 #+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref easy-templates :noweb-sep "\n\n"
 (tempo-define-template "vct-r-src-block" '("#+BEGIN_SRC R :session :results output\n" p "\n#+END_SRC" >) "<r" "Insert a R source code block")
+(tempo-define-template "vct-ruby-src-block" '("#+BEGIN_SRC ruby :session :results output\n" p "\n#+END_SRC" >) "<rb" "Insert a Ruby source code block")
 #+END_SRC
 
 *** Timestamp configuration

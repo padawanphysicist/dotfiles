@@ -631,15 +631,15 @@ redshift -l -3.7318616:-38.5266704 &
       <action name="Unfocus"/>
     </keybind>
     <!-- Keybindings for window switching -->
-    <keybind key="A-Tab">
-      <action name="NextWindow">
-        <finalactions>
-          <action name="Focus"/>
-          <action name="Raise"/>
-          <action name="Unshade"/>
-        </finalactions>
-      </action>
-    </keybind>
+    <!-- <keybind key="A-Tab"> -->
+    <!--   <action name="NextWindow"> -->
+    <!--     <finalactions> -->
+    <!--       <action name="Focus"/> -->
+    <!--       <action name="Raise"/> -->
+    <!--       <action name="Unshade"/> -->
+    <!--     </finalactions> -->
+    <!--   </action> -->
+    <!-- </keybind> -->
     <keybind key="A-S-Tab">
       <action name="PreviousWindow">
         <finalactions>
@@ -709,7 +709,7 @@ redshift -l -3.7318616:-38.5266704 &
       </action>
     </keybind>
     <!-- Change windows using rofi -->
-    <keybind key="W-space">
+    <keybind key="A-Tab">
       <action name="Execute">
         <command>rofi -show window</command>
       </action>
@@ -1320,6 +1320,11 @@ I will define the following keybindings ([[http://openbox.org/wiki/Help:Actions]
 - Super+Tab: List windows (as middle-click desktop)
 
 #+BEGIN_SRC xml :noweb yes :noweb-ref window-positioning-keybindings
+<keybind key="A-space">
+  <action name="ShowMenu">
+<menu>client-menu</menu>
+  </action>
+</keybind>
 <!-- Maximize/Restore window -->
 <keybind key="A-F10">
   <action name="ToggleMaximize">
@@ -1430,10 +1435,9 @@ I will define the following keybindings ([[http://openbox.org/wiki/Help:Actions]
 		<width>50%</width>
 	</action>
 </keybind>
-<!-- Super+Tab = List Windows (same as middle-click desktop) -->
-<keybind key="W-Tab">
-  <action name="ShowMenu">
-	<menu>client-list-combined-menu</menu>
+<keybind key="C-S-A-Left">
+  <action name="MoveResizeTo">
+    <monitor>2</monitor>
   </action>
 </keybind>
 #+END_SRC

@@ -13,7 +13,8 @@
 sh ~/.fehbg &
 
 # Enable transparency
-xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55 &
+#xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55 &
+compton &
 
 # Clipboard
 clipit &
@@ -22,8 +23,8 @@ clipit &
 polybar mainbar-openbox &
 
 # Open some applications
+konsole -e "tmux -2" & sleep 0.5
 firefox &
-xterm -e "tmux -2" & sleep 0.5
 
 # Desktop notifications
 dunst &

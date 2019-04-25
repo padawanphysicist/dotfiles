@@ -88,6 +88,8 @@ cdlatex
 regex-tool
 yasnippet-snippets
 sed-mode
+sage-shell-mode
+ob-sagemath
 #+END_SRC
 
 ** Excluded Packages
@@ -614,6 +616,37 @@ Org configuration is the largest part of my spacemacs configuration (Probably be
     (sql . t)))
 #+END_SRC
 
+*** Configure SageMath
+
+#+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref org-babel-configuration :noweb-sep "\n"
+;; Ob-sagemath supports only evaluating with a session.
+(setq org-babel-default-header-args:sage '((:session . t)
+                                           (:results . "output")))
+
+;; C-c c for asynchronous evaluating (only for SageMath code blocks).
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async))
+
+;; Do not confirm before evaluation
+(setq org-confirm-babel-evaluate nil)
+
+;; Do not evaluate code blocks when exporting.
+(setq org-export-use-babel nil)
+
+;; Show images when opening a file.
+(setq org-startup-with-inline-images t)
+
+;; Show images after evaluating code blocks.
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+
+;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
+(sage-shell:define-alias)
+
+;; Turn on eldoc-mode in Sage terminal and in Sage source files
+(add-hook 'sage-shell-mode-hook #'eldoc-mode)
+(add-hook 'sage-shell:sage-mode-hook #'eldoc-mode)
+#+END_SRC
+
 *** Easy templates
 
 With just a few keystrokes, [[https://orgmode.org/manual/Easy-templates.html][Org’s easy templates]] inserts empty pairs of structural elements, such as ~#+BEGIN_SRC~ and ~#+END_SRC~. Easy templates use an expansion mechanism, which is native to Org, in a process similar to yasnippet and other Emacs template expansion packages. 
@@ -631,6 +664,7 @@ Then we can define the templates.
 #+BEGIN_SRC emacs-lisp :noweb yes :noweb-ref easy-templates :noweb-sep "\n\n"
 (tempo-define-template "vct-r-src-block" '("#+BEGIN_SRC R :session :results output\n" p "\n#+END_SRC" >) "<r" "Insert a R source code block")
 (tempo-define-template "vct-ruby-src-block" '("#+BEGIN_SRC ruby :session :results output\n" p "\n#+END_SRC" >) "<rb" "Insert a Ruby source code block")
+(tempo-define-template "vct-sage-src-block" '("#+BEGIN_SRC sage :session :results output\n" p "\n#+END_SRC" >) "<sage" "Insert a Ruby source code block")
 #+END_SRC
 
 *** Timestamp configuration

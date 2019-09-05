@@ -151,6 +151,7 @@ There are two things you can do about this warning:
  #+end_src
 
 ** Theme
+*** Colorscheme
 
 I like light on dark because I find it to be more restful. I find hard a theme which works both on GUI and terminal, but so far [[https://github.com/nashamri/spacemacs-theme][Spacemacs theme]] seems to be a nice choice.
 #+begin_src emacs-lisp
@@ -158,4 +159,17 @@ I like light on dark because I find it to be more restful. I find hard a theme w
   :defer t
   :init
   (load-theme 'spacemacs-dark t))
+#+end_src
+
+*** Spaceline
+
+Powerline theme from Spacemacs
+
+#+begin_src emacs-lisp
+  (use-package spaceline
+    :config
+    (require 'spaceline-config)
+    (spaceline-spacemacs-theme)
+    (setq powerline-default-separator 'wave)
+    (spaceline-compile))
 #+end_src

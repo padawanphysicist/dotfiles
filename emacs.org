@@ -1,7 +1,6 @@
 #+title: Emacs configuration
 #+property: header-args+ :shebang ";; -*- mode: emacs-lisp -*-"
 
-
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
 * Init file
@@ -274,7 +273,12 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 
 In this section I load all configuration I do outside the init file:
 #+begin_src emacs-lisp
-(require 'user-init-org)
+(add-to-list 'package-pinned-packages '(org . "org") t)
+(use-package org
+  :pin org
+  :ensure org-plus-contrib ;; Workaround
+  :config
+  (require 'user-init-org))
 #+end_src
 
 * Org configuration
@@ -284,8 +288,7 @@ In this section I load all configuration I do outside the init file:
 :header-args+: :noweb yes
 :end:
 
-Org is so awesome it deserves a section for itself!
-
+Org is so awesome it deserves a package itself:
 #+begin_src emacs-lisp
 ;; package --- Summary
 ;;; configure org mode
@@ -294,9 +297,33 @@ Org is so awesome it deserves a section for itself!
 
 ;;; Code:
 
-(add-hook 'org-mode-hook 'org-indent-mode)
+<<org-conf>>
 
 (message "configuring org-mode")
 (provide 'user-init-org)
 ;;; user-init-org.el ends here
+#+end_src
+
+** General configuration
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+*** Ident mode by default
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+*** Visual lines by default
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'visual-line-mode)
+#+end_src
+
+*** Fix tag position
+
+#+begin_src emacs-lisp
+(setq org-tags-column 0)
 #+end_src

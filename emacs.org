@@ -173,12 +173,12 @@ I like light on dark because I find it to be more restful. I find hard a theme w
 Powerline theme from Spacemacs
 
 #+begin_src emacs-lisp
-  (use-package spaceline
-    :config
-    (require 'spaceline-config)
-    (spaceline-spacemacs-theme)
-    (setq powerline-default-separator 'wave)
-    (spaceline-compile))
+(use-package spaceline
+  :config
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  (setq powerline-default-separator 'box)
+  (spaceline-compile))
 #+end_src
 ** Make Emacs discoverable
 

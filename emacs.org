@@ -193,7 +193,13 @@ Displays available keybindings in popup, turning Emacs more discoverable.
          ("C-x C-r" . helm-recentf)
          ("C-x C-b" . helm-buffers-list)
          ("C-x b" . helm-buffers-list))
-  :config (progn (setq helm-buffers-fuzzy-matching t) (helm-mode 1)))
+  :config
+  (progn
+    (setq helm-buffers-fuzzy-matching t)
+    (customize-set-variable 'helm-ff-lynx-style-map t)
+    (define-key helm-map (kbd "<left>") 'helm-previous-source)
+    (define-key helm-map (kbd "<right>") 'helm-next-source)
+    (helm-mode 1)))
 #+end_src
 
 I also add [[https://company-mode.github.io/][company-mode]], which is a completion framework for emacs:
@@ -238,13 +244,13 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 *** Ruby
 
 #+begin_src emacs-lisp
-  (use-package inf-ruby
-    :init
-    (add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
-    :config
-    (progn
-      (add-to-list 'inf-ruby-implementations '("pry" . "pry"))
-      (setq inf-ruby-default-implementation "pry")))
+(use-package inf-ruby
+  :init
+  (add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
+  :config
+  (progn
+    (add-to-list 'inf-ruby-implementations '("pry" . "pry"))
+    (setq inf-ruby-default-implementation "pry")))
 #+end_src
 
 *** R

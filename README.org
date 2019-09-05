@@ -7,6 +7,22 @@ This is my dotfiles repo. I hope you find something useful here!
 - [[https://www.gnu.org/software/stow/][GNU Stow]] for symlinking
 - [[https://www.gnu.org/software/emacs/][GNU Emacs]] for tangling the files
 
+Besides that, there is a series of additional software I have to install to have a smoother experience:
+
+- Openbox
+  - Menumaker
+  - Rofi
+  - Redshift
+  - Conky
+  - Compton
+  - feh
+  - Tint2
+  - xclip|xsel
+- Shell
+  - [[https://git-scm.com/][Git]]
+  - xdg-user-dirs
+  - [[https://github.com/scop/bash-completion][Bash completion]]
+
 * Instructions
 
 Clone the repository in a folder in your =$HOME= (I keep it as a hidden directory =.dotfiles=), either from [[https://gitlab.com][GitLab]]

@@ -225,10 +225,34 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 #+end_src
 ** Git configuration
 
+[[https://magit.vc/][Magit]] is a wonderful git interface for emacs
+
 #+begin_src emacs-lisp
 (use-package magit
   :bind (("C-x g" . magit-status)))
 (use-package git-gutter-fringe
   :config
   (global-git-gutter-mode t))
+#+end_src
+** Programming languages
+*** Ruby
+
+#+begin_src emacs-lisp
+  (use-package inf-ruby
+    :init
+    (add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
+    :config
+    (progn
+      (add-to-list 'inf-ruby-implementations '("pry" . "pry"))
+      (setq inf-ruby-default-implementation "pry")))
+#+end_src
+
+*** R
+
+#+begin_src emacs-lisp
+(use-package ess
+  :ensure ess
+  :commands (inferior-ess-mode ess-help-mode)
+  :config
+  (setq inferior-R-args "--quiet"))
 #+end_src

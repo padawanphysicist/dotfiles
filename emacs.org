@@ -150,6 +150,14 @@ There are two things you can do about this warning:
 (load custom-file nil t)
  #+end_src
 
+** Add my elisp directory and other files
+
+Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.elisp")
+#+end_src
+
 ** Theme
 *** Colorscheme
 
@@ -261,4 +269,34 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   :commands (inferior-ess-mode ess-help-mode)
   :config
   (setq inferior-R-args "--quiet"))
+#+end_src
+** Load external plugins
+
+In this section I load all configuration I do outside the init file:
+#+begin_src emacs-lisp
+(require 'user-init-org)
+#+end_src
+
+* Org configuration
+:properties:
+:header-args:  :tangle "emacs/.elisp/user-init-org.el"
+:header-args+: :mkdirp yes
+:header-args+: :noweb yes
+:end:
+
+Org is so awesome it deserves a section for itself!
+
+#+begin_src emacs-lisp
+;; package --- Summary
+;;; configure org mode
+;;; Commentary:
+;; Configures org mode parameters
+
+;;; Code:
+
+(add-hook 'org-mode-hook 'org-indent-mode)
+
+(message "configuring org-mode")
+(provide 'user-init-org)
+;;; user-init-org.el ends here
 #+end_src

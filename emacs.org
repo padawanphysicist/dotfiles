@@ -173,3 +173,11 @@ Powerline theme from Spacemacs
     (setq powerline-default-separator 'wave)
     (spaceline-compile))
 #+end_src
+** Make Emacs discoverable
+
+Displays available keybindings in popup, turning Emacs more discoverable.
+#+begin_src emacs-lisp
+(use-package which-key
+  :init
+  (which-key-mode))
+#+end_src

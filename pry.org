@@ -1,0 +1,41 @@
+#+title: Pry configuration
+#+PROPERTY: header-args+ :tangle "pry/.pryrc"
+#+PROPERTY: header-args+ :mkdirp yes
+#+PROPERTY: header-args+ :shebang "#-*- mode: ruby -*-" 
+
+Pry is a powerful alternative to the standard IRB shell for Ruby. It features syntax highlighting, a flexible plugin architecture, runtime invocation and source and documentation browsing. 
+
+* Load file within session
+
+#+begin_src ruby
+Pry::Commands.block_command "load", "Execute the code within file in the current session, leaving the resulting objects for inspecting" do |filename|
+  Pry.toplevel_binding.eval File.read(filename)
+end
+#+end_src
+
+* Stepping code
+
+Enable short commands for stepping around while debugging.
+
+#+begin_src ruby
+if defined?(PryByebug)
+  Pry.commands.alias_command 'c', 'continue'
+  Pry.commands.alias_command 's', 'step'
+  Pry.commands.alias_command 'n', 'next'
+  Pry.commands.alias_command 'f', 'finish'
+end
+#+end_src
+
+* Repeat last command
+
+Press ~ENTER~ will repeat the last command over again. Very convenient
+to step several lines of code.
+
+#+begin_src ruby
+# Hit Enter to repeat last command
+Pry::Commands.command /^$/, "repeat last command" do
+  _pry_.run_command Pry.history.to_a.last
+end
+#+end_src
+
+

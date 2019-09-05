@@ -39,6 +39,19 @@ The init file contains personal Emacs-Lisp code that you want to execute when yo
 (setq-default cursor-type 'bar)
  #+end_src
 
+*** Smooth Scrolling
+
+#+begin_src emacs-lisp
+;; Scroll one line at a time (less "jumpy" than defaults)
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+;; don't accelerate scrolling
+(setq mouse-wheel-progressive-speed nil)
+;; scroll window under mouse
+(setq mouse-wheel-follow-mouse 't)
+;; keyboard scroll one line at a time
+(setq scroll-step 1)
+#+end_src
+
 *** Disable startup screen
 
  #+begin_src emacs-lisp
@@ -326,4 +339,15 @@ Org is so awesome it deserves a package itself:
 
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
+#+end_src
+** Babel
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+*** Preserve leading whitespace on export
+
+#+begin_src emacs-lisp
+(setq org-src-preserve-indentation t)
 #+end_src

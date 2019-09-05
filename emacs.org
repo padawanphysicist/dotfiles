@@ -181,3 +181,54 @@ Displays available keybindings in popup, turning Emacs more discoverable.
   :init
   (which-key-mode))
 #+end_src
+
+** Completion on steroids
+
+[[https://github.com/emacs-helm/helm][Helm]] is is an Emacs framework for incremental completions and narrowing selections.
+
+#+begin_src emacs-lisp
+(use-package helm
+  :bind (("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)
+         ("C-x C-r" . helm-recentf)
+         ("C-x C-b" . helm-buffers-list)
+         ("C-x b" . helm-buffers-list))
+  :config (progn (setq helm-buffers-fuzzy-matching t) (helm-mode 1)))
+#+end_src
+
+I also add [[https://company-mode.github.io/][company-mode]], which is a completion framework for emacs:
+#+begin_src emacs-lisp
+(use-package company
+  :config
+  (setq company-tooltip-align-annotations t)
+  (setq company-tooltip-flip-when-above t)
+  ;; Easy navigation to candidates with M-<n>
+  (setq company-show-numbers t)
+  (setq company-require-match nil)
+  (add-hook 'after-init-hook 'global-company-mode))
+#+end_src
+** Sane undo/redo
+
+The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
+#+begin_src emacs-lisp
+;; Enable undo-tree, sane undo/redo behavior
+(use-package undo-tree
+  :init (global-undo-tree-mode)
+  :config
+  ;; Turn on everywhere
+  (global-undo-tree-mode 1)
+  ;; Make ctrl-z undo
+  (global-set-key (kbd "C-z") 'undo)
+  ;; Make ctrl-Z redo
+  (defalias 'redo 'undo-tree-redo)
+  (global-set-key (kbd "C-S-z") 'redo))
+#+end_src
+** Git configuration
+
+#+begin_src emacs-lisp
+(use-package magit
+  :bind (("C-x g" . magit-status)))
+(use-package git-gutter-fringe
+  :config
+  (global-git-gutter-mode t))
+#+end_src

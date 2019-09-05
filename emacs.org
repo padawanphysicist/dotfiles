@@ -150,3 +150,12 @@ There are two things you can do about this warning:
 (load custom-file nil t)
  #+end_src
 
+** Theme
+
+I like light on dark because I find it to be more restful. I find hard a theme which works both on GUI and terminal, but so far [[https://github.com/nashamri/spacemacs-theme][Spacemacs theme]] seems to be a nice choice.
+#+begin_src emacs-lisp
+(use-package spacemacs-theme
+  :defer t
+  :init
+  (load-theme 'spacemacs-dark t))
+#+end_src

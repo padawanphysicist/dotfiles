@@ -522,6 +522,10 @@ This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview
 (add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
 #+end_src
 
+*** LaTeX code syntax highlighting
+#+begin_src emacs-lisp
+(setq org-highlight-latex-and-related '(latex script entities))
+#+end_src
 ** Babel
 :properties:
 :header-args+: :noweb-ref org-conf

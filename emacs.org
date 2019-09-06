@@ -260,6 +260,16 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   :config
   (global-git-gutter-mode t))
 #+end_src
+** LaTeX configuration
+
+#+begin_src emacs-lisp
+(use-package tex
+  :defer t
+  :ensure auctex
+  :config
+  (setq TeX-auto-save t))
+#+end_src
+
 ** Programming languages
 *** Ruby
 
@@ -286,7 +296,6 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 
 In this section I load all configuration I do outside the init file:
 #+begin_src emacs-lisp
-(add-to-list 'package-pinned-packages '(org . "org") t)
 (use-package org
   :pin org
   :ensure org-plus-contrib ;; Workaround
@@ -358,10 +367,6 @@ Org is so awesome it deserves a package itself:
 :end:
 
 *** Fix fragment preview size
-:properties:
-:header-args+: :noweb-ref org-conf
-:header-args+: :tangle no
-:end:
 
 Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
 
@@ -380,10 +385,6 @@ Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/quest
 #+end_src
 
 *** Fix fragment preview numbering
-:properties:
-:header-args+: :noweb-ref org-conf
-:header-args+: :tangle no
-:end:
 
 In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
 
@@ -432,10 +433,6 @@ In org-mode we can use LaTeX equations, and toggle an overlay that shows what th
 #+end_src
 
 *** Automatic LaTeX fragment previewing toggle
-:properties:
-:header-args+: :noweb-ref org-conf
-:header-args+: :tangle no
-:end:
 
 This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
 #+begin_src emacs-lisp
@@ -523,9 +520,17 @@ This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview
 #+end_src
 
 *** LaTeX code syntax highlighting
+
 #+begin_src emacs-lisp
 (setq org-highlight-latex-and-related '(latex script entities))
 #+end_src
+
+*** Quick insertion of LaTeX environment
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+#+end_src
+
 ** Babel
 :properties:
 :header-args+: :noweb-ref org-conf

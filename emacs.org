@@ -340,6 +340,188 @@ Org is so awesome it deserves a package itself:
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
 #+end_src
+
+*** Stop the org-level headers from increasing in height relative to the other text
+
+#+begin_src emacs-lisp
+(defun my/org-mode-hook ()
+  "Stop the org-level headers from increasing in height relative to the other text."
+  (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4 org-level-5))
+    (set-face-attribute face nil :weight 'normal :height 1.0)))
+(add-hook 'org-mode-hook 'my/org-mode-hook)
+#+end_src
+
+** LaTeX
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+*** Fix fragment preview size
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
+
+#+begin_src emacs-lisp
+;; Default scaling
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+(defun update-org-latex-fragments ()
+  (org-toggle-latex-fragment '(16))
+  (let ((text-scale-factor (expt text-scale-mode-step text-scale-mode-amount)))
+    (plist-put org-format-latex-options :scale (* 2.3 text-scale-factor))
+    (princ (plist-get org-format-latex-options :scale))
+    )
+  (org-toggle-latex-fragment '(16)))
+(add-hook 'text-scale-mode-hook 'update-org-latex-fragments)
+#+end_src
+
+*** Fix fragment preview numbering
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
+
+#+begin_src emacs-lisp
+(require 'cl-lib)
+(require 'cl)
+(defun org-renumber-environment (orig-func &rest args)
+  "Improve equation numbering"
+  (let ((results '())
+	(counter -1)
+	(numberp))
+    (setq results (loop for (begin .  env) in
+			(org-element-map (org-element-parse-buffer) 'latex-environment
+			  (lambda (env)
+			    (cons
+			     (org-element-property :begin env)
+			     (org-element-property :value env))))
+			collect
+			(cond
+			 ((and (string-match "\\\\begin{equation}" env)
+			       (not (string-match "\\\\tag{" env)))
+			  (incf counter)
+			  (cons begin counter))
+			 ((string-match "\\\\begin{align}" env)
+			  (prog2
+			      (incf counter)
+			      (cons begin counter)
+			    (with-temp-buffer
+			      (insert env)
+			      (goto-char (point-min))
+			      ;; \\ is used for a new line. Each one leads to a number
+			      (incf counter (count-matches "\\\\$"))
+			      ;; unless there are nonumbers.
+			      (goto-char (point-min))
+			      (decf counter (count-matches "\\nonumber")))))
+			 (t
+			  (cons begin nil)))))
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+	    (concat
+	     (format "\\setcounter{equation}{%s}\n" numberp)
+	     (car args)))))
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+#+end_src
+
+*** Automatic LaTeX fragment previewing toggle
+:properties:
+:header-args+: :noweb-ref org-conf
+:header-args+: :tangle no
+:end:
+
+This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
+#+begin_src emacs-lisp
+(defvar kk/org-latex-fragment-last nil
+  "Holds last fragment/environment you were on.")
+
+(defun kk/org-in-latex-fragment-p ()
+  "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+  (let* ((el (org-element-context))
+	 (el-type (car el)))
+    (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+	 (org-element-property :begin el))))
+
+(defun kk/org-latex-fragment-toggle ()
+  "Toggle a latex fragment image "
+  (and (eq 'org-mode major-mode)
+       (let ((begin (kk/org-in-latex-fragment-p)))
+	 (cond
+	  ;; were on a fragment and now on a new fragment
+	  ((and
+	    ;; fragment we were on
+	    kk/org-latex-fragment-last
+	    ;; and are on a fragment now
+	    begin
+
+	    ;; but not on the last one this is a little tricky. as you edit the
+	    ;; fragment, it is not equal to the last one. We use the begin
+	    ;; property which is less likely to change for the comparison.
+	    (not (and kk/org-latex-fragment-last
+		      (= begin
+			 kk/org-latex-fragment-last))))
+	   ;; go back to last one and put image back, provided there is still a fragment there
+	   (save-excursion
+	     (goto-char kk/org-latex-fragment-last)
+	     (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+	     ;; now remove current image
+	     (goto-char begin)
+	     (let ((ov (loop for ov in (org--list-latex-overlays)
+			     if
+			     (and
+			      (<= (overlay-start ov) (point))
+			      (>= (overlay-end ov) (point)))
+			     return ov)))
+	       (when ov
+		 (delete-overlay ov)))
+	     ;; and save new fragment
+	     (setq kk/org-latex-fragment-last begin)))
+
+	  ;; were on a fragment and now are not on a fragment
+	  ((and
+	    ;; not on a fragment now
+	    (not begin)
+	    ;; but we were on one
+	    kk/org-latex-fragment-last)
+	   ;; put image back on, provided that there is still a fragment here.
+	   (save-excursion
+	     (goto-char kk/org-latex-fragment-last)
+	     (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+	   ;; unset last fragment
+	   (setq kk/org-latex-fragment-last nil))
+
+	  ;; were not on a fragment, and now are
+	  ((and
+	    ;; we were not one one
+	    (not kk/org-latex-fragment-last)
+	    ;; but now we are
+	    begin)
+	   ;; remove image
+	   (save-excursion
+	     (goto-char begin)
+	     (let ((ov (loop for ov in (org--list-latex-overlays)
+			     if
+			     (and
+			      (<= (overlay-start ov) (point))
+			      (>= (overlay-end ov) (point)))
+			     return ov)))
+	       (when ov
+		 (delete-overlay ov))))
+	   (setq kk/org-latex-fragment-last begin))))))
+
+(add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
+#+end_src
+
 ** Babel
 :properties:
 :header-args+: :noweb-ref org-conf

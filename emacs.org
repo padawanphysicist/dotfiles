@@ -193,6 +193,15 @@ Powerline theme from Spacemacs
   (setq powerline-default-separator 'box)
   (spaceline-compile))
 #+end_src
+** Jumping around the file
+
+#+begin_src emacs-lisp
+(use-package avy
+  :ensure t
+  :bind (("C-;" . avy-goto-char)
+         ("M-g g" . avy-goto-line)))
+#+end_src
+
 ** Make Emacs discoverable
 
 Displays available keybindings in popup, turning Emacs more discoverable.
@@ -294,13 +303,18 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 #+end_src
 ** Load external plugins
 
-In this section I load all configuration I do outside the init file:
 #+begin_src emacs-lisp
 (use-package org
   :pin org
   :ensure org-plus-contrib ;; Workaround
   :config
   (require 'user-init-org))
+#+end_src
+
+#+begin_src emacs-lisp
+;(use-package poly-org
+;  :config
+;  (add-to-list 'auto-mode-alist '("\\.org" . poly-org-mode)))
 #+end_src
 
 * Org configuration
@@ -541,4 +555,20 @@ This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview
 
 #+begin_src emacs-lisp
 (setq org-src-preserve-indentation t)
+#+end_src
+
+*** Load languages
+
+#+begin_src emacs-lisp
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((shell . t)
+   (R . t)
+   (ruby . t)
+   (C . t)
+   (python . t)
+   (fortran . t)
+   (makefile . t)
+   (emacs-lisp . nil)))
 #+end_src

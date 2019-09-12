@@ -193,6 +193,15 @@ Powerline theme from Spacemacs
   (setq powerline-default-separator 'box)
   (spaceline-compile))
 #+end_src
+
+** Undo/Redo window configuration
+
+This enable [[https://www.emacswiki.org/emacs/WinnerMode][WinnerMode]]:
+#+begin_src emacs-lisp
+(when (fboundp 'winner-mode)
+      (winner-mode 1))
+#+end_src
+
 ** Jumping around the file
 
 #+begin_src emacs-lisp
@@ -309,12 +318,6 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   :ensure org-plus-contrib ;; Workaround
   :config
   (require 'user-init-org))
-#+end_src
-
-#+begin_src emacs-lisp
-;(use-package poly-org
-;  :config
-;  (add-to-list 'auto-mode-alist '("\\.org" . poly-org-mode)))
 #+end_src
 
 * Org configuration

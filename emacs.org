@@ -237,6 +237,8 @@ Displays available keybindings in popup, turning Emacs more discoverable.
     (customize-set-variable 'helm-ff-lynx-style-map t)
     (define-key helm-map (kbd "<left>") 'helm-previous-source)
     (define-key helm-map (kbd "<right>") 'helm-next-source)
+    ;; Change back behaviour of TAB completion in =helm-find-files=
+    (define-key helm-map (kbd "TAB") 'helm-execute-persistent-action)
     (helm-mode 1)))
 #+end_src
 

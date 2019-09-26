@@ -1,11 +1,11 @@
 #+title: Emacs configuration
-#+property: header-args+ :shebang ";; -*- mode: emacs-lisp -*-"
 
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
 * Init file
 :properties:
 :header-args:  :tangle "emacs/.emacs"
+:header-args+: :tangle-mode (identity #o444)
 :header-args+: :mkdirp yes
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:

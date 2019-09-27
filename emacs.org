@@ -210,6 +210,12 @@ Powerline theme from Spacemacs
   (spaceline-compile))
 #+end_src
 
+** Clean up modeline
+
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+
 ** Undo/Redo window configuration
 
 This enable [[https://www.emacswiki.org/emacs/WinnerMode][WinnerMode]]:
@@ -241,8 +247,11 @@ For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] pa
 Displays available keybindings in popup, turning Emacs more discoverable.
 #+begin_src emacs-lisp
 (use-package which-key
+  :diminish which-key-mode
   :init
-  (which-key-mode))
+  (which-key-mode)
+  :config
+  (setq which-key-idle-delay 0.05))
 #+end_src
 
 ** Completion on steroids
@@ -318,6 +327,28 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   :ensure auctex
   :config
   (setq TeX-auto-save t))
+#+end_src
+
+** Spelling
+
+#+begin_src emacs-lisp
+(use-package flyspell
+  :diminish flyspell-mode
+  :hook ((prog-mode . flyspell-prog-mode)
+	 (text-mode . flyspell-mode)))
+
+(setq ispell-program-name "/usr/bin/aspell")
+(setq ispell-dictionary "en_US") ;; set the default dictionary
+
+(eval-after-load "flyspell"
+  ' (progn
+     (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
+     (define-key flyspell-mouse-map [mouse-3] #'undefined)))
+
+(global-font-lock-mode t)
+(custom-set-faces '(flyspell-incorrect ((t (:inverse-video t)))))
+
+(setq ispell-silently-savep t)
 #+end_src
 
 ** Programming languages

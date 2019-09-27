@@ -151,16 +151,32 @@ There are two things you can do about this warning:
 
 *** Load custom configuration
 
- Offload the custom-set-variables to a separate file. This keeps your init.el neater and you have the option to gitignore your custom.el if you see fit.
+Offload the custom-set-variables to a separate file. This keeps your init.el neater and you have the option to gitignore your custom.el if you see fit.
 
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 (setq custom-file "~/.emacs.d/custom.el")
 (unless (file-exists-p custom-file)
   (write-region "" nil custom-file))
 
 ;;; Load custom file. Don't hide errors. Hide success message
 (load custom-file nil t)
- #+end_src
+#+end_src
+
+*** Save file with F12
+
+I really dislike the default key chord.
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "<f12>") 'save-buffer)
+#+end_src
+
+*** Find file with C-o
+
+The keybinding =C-o= is bound to =<insertline>=, which inserts a newline after the cursor. I never use this command, so let us have something more useful.
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-o") 'helm-find-files)
+#+end_src
 
 ** Add my elisp directory and other files
 

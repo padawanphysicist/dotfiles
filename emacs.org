@@ -227,6 +227,15 @@ This enable [[https://www.emacswiki.org/emacs/WinnerMode][WinnerMode]]:
          ("M-g g" . avy-goto-line)))
 #+end_src
 
+** Jumping around buffers
+
+For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] package.
+
+#+begin_src emacs-lisp
+(use-package ace-window
+  :bind (("M-o" . ace-window)))
+#+end_src
+
 ** Make Emacs discoverable
 
 Displays available keybindings in popup, turning Emacs more discoverable.

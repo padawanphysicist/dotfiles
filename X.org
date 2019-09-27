@@ -31,8 +31,8 @@ emacs.geometry: 100x40
 
 The first thing I like to change is the default font. Also, I disable bold fonts:
 #+BEGIN_SRC conf :noweb-ref xterm-configuration
-XTerm*faceName: xft:Monego
-XTerm*faceSize: 15
+!XTerm*faceName: xft:Monego
+!XTerm*faceSize: 15
 XTerm*renderFont: true
 XTerm*boldMode: false
 #+END_SRC

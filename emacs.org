@@ -187,17 +187,71 @@ Sometimes I load files outside the package system. As long as they're in a direc
 #+end_src
 
 ** Theme
-*** Colorscheme
+*** Treat all themes as safe
+
+Do not query the user before use
+
+#+begin_src emacs-lisp
+(setf custom-safe-themes t)
+#+end_src
+
+*** Download themes
+
+#+begin_src emacs-lisp
+(use-package solarized-theme :demand t)
+(use-package doom-themes :demand t)
+(use-package spacemacs-theme :defer t :demand t)
+#+end_src
+
+*** Functions for changing themes
+
+#+begin_src emacs-lisp
+(defun vct/disable-all-themes ()
+  (dolist (th custom-enabled-themes)
+          (disable-theme th)))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun vct/load-dark-theme ()
+  (vct/disable-all-themes)
+  (load-theme 'spacemacs-dark))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun vct/load-light-theme ()
+  (vct/disable-all-themes)
+  (load-theme 'spacemacs-light))
+#+end_src
+
+=C-x t= to toggle between light and dark themes:
+#+begin_src emacs-lisp
+(defun vct/toggle-theme () "Toggle between dark and light themes."
+  (interactive)
+  ;; Load dark if light is top-most enabled theme, else load light.
+  (if (equal (car custom-enabled-themes) 'spacemacs-dark)
+      (vct/load-light-theme)
+      (vct/load-dark-theme))
+  ;; The dark theme's modeline separator is ugly.
+  ;; Keep reading below regarding “powerline”.
+  ;; (setq powerline-default-separator 'arrow)
+  ;; (spaceline-spacemacs-theme)
+)
+
+(global-set-key "\C-x\ t" 'vct/toggle-theme)
+
+;; Initially begin with the light theme.
+(load-theme 'spacemacs-light t)
+#+end_src
 
 I like light on dark because I find it to be more restful. I find hard a theme which works both on GUI and terminal, but so far [[https://github.com/nashamri/spacemacs-theme][Spacemacs theme]] seems to be a nice choice.
 #+begin_src emacs-lisp
-(use-package spacemacs-theme
-  :defer t
-  :init
-  (load-theme 'spacemacs-dark t))
+;; (use-package spacemacs-theme
+;;   :defer t
+;;   :init
+;;   (load-theme 'spacemacs-dark t))
 #+end_src
 
-*** Spaceline
+** Spaceline
 
 Powerline theme from Spacemacs
 

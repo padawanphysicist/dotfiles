@@ -198,8 +198,8 @@ Do not query the user before use
 *** Download themes
 
 #+begin_src emacs-lisp
-(use-package solarized-theme :demand t)
-(use-package doom-themes :demand t)
+;(use-package solarized-theme :demand t)
+;(use-package doom-themes :demand t)
 (use-package spacemacs-theme :defer t :demand t)
 #+end_src
 
@@ -294,6 +294,16 @@ For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] pa
 #+begin_src emacs-lisp
 (use-package ace-window
   :bind (("M-o" . ace-window)))
+#+end_src
+
+** Tabs
+
+I really like my Helm-supported =C-x b=, but the visual appeal of a [[https://github.com/manateelazycat/awesome-tab][tab bar]] for Emacs is interesting. Let's try it out and see how long this lasts - it may be like Neotree: Something cute to show to others, but not as fast as the keyboard. 
+#+begin_src emacs-lisp
+(use-package awesome-tab
+  :load-path "~/.elisp/awesome-tab/"
+  :config
+  (awesome-tab-mode t))
 #+end_src
 
 ** Make Emacs discoverable

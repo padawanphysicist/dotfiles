@@ -260,6 +260,7 @@ Displays available keybindings in popup, turning Emacs more discoverable.
 
 #+begin_src emacs-lisp
 (use-package helm
+  :diminish helm-mode
   :bind (("M-x" . helm-M-x)
          ("C-x C-f" . helm-find-files)
          ("C-x C-r" . helm-recentf)

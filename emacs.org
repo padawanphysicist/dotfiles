@@ -281,19 +281,24 @@ I also add [[https://company-mode.github.io/][company-mode]], which is a complet
 ** Sane undo/redo
 
 The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
+
 #+begin_src emacs-lisp
-;; Enable undo-tree, sane undo/redo behavior
 (use-package undo-tree
   :init (global-undo-tree-mode)
   :config
   ;; Turn on everywhere
   (global-undo-tree-mode 1)
+  ;; Each node in the tree should have a timestamp
+  (setq undo-tree-visualizer-timestamps t)
+  ;; Show a diff window displaying changes between undo nodes
+  (setq undo-tree-visualizer-diff t)
   ;; Make ctrl-z undo
   (global-set-key (kbd "C-z") 'undo)
   ;; Make ctrl-Z redo
   (defalias 'redo 'undo-tree-redo)
   (global-set-key (kbd "C-S-z") 'redo))
 #+end_src
+
 ** Git configuration
 
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs

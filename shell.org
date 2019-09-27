@@ -425,6 +425,7 @@ I also want to set a few shell options to control how history is stored as well:
 shopt -s cmdhist
 shopt -s histreedit
 shopt -s histappend
+shopt -s histverify # History command is not executed immediately
 #+end_src
 
 I use this to preserve the history across tmux sessions

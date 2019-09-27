@@ -296,6 +296,17 @@ For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] pa
   :bind (("M-o" . ace-window)))
 #+end_src
 
+I also like to highlight the current buffer:
+
+#+begin_src emacs-lisp
+(use-package auto-dim-other-buffers
+  :config (auto-dim-other-buffers-mode))
+
+(add-hook 'after-init-hook (lambda ()
+  (when (fboundp 'auto-dim-other-buffers-mode)
+    (auto-dim-other-buffers-mode t))))
+#+end_src
+
 ** Make Emacs discoverable
 
 Displays available keybindings in popup, turning Emacs more discoverable.

@@ -296,16 +296,6 @@ For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] pa
   :bind (("M-o" . ace-window)))
 #+end_src
 
-** Tabs
-
-I really like my Helm-supported =C-x b=, but the visual appeal of a [[https://github.com/manateelazycat/awesome-tab][tab bar]] for Emacs is interesting. Let's try it out and see how long this lasts - it may be like Neotree: Something cute to show to others, but not as fast as the keyboard. 
-#+begin_src emacs-lisp
-(use-package awesome-tab
-  :load-path "~/.elisp/awesome-tab/"
-  :config
-  (awesome-tab-mode t))
-#+end_src
-
 ** Make Emacs discoverable
 
 Displays available keybindings in popup, turning Emacs more discoverable.

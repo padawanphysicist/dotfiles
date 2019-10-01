@@ -282,7 +282,6 @@ This enable [[https://www.emacswiki.org/emacs/WinnerMode][WinnerMode]]:
 
 #+begin_src emacs-lisp
 (use-package avy
-  :ensure t
   :bind (("C-;" . avy-goto-char)
          ("M-g g" . avy-goto-line)))
 #+end_src
@@ -294,17 +293,6 @@ For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] pa
 #+begin_src emacs-lisp
 (use-package ace-window
   :bind (("M-o" . ace-window)))
-#+end_src
-
-I also like to highlight the current buffer:
-
-#+begin_src emacs-lisp
-(use-package auto-dim-other-buffers
-  :config (auto-dim-other-buffers-mode))
-
-(add-hook 'after-init-hook (lambda ()
-  (when (fboundp 'auto-dim-other-buffers-mode)
-    (auto-dim-other-buffers-mode t))))
 #+end_src
 
 ** Make Emacs discoverable

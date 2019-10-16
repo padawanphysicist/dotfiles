@@ -24,17 +24,17 @@ cd ~/.dotfiles
 
 tangle the files
 #+begin_src sh
-for i in *.org ; do emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$i\"))"; done
+for file in *.org ; do emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$file\"))"; done
 #+end_src
 
 and create the symlinks to your =$HOME= directory:
 #+begin_src sh
-for d in */ ; do stow <folder> ; done
+for directory in */ ; do stow $directory ; done
 #+end_src
 
 * Configuration files
 
-#+begin_src sh :results raw
+#+begin_src sh :results raw :exports results
 for i in *.org; do if [[ $i != "README.org" ]]; then echo '-' [[$i]]; fi ; done
 #+end_src
 

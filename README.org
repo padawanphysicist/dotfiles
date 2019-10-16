@@ -27,12 +27,12 @@ Besides that, there is a series of additional software I have to install to have
 
 Clone the repository in a folder in your =$HOME= (I keep it as a hidden directory =.dotfiles=), either from [[https://gitlab.com][GitLab]]
 #+BEGIN_SRC sh
-$ git clone https://github.com/padawanphysicist/dotfiles.git ~/.dotfiles
+$ git clone https://gitlab.com/padawanphysicist/dotfiles.git ~/.dotfiles
 #+END_SRC
 
 or [[https://github.com][GitHub]]:
 #+BEGIN_SRC sh
-$ git clone https://gitlab.com/padawanphysicist/dotfiles.git ~/.dotfiles
+$ git clone https://github.com/padawanphysicist/dotfiles.git ~/.dotfiles
 #+END_SRC
 
 then enter the directory,

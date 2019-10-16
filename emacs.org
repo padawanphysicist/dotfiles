@@ -1,43 +1,29 @@
 #+title: Emacs configuration
+#+property: header-args  :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
 
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
 * Init file
 :properties:
-:header-args:  :tangle "emacs/.emacs"
-:header-args+: :tangle-mode (identity #o444)
-:header-args+: :mkdirp yes
+:header-args+: :tangle "emacs/.emacs"
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:
 
-The init file contains personal Emacs-Lisp code that you want to execute when you start Emacs.
-
 ** Sane defaults
-*** Personal Information
-
- #+begin_src emacs-lisp
-(setq user-full-name "Victor Santos"
-      user-mail-address "victor_santos@fisica.ufc.br")
- #+end_src
-
 *** Disable menu-bar, tool-bar, and scroll-bar
 
- #+begin_src emacs-lisp
+You can always open the menu by pressing =<F10>=.
+
+#+begin_src emacs-lisp
 (if (fboundp 'menu-bar-mode)
     (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode)
     (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode)
     (scroll-bar-mode -1))
- #+end_src
-
-*** Cursor style
-
- I like the cursor similar to other text editors.
-
- #+begin_src emacs-lisp
-(setq-default cursor-type 'bar)
- #+end_src
+#+end_src
 
 *** Smooth Scrolling
 
@@ -52,67 +38,156 @@ The init file contains personal Emacs-Lisp code that you want to execute when yo
 (setq scroll-step 1)
 #+end_src
 
-*** Disable startup screen
+*** Change "yes or no" to "y or n"
 
- #+begin_src emacs-lisp
-(setq inhibit-startup-screen t)
- #+end_src
+Lazy people like me never want to type "yes" when "y" will suffice.
+
+#+begin_src emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
 
 *** Show matching brackets
 
- =[[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]]= allows one to see matching pairs of parentheses and other characters. 
- #+begin_src emacs-lisp
+=[[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]]= allows one to see matching pairs of parentheses and other characters. 
+#+begin_src emacs-lisp
 (show-paren-mode 1)
- #+end_src
+#+end_src
 
- By default, there’s a small delay before showing a matching parenthesis. It can be deactivated with the following:
- #+begin_src emacs-lisp
+By default, there’s a small delay before showing a matching parenthesis. It can be deactivated with the following:
+#+begin_src emacs-lisp
 (setq show-paren-delay 0)
- #+end_src
+#+end_src
 
 *** Disable bell sound
 
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 (setq ring-bell-function 'ignore)
- #+end_src
-
-*** Set up *scratch* buffer
-
- #+begin_src emacs-lisp
-(setq initial-scratch-message ";; Excuse me sir, do you have a moment to talk about our\n;; Lord, Savior, and the one true operating system, EMACS?")
- #+end_src
-
-*** Change "yes or no" to "y or n"
-
- Lazy people like me never want to type "yes" when "y" will suffice.
-
- #+begin_src emacs-lisp
-(fset 'yes-or-no-p 'y-or-n-p)
- #+end_src
+#+end_src
 
 *** Change backup behaviour
 
- This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
+This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
 
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 ;; Don't litter my filesystem tree
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
- #+end_src
+#+end_src
 
- Since disk space is cheap, I prefer to save a lot!
- #+begin_src emacs-lisp
+Since disk space is cheap, I prefer to save a lot!
+#+begin_src emacs-lisp
 (setq backup-by-copying t) ;; don't clobber symlinks
 (setq delete-old-versions t)
 (setq kept-new-versions 8)
 (setq kept-old-versions 4)
 (setq version-control t)
- #+end_src
+#+end_src
 
-*** Package management
-**** Setup =package.el=
+*** Add my elisp directory and other files
 
- Modified from https://melpa.org/#/getting-started:
- #+begin_src emacs-lisp
+Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.elisp")
+#+end_src
+
+*** Line numbering
+
+Line numbering is really helpful for simple file movement.
+
+**** Number of columns reserved for line number display
+
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-width 4)
+#+end_src
+
+**** Do not shrink line number width
+
+#+begin_src emacs-lisp
+(setq display-line-numbers-grow-only t)
+#+end_src
+
+**** Relative line numbers taking into account screen lines
+
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-type 'visual)
+#+end_src
+
+**** Display the absolute number of the current line
+
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-current-absolute t)
+#+end_src
+
+**** Disregard narrowing when showing line numbers
+
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-widen t)
+#+end_src
+
+**** Enable only for some modes
+
+#+begin_src emacs-lisp
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+#+end_src
+
+*** Setup visual lines
+
+Visual line mode actually does several things. From a user's point of view, it:
+- Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
+- Makes up/down arrow keys move by a visual line. (controlled by the var line-move-visual.)
+- Makes the kill-line command delete by a visual line, as opposed to a logical line.
+- Turns off the display of little return arrow at the edge of window. (controlled by the var fringe-indicator-alist.)
+
+;; Enable by default
+#+begin_src emacs-lisp
+(global-visual-line-mode t)
+#+end_src
+
+and this code enable a visual hint whether a paragraph is hard or soften wrapped:
+#+begin_src emacs-lisp
+(defface my-custom-curly-face
+  '((t (:foreground "orange")))
+  "Face for fringe curly bitmaps."
+  :group 'basic-faces)
+
+(set-fringe-bitmap-face 'left-curly-arrow 'my-custom-curly-face)
+(set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+#+end_src
+
+*** Disable tooltips
+
+By default Emacs will display its tooltips in a separate frame. If you want to force Emacs to use the echo area exclusively, you can do that with this handy code snippet:
+#+begin_src emacs-lisp
+;;(tooltip-mode -1)
+#+end_src
+
+** Package management
+
+Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
+
+By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your =.emacs= file in a way that is both performance-oriented and tidy. However, I usually have some issues to sync and reproduce its configuration along different machines, which led me to test [[https://github.com/raxod502/straight.el][straight.el]]. It integrates nicely with git repositories, even pointing to forked repos.
+
+From the [[https://github.com/raxod502/straight.el/blob/develop/README.md#getting-started]["Getting Started" page]], you can setup using the following block:
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+I still want to use MELPA and M-x package-list-packages to peruse the MELPA repo, so I ended up with the following minimal =package.el= config, placed after the =straight.el= bootstrap and config:
+#+begin_src emacs-lisp
 (require 'package)
 (setq package-enable-at-startup nil) ;; Do not activate installed packages when Emacs starts
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
@@ -130,28 +205,15 @@ There are two things you can do about this warning:
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
-(unless package--initialized (package-initialize))
- #+end_src
+#+end_src
 
-**** Setup =use-package=
+This doesn’t harm the =straight.el= installation, so for me it’s the best of both worlds.
 
- [[https://jwiegley.github.io/use-package][use-package]] allows to isolate configuration 
+** Load custom configuration
 
- #+begin_src emacs-lisp
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(eval-when-compile
-  (require 'use-package))
+Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
 
-;; Causes all packages to be installed automatically if not already
-;; present in the system
-(setq use-package-always-ensure t)
- #+end_src
-
-*** Load custom configuration
-
-Offload the custom-set-variables to a separate file. This keeps your init.el neater and you have the option to gitignore your custom.el if you see fit.
+This code offloads the =custom-set-variables= to a separate file. This keeps your =init.el= neater and you have the option to gitignore your =custom.el= if you see fit.
 
 #+begin_src emacs-lisp
 (setq custom-file "~/.emacs.d/custom.el")
@@ -162,204 +224,199 @@ Offload the custom-set-variables to a separate file. This keeps your init.el nea
 (load custom-file nil t)
 #+end_src
 
-*** Save file with F12
+*** Enable PATH within Emacs
 
-I really dislike the default key chord.
-
+With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
 #+begin_src emacs-lisp
-(global-set-key (kbd "<f12>") 'save-buffer)
-#+end_src
-
-*** Find file with C-o
-
-The keybinding =C-o= is bound to =<insertline>=, which inserts a newline after the cursor. I never use this command, so let us have something more useful.
-
-#+begin_src emacs-lisp
-(global-set-key (kbd "C-o") 'helm-find-files)
-#+end_src
-
-** Add my elisp directory and other files
-
-Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
-
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/.elisp")
-#+end_src
-
-** Theme
-*** Treat all themes as safe
-
-Do not query the user before use
-
-#+begin_src emacs-lisp
-(setf custom-safe-themes t)
-#+end_src
-
-*** Download themes
-
-#+begin_src emacs-lisp
-;(use-package solarized-theme :demand t)
-;(use-package doom-themes :demand t)
-(use-package spacemacs-theme :defer t :demand t)
-#+end_src
-
-*** Functions for changing themes
-
-#+begin_src emacs-lisp
-(defun vct/disable-all-themes ()
-  (dolist (th custom-enabled-themes)
-          (disable-theme th)))
+(straight-use-package 'exec-path-from-shell)
 #+end_src
 
 #+begin_src emacs-lisp
-(defun vct/load-dark-theme ()
-  (vct/disable-all-themes)
-  (load-theme 'spacemacs-dark))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun vct/load-light-theme ()
-  (vct/disable-all-themes)
-  (load-theme 'spacemacs-light))
-#+end_src
-
-=C-x t= to toggle between light and dark themes:
-#+begin_src emacs-lisp
-(defun vct/toggle-theme () "Toggle between dark and light themes."
-  (interactive)
-  ;; Load dark if light is top-most enabled theme, else load light.
-  (if (equal (car custom-enabled-themes) 'spacemacs-dark)
-      (vct/load-light-theme)
-      (vct/load-dark-theme))
-  ;; The dark theme's modeline separator is ugly.
-  ;; Keep reading below regarding “powerline”.
-  ;; (setq powerline-default-separator 'arrow)
-  ;; (spaceline-spacemacs-theme)
-)
-
-(global-set-key "\C-x\ t" 'vct/toggle-theme)
-
-;; Initially begin with the light theme.
-(load-theme 'spacemacs-light t)
-#+end_src
-
-I like light on dark because I find it to be more restful. I find hard a theme which works both on GUI and terminal, but so far [[https://github.com/nashamri/spacemacs-theme][Spacemacs theme]] seems to be a nice choice.
-#+begin_src emacs-lisp
-;; (use-package spacemacs-theme
-;;   :defer t
-;;   :init
-;;   (load-theme 'spacemacs-dark t))
-#+end_src
-
-** Spaceline
-
-Powerline theme from Spacemacs
-
-#+begin_src emacs-lisp
-(use-package spaceline
-  :config
-  (require 'spaceline-config)
-  (spaceline-spacemacs-theme)
-  (setq powerline-default-separator 'box)
-  (spaceline-compile))
-#+end_src
-
-** Clean up modeline
-
-#+begin_src emacs-lisp
-(use-package diminish)
-#+end_src
-
-** Undo/Redo window configuration
-
-This enable [[https://www.emacswiki.org/emacs/WinnerMode][WinnerMode]]:
-#+begin_src emacs-lisp
-(when (fboundp 'winner-mode)
-      (winner-mode 1))
-#+end_src
-
-** Jumping around the file
-
-#+begin_src emacs-lisp
-(use-package avy
-  :bind (("C-;" . avy-goto-char)
-         ("M-g g" . avy-goto-line)))
-#+end_src
-
-** Jumping around buffers
-
-For this I use the nice [[https://github.com/abo-abo/ace-window][ace-window]] package.
-
-#+begin_src emacs-lisp
-(use-package ace-window
-  :bind (("M-o" . ace-window)))
+(exec-path-from-shell-initialize)
 #+end_src
 
 ** Make Emacs discoverable
 
-Displays available keybindings in popup, turning Emacs more discoverable.
+Emacs by default is built around this idea of discoverability. It is a self-documented editor. To see this, check =C-h ?=. 
+
+However, after enabling a whole plethora of available packages you can get lost by the messiness of the enabled shortcuts. 
+
+[[https://github.com/justbur/emacs-which-key][which-key]] is a minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup. This provides a way to discover shortcuts globally.
+
+We first install the package,
 #+begin_src emacs-lisp
-(use-package which-key
-  :diminish which-key-mode
-  :init
-  (which-key-mode)
-  :config
-  (setq which-key-idle-delay 0.05))
+(straight-use-package 'which-key)
 #+end_src
 
-** Completion on steroids
-
-[[https://github.com/emacs-helm/helm][Helm]] is is an Emacs framework for incremental completions and narrowing selections.
-
+and then enable it globally:
 #+begin_src emacs-lisp
-(use-package helm
-  :diminish helm-mode
-  :bind (("M-x" . helm-M-x)
-         ("C-x C-f" . helm-find-files)
-         ("C-x C-r" . helm-recentf)
-         ("C-x C-b" . helm-buffers-list)
-         ("C-x b" . helm-buffers-list))
-  :config
-  (progn
-    (setq helm-buffers-fuzzy-matching t)
-    (customize-set-variable 'helm-ff-lynx-style-map t)
-    (define-key helm-map (kbd "<left>") 'helm-previous-source)
-    (define-key helm-map (kbd "<right>") 'helm-next-source)
-    ;; Change back behaviour of TAB completion in =helm-find-files=
-    (define-key helm-map (kbd "TAB") 'helm-execute-persistent-action)
-    (helm-mode 1)))
+(which-key-mode)
 #+end_src
 
-I also add [[https://company-mode.github.io/][company-mode]], which is a completion framework for emacs:
+The only additional setup I like to do is to decrease the delay for which-key buffer to popup. The default value is 1.0, which is too long for me:
 #+begin_src emacs-lisp
-(use-package company
-  :config
-  (setq company-tooltip-align-annotations t)
-  (setq company-tooltip-flip-when-above t)
-  ;; Easy navigation to candidates with M-<n>
-  (setq company-show-numbers t)
-  (setq company-require-match nil)
-  (add-hook 'after-init-hook 'global-company-mode))
+(setq which-key-idle-delay 0.05)
 #+end_src
-** Sane undo/redo
 
-The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
+** Improve command grouping
+
+After make Emacs easily discoverable, one can define all sorts of commands. Once you start to do that, you are left with the question of how to manage this.
+
+[[https://github.com/abo-abo/hydra][hydra]] is a package that can be used to tie related commands into a family of short bindings with a common prefix.
 
 #+begin_src emacs-lisp
-(use-package undo-tree
-  :init (global-undo-tree-mode)
-  :config
-  ;; Turn on everywhere
-  (global-undo-tree-mode 1)
-  ;; Each node in the tree should have a timestamp
-  (setq undo-tree-visualizer-timestamps t)
-  ;; Show a diff window displaying changes between undo nodes
-  (setq undo-tree-visualizer-diff t)
-  ;; Make ctrl-z undo
-  (global-set-key (kbd "C-z") 'undo)
-  ;; Make ctrl-Z redo
-  (defalias 'redo 'undo-tree-redo)
-  (global-set-key (kbd "C-S-z") 'redo))
+(straight-use-package 'hydra)
+#+end_src
+
+** Improve completion
+
+Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://github.com/abo-abo/swiper][Ivy]] is an interactive interface for completion in Emacs.
+
+When active, =ivy-mode= completes the selection process by narrowing available choices while previewing in the minibuffer. Selecting the final candidate is either through simple keyboard character inputs or through powerful regular expressions. I'm using it as an alternative to [[https://github.com/emacs-helm/helm][helm]], as it feels much more lightweight.
+
+*** Install Ivy
+
+#+begin_src emacs-lisp
+(straight-use-package 'swiper)
+(straight-use-package 'counsel)
+#+end_src
+
+*** Enable Ivy completion everywhere
+
+#+begin_src emacs-lisp
+(ivy-mode 1)
+#+end_src
+
+*** Keybindings
+
+Here is a list of commands that are useful to be bound globally, along with some sample bindings: 
+
+**** Ivy-based interface to standard commands
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-s") 'swiper-isearch) ;; Default search
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "M-y") 'counsel-yank-pop)
+(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+(global-set-key (kbd "C-c v") 'ivy-push-view)
+(global-set-key (kbd "C-c V") 'ivy-pop-view)
+#+end_src
+
+**** Ivy-resume and other commands
+
+#+begin_src emacs-lisp
+;(global-set-key (kbd "C-c C-r") 'ivy-resume)
+;(global-set-key (kbd "C-c b") 'counsel-bookmark)
+;(global-set-key (kbd "C-c d") 'counsel-descbinds)
+;(global-set-key (kbd "C-c g") 'counsel-git)
+;(global-set-key (kbd "C-c o") 'counsel-outline)
+;(global-set-key (kbd "C-c t") 'counsel-load-theme)
+;(global-set-key (kbd "C-c F") 'counsel-org-file)
+#+end_src
+
+** Improve navigation
+
+[[https://github.com/abo-abo/avy][Avy]] allows you to navigate to every visible portion of your Emacs (buffers & windows) with only a handful of keystrokes.
+
+#+begin_src emacs-lisp
+(straight-use-package 'avy)
+#+end_src
+
+** Improve window management
+
+Besides Avy, there is the [[https://github.com/abo-abo/ace-window][ace-window]] package, which allows to select a window to switch to.
+
+#+begin_src emacs-lisp
+(straight-use-package 'ace-window)
+#+end_src
+
+** Improve completion
+
+[[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. The name stands for "complete anything". It uses pluggable back-ends and front-ends to retrieve and display completion candidates.
+
+#+begin_src emacs-lisp
+(straight-use-package 'company)
+
+;; Enable in all buffers
+(add-hook 'after-init-hook 'global-company-mode)
+#+end_src
+
+*** Instant suggestions
+
+What most of us want is instant suggestions. That is, suggestions that appear immediately after one starts typing. By default, Company Mode does not immediately show suggestions. To show suggestions without delay:
+
+#+begin_src emacs-lisp
+(setq company-idle-delay 0)
+#+end_src
+
+*** Suggestions after first character
+
+By default, suggestions only appear after you have typed a few characters. That introduces an unacceptable delay, and wastes keystrokes. Suggestions should appear right after the first letter is entered. To achieve this:
+
+#+begin_src emacs-lisp
+(setq company-minimum-prefix-length 1)
+#+end_src
+
+*** Loop over selection list after reach end
+
+#+begin_src emacs-lisp
+(setq company-selection-wrap-around t)
+#+end_src
+
+*** Use tab key to cycle through suggestions
+
+#+begin_src emacs-lisp
+; ('tng' means 'tab and go')
+(company-tng-configure-default)
+#+end_src
+
+*** Using digits to select company-mode candidates
+
+#+begin_src emacs-lisp
+(setq company-show-numbers t)
+#+end_src
+
+** Sort and filtering completion
+
+[[https://github.com/raxod502/prescient.el][prescient.el]] is a library which sorts and filters lists of candidates, such as appear when you use a package like Ivy or Company.
+
+#+begin_src emacs-lisp
+(straight-use-package 'prescient)
+(straight-use-package 'ivy-prescient)
+;(straight-use-package 'company-prescient)
+
+(ivy-prescient-mode)
+;(company-prescient-mode)
+#+end_src
+
+** Templating
+
+[[https://github.com/joaotavora/yasnippet][YASnippet]] is a nice templating system for Emacs.
+
+#+begin_src emacs-lisp
+(straight-use-package 'yasnippet)
+#+end_src
+
+Then we populate with snippets folder:
+#+begin_src emacs-lisp
+(yas-global-mode 1)
+
+;(yas-global-mode 1)
+;(setq yas-snippet-dirs (append yas-snippet-dirs '("~/.yasnippet")))
+(setq yas-snippet-dirs '("~/.yasnippet"))
+(define-key yas-minor-mode-map (kbd "<tab>") nil)
+(define-key yas-minor-mode-map (kbd "TAB") nil)
+(define-key yas-minor-mode-map (kbd "<C-tab>") 'yas-expand)
+(yas-reload-all)
+#+end_src
+
+** Visual bookmarks
+
+The package [[https://github.com/joodland/bm][bm]] provides visible, buffer local, bookmarks and the ability to jump forward and backward to the next bookmark.
+
+#+begin_src emacs-lisp
+(straight-use-package 'bm)
 #+end_src
 
 ** Git configuration
@@ -367,81 +424,263 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs
 
 #+begin_src emacs-lisp
-(use-package magit
-  :bind (("C-x g" . magit-status)))
-(use-package git-gutter-fringe
-  :config
-  (global-git-gutter-mode t))
-#+end_src
-** LaTeX configuration
-
-#+begin_src emacs-lisp
-(use-package tex
-  :defer t
-  :ensure auctex
-  :config
-  (setq TeX-auto-save t))
-#+end_src
-
-** Spelling
-
-#+begin_src emacs-lisp
-(use-package flyspell
-  :diminish flyspell-mode
-  :hook ((prog-mode . flyspell-prog-mode)
-	 (text-mode . flyspell-mode)))
-
-(setq ispell-program-name "/usr/bin/aspell")
-(setq ispell-dictionary "en_US") ;; set the default dictionary
-
-(eval-after-load "flyspell"
-  ' (progn
-     (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
-     (define-key flyspell-mouse-map [mouse-3] #'undefined)))
-
-(global-font-lock-mode t)
-(custom-set-faces '(flyspell-incorrect ((t (:inverse-video t)))))
-
-(setq ispell-silently-savep t)
+(straight-use-package 'magit)
+(straight-use-package 'git-gutter-fringe)
+(global-set-key (kbd "C-x g") 'magit-status)
+(global-git-gutter-mode t)
 #+end_src
 
 ** Programming languages
-*** Ruby
+
+In this section I try to setup some support for programming languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
+
+The first thing to enable is [[https://github.com/flycheck/flycheck][flycheck]]:
 
 #+begin_src emacs-lisp
-(use-package inf-ruby
-  :init
-  (add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
-  :config
-  (progn
-    (add-to-list 'inf-ruby-implementations '("pry" . "pry"))
-    (setq inf-ruby-default-implementation "pry")))
+(straight-use-package 'flycheck)
 #+end_src
+
+and enable it in programming modes:
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'flycheck-mode)
+#+end_src
+
+*** Ruby
+
+**** Enable enhanced ruby mode
+
+Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
+
+#+begin_src emacs-lisp
+(straight-use-package 'enh-ruby-mode)
+#+end_src
+
+Since enhanced mode is supposed to replace the default Ruby mode, it is nice to enable it for all common Ruby files:
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
+#+end_src
+
+**** Enable inferior Ruby
+
+#+begin_src emacs-lisp
+(straight-use-package 'inf-ruby)
+
+(add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
+(setq inf-ruby-default-implementation "pry")
+
+;;(add-hook 'enh-ruby-mode-hook (lambda () (interactive) (save-excursion (inf-ruby "pry"))))
+#+end_src
+
+**** Enable Rubocop
+
+#+begin_src emacs-lisp
+(straight-use-package 'rubocop)
+(add-hook 'ruby-mode-hook 'rubocop-mode)
+#+end_src
+
+**** Enable Robe
+
+#+begin_src emacs-lisp
+(straight-use-package 'robe)
+
+(eval-after-load 'company '(push 'company-robe company-backends))
+
+;;(add-hook 'enh-ruby-mode 'robe-mode)
+(add-hook 'enh-ruby-mode-hook 'robe-mode)
+#+end_src
+
+*** Haskell
+
+**** Enable Haskell mode
+
+#+begin_src emacs-lisp
+(straight-use-package 'haskell-mode)
+#+end_src
+
+**** Interactive Haskell mode
+
+#+begin_src emacs-lisp
+(straight-use-package 'intero)
+(add-hook 'haskell-mode-hook 'intero-mode)
+(intero-global-mode 1)
+#+end_src
+
+*** SageMath
+
+[[https://github.com/sagemath/sage-shell-mode][This package]] enable to run [[http://www.sagemath.org/][SageMath]] within Emacs.
+
+#+begin_src emacs-lisp
+(straight-use-package 'sage-shell-mode)
+
+;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
+(sage-shell:define-alias)
+
+;; Turn on eldoc-mode in Sage terminal and in Sage source files
+(add-hook 'sage-shell-mode-hook #'eldoc-mode)
+(add-hook 'sage-shell:sage-mode-hook #'eldoc-mode)
+#+end_src
+
+For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][ob-sagemath]]:
+#+begin_src emacs-lisp
+(straight-use-package 'ob-sagemath)
+#+end_src
+
 
 *** R
 
 #+begin_src emacs-lisp
-(use-package ess
-  :ensure ess
-  :commands (inferior-ess-mode ess-help-mode)
-  :config
-  (setq inferior-R-args "--quiet"))
+(straight-use-package 'ess)
 #+end_src
-** Load external plugins
+
+** Org mode
+
+Install Org mode to use the last version instead of the version bundled with Emacs:
 
 #+begin_src emacs-lisp
-(use-package org
-  :pin org
-  :ensure org-plus-contrib ;; Workaround
-  :config
-  (require 'user-init-org))
+(straight-use-package 'org)
+
+(require 'user-init-org)
+#+end_src
+
+** Enhance user experience
+
+In this section we use all the previously installed packages to make Emacs a joy to use!
+
+*** Custom themes
+
+I like the selection from [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]:
+
+#+begin_src emacs-lisp
+(straight-use-package 'doom-themes)
+(straight-use-package 'all-the-icons)
+(straight-use-package 'all-the-icons-ivy)
+
+(all-the-icons-ivy-setup)
+
+(load-theme 'doom-one t)
+
+;; Enable flashing mode-line on errors
+(doom-themes-visual-bell-config)
+
+;; Enable custom neotree theme (all-the-icons must be installed!)
+(doom-themes-neotree-config)
+;; or for treemacs users
+;; (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+;; (doom-themes-treemacs-config)
+
+;; Corrects (and improves) org-mode's native fontification.
+(doom-themes-org-config)
+#+end_src
+
+*** Dashboard
+
+#+begin_src emacs-lisp
+(straight-use-package 'dashboard)
+
+(dashboard-setup-startup-hook)
+
+;; Set the banner
+(setq dashboard-startup-banner 'logo)
+(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+#+end_src
+
+*** Increase/decrease font size
+
+Sometimes it easy to read the text using a different font size than the default. The default keybinding for scaling the font =C-x C-+/-=, which is, frankly, nonsense!
+
+#+begin_src emacs-lisp
+(defhydra hydra-zoom (global-map "<f2>")
+  "zoom"
+  ("k" text-scale-increase "in")
+  ("j" text-scale-decrease "out")
+  ("q" nil "quit"))
+#+end_src
+
+*** Navigation
+
+#+begin_src emacs-lisp
+(defhydra hydra-avy (:exit t :hint nil)
+  "
+ Line^^       Region^^        Goto
+----------------------------------------------------------
+ [_y_] yank   [_Y_] yank      [_c_] timed char  [_C_] char
+ [_m_] move   [_M_] move      [_w_] word        [_W_] any word
+ [_k_] kill   [_K_] kill      [_l_] line        [_L_] end of line
+ "
+  ("c" avy-goto-char-timer)
+  ("C" avy-goto-char)
+  ("w" avy-goto-word-1)
+  ("W" avy-goto-word-0)
+  ("l" avy-goto-line)
+  ("L" avy-goto-end-of-line)
+  ("m" avy-move-line)
+  ("M" avy-move-region)
+  ("k" avy-kill-whole-line)
+  ("K" avy-kill-region)
+  ("y" avy-copy-line)
+  ("Y" avy-copy-region)
+  ("q" nil "quit"))
+
+(global-set-key (kbd "C-;") 'hydra-avy/body)
+#+end_src
+
+*** Window movement
+
+#+begin_src emacs-lisp
+(defhydra hydra-window ()
+  "window"
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
+  ("\\" (lambda () (interactive) (split-window-right) (windmove-right)) "vert")
+  ("/" (lambda () (interactive) (split-window-right) (windmove-right)) "vert")
+  ("-" (lambda () (interactive) (split-window-below) (windmove-down)) "horz")
+  ("t" transpose-frame "'")
+  ("o" delete-other-windows "one" :color blue)
+  ("a" ace-window "ace")
+  ("s" ace-swap-window "swap")
+  ("d" ace-delete-window "del")
+  ("i" ace-maximize-window "ace-one" :color blue)
+  ("q" nil "cancel"))
+
+(global-set-key (kbd "C-M-o") 'hydra-window/body)
+#+end_src
+
+*** Bookmarks
+
+#+begin_src emacs-lisp
+(defhydra hydra-bmk ()
+   ("t" bm-toggle "toggl")
+   ("n" bm-next "next")
+   ("p" bm-previous "prev"))
+
+(global-set-key (kbd "C-M-b") 'hydra-bmk/body)
+#+end_src
+
+*** Sane undo/redo
+
+The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
+
+#+begin_src emacs-lisp
+(straight-use-package 'undo-tree)
+
+;; Turn on everywhere
+(global-undo-tree-mode 1)
+;; Each node in the tree should have a timestamp
+(setq undo-tree-visualizer-timestamps t)
+;; Show a diff window displaying changes between undo nodes
+(setq undo-tree-visualizer-diff t)
+;; Make ctrl-z undo
+ (global-set-key (kbd "C-z") 'undo)
+;; Make ctrl-Z redo
+(defalias 'redo 'undo-tree-redo)
+(global-set-key (kbd "C-S-z") 'redo)
 #+end_src
 
 * Org configuration
 :properties:
-:header-args:  :tangle "emacs/.elisp/user-init-org.el"
-:header-args+: :mkdirp yes
-:header-args+: :noweb yes
+:header-args+: :tangle "emacs/.elisp/user-init-org.el"
 :end:
 
 Org is so awesome it deserves a package itself:
@@ -466,205 +705,11 @@ Org is so awesome it deserves a package itself:
 :header-args+: :tangle no
 :end:
 
-*** Ident mode by default
-
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'org-indent-mode)
-#+end_src
-
-*** Visual lines by default
-
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'visual-line-mode)
-#+end_src
-
 *** Fix tag position
 
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
 #+end_src
-
-*** Stop the org-level headers from increasing in height relative to the other text
-
-#+begin_src emacs-lisp
-(defun my/org-mode-hook ()
-  "Stop the org-level headers from increasing in height relative to the other text."
-  (dolist (face '(org-level-1 org-level-2 org-level-3 org-level-4 org-level-5))
-    (set-face-attribute face nil :weight 'normal :height 1.0)))
-(add-hook 'org-mode-hook 'my/org-mode-hook)
-#+end_src
-
-** LaTeX
-:properties:
-:header-args+: :noweb-ref org-conf
-:header-args+: :tangle no
-:end:
-
-*** Fix fragment preview size
-
-Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
-
-#+begin_src emacs-lisp
-;; Default scaling
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-
-(defun update-org-latex-fragments ()
-  (org-toggle-latex-fragment '(16))
-  (let ((text-scale-factor (expt text-scale-mode-step text-scale-mode-amount)))
-    (plist-put org-format-latex-options :scale (* 2.3 text-scale-factor))
-    (princ (plist-get org-format-latex-options :scale))
-    )
-  (org-toggle-latex-fragment '(16)))
-(add-hook 'text-scale-mode-hook 'update-org-latex-fragments)
-#+end_src
-
-*** Fix fragment preview numbering
-
-In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
-
-#+begin_src emacs-lisp
-(require 'cl-lib)
-(require 'cl)
-(defun org-renumber-environment (orig-func &rest args)
-  "Improve equation numbering"
-  (let ((results '())
-	(counter -1)
-	(numberp))
-    (setq results (loop for (begin .  env) in
-			(org-element-map (org-element-parse-buffer) 'latex-environment
-			  (lambda (env)
-			    (cons
-			     (org-element-property :begin env)
-			     (org-element-property :value env))))
-			collect
-			(cond
-			 ((and (string-match "\\\\begin{equation}" env)
-			       (not (string-match "\\\\tag{" env)))
-			  (incf counter)
-			  (cons begin counter))
-			 ((string-match "\\\\begin{align}" env)
-			  (prog2
-			      (incf counter)
-			      (cons begin counter)
-			    (with-temp-buffer
-			      (insert env)
-			      (goto-char (point-min))
-			      ;; \\ is used for a new line. Each one leads to a number
-			      (incf counter (count-matches "\\\\$"))
-			      ;; unless there are nonumbers.
-			      (goto-char (point-min))
-			      (decf counter (count-matches "\\nonumber")))))
-			 (t
-			  (cons begin nil)))))
-    (when (setq numberp (cdr (assoc (point) results)))
-      (setf (car args)
-	    (concat
-	     (format "\\setcounter{equation}{%s}\n" numberp)
-	     (car args)))))
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'org-renumber-environment)
-#+end_src
-
-*** Automatic LaTeX fragment previewing toggle
-
-This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview-in-org-mode/][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
-#+begin_src emacs-lisp
-(defvar kk/org-latex-fragment-last nil
-  "Holds last fragment/environment you were on.")
-
-(defun kk/org-in-latex-fragment-p ()
-  "Return the point where the latex fragment begins, if inside
-  a latex fragment. Else return false"
-  (let* ((el (org-element-context))
-	 (el-type (car el)))
-    (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
-	 (org-element-property :begin el))))
-
-(defun kk/org-latex-fragment-toggle ()
-  "Toggle a latex fragment image "
-  (and (eq 'org-mode major-mode)
-       (let ((begin (kk/org-in-latex-fragment-p)))
-	 (cond
-	  ;; were on a fragment and now on a new fragment
-	  ((and
-	    ;; fragment we were on
-	    kk/org-latex-fragment-last
-	    ;; and are on a fragment now
-	    begin
-
-	    ;; but not on the last one this is a little tricky. as you edit the
-	    ;; fragment, it is not equal to the last one. We use the begin
-	    ;; property which is less likely to change for the comparison.
-	    (not (and kk/org-latex-fragment-last
-		      (= begin
-			 kk/org-latex-fragment-last))))
-	   ;; go back to last one and put image back, provided there is still a fragment there
-	   (save-excursion
-	     (goto-char kk/org-latex-fragment-last)
-	     (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment))
-
-	     ;; now remove current image
-	     (goto-char begin)
-	     (let ((ov (loop for ov in (org--list-latex-overlays)
-			     if
-			     (and
-			      (<= (overlay-start ov) (point))
-			      (>= (overlay-end ov) (point)))
-			     return ov)))
-	       (when ov
-		 (delete-overlay ov)))
-	     ;; and save new fragment
-	     (setq kk/org-latex-fragment-last begin)))
-
-	  ;; were on a fragment and now are not on a fragment
-	  ((and
-	    ;; not on a fragment now
-	    (not begin)
-	    ;; but we were on one
-	    kk/org-latex-fragment-last)
-	   ;; put image back on, provided that there is still a fragment here.
-	   (save-excursion
-	     (goto-char kk/org-latex-fragment-last)
-	     (when (kk/org-in-latex-fragment-p) (org-preview-latex-fragment)))
-
-	   ;; unset last fragment
-	   (setq kk/org-latex-fragment-last nil))
-
-	  ;; were not on a fragment, and now are
-	  ((and
-	    ;; we were not one one
-	    (not kk/org-latex-fragment-last)
-	    ;; but now we are
-	    begin)
-	   ;; remove image
-	   (save-excursion
-	     (goto-char begin)
-	     (let ((ov (loop for ov in (org--list-latex-overlays)
-			     if
-			     (and
-			      (<= (overlay-start ov) (point))
-			      (>= (overlay-end ov) (point)))
-			     return ov)))
-	       (when ov
-		 (delete-overlay ov))))
-	   (setq kk/org-latex-fragment-last begin))))))
-
-(add-hook 'post-command-hook 'kk/org-latex-fragment-toggle t)
-#+end_src
-
-*** LaTeX code syntax highlighting
-
-#+begin_src emacs-lisp
-(setq org-highlight-latex-and-related '(latex script entities))
-#+end_src
-
-*** Quick insertion of LaTeX environment
-
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-#+end_src
-
 ** Babel
 :properties:
 :header-args+: :noweb-ref org-conf
@@ -680,6 +725,8 @@ This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview
 *** Load languages
 
 #+begin_src emacs-lisp
+(setq haskell-process-type 'stack-ghci)
+
 ;; active Babel languages
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -690,11 +737,440 @@ This solution (found [[http://slumpy.org/blog/2017-02-01-automatic-latex-preview
    (python . t)
    (fortran . t)
    (makefile . t)
-   (emacs-lisp . nil)))
+   (sagemath . t)
+   (haskell . t)
+   (emacs-lisp . t)))
 #+end_src
 
 *** Do not ask for confirmation when executing code block
 
 #+begin_src emacs-lisp
 (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+*** Default header arguments
+**** Header for all languages
+
+#+begin_src emacs-lisp
+;; add default arguments to use when evaluating a source block
+(add-to-list 'org-babel-default-header-args
+             '(:noweb . "yes"))
+#+end_src
+
+**** R
+#+begin_src emacs-lisp
+(add-to-list 'org-babel-default-header-args:R '(:session . "org-R"))
+
+(add-to-list 'org-babel-default-header-args:R
+             '((:width . 640) (:height . 640)))
+#+end_src
+
+**** SageMath
+
+#+begin_src emacs-lisp
+;; Ob-sagemath supports only evaluating with a session.
+(setq org-babel-default-header-args:sage '((:session . t)
+                                           (:results . "output")))
+
+;; C-c c for asynchronous evaluating (only for SageMath code blocks).
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async))
+#+end_src
+
+**** Ruby
+
+#+begin_src emacs-lisp
+(add-to-list 'org-babel-default-header-args:ruby '(:session . "org-ruby"))
+#+end_src
+
+* Snippets
+** Org
+:properties:
+:header-args+: :tangle-mode (identity #o666)
+:header-args+: :tangle no
+:end:
+
+*** Emacs-lisp code block
+
+#+begin_src text :tangle "emacs/.yasnippet/org-mode/elisp_src_block"
+# -*- mode: snippet -*-
+# name: elisp
+# key: <el
+# --
+,#+begin_src emacs-lisp
+$0
+,#+end_src
+#+end_src
+
+* Inbox/Trash
+:properties:
+:header-args: :tangle no
+:end:
+
+I use to keep in this section code I'm testing and I dont want to put in the configuration file.
+** Applications for Hydra
+
+These are the sample Hydras from https://raw.githubusercontent.com/abo-abo/hydra/05871dd6c8af7b2268bd1a10eb9f8a3e423209cd/hydra-examples.el
+#+begin_src emacs-lisp
+  ;;* Examples
+  ;;** Example 1: text scale
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (defhydra hydra-zoom (global-map "<f2>")
+      "zoom"
+      ("g" text-scale-increase "in")
+      ("l" text-scale-decrease "out")))
+
+  ;; This example generates three commands:
+  ;;
+  ;;     `hydra-zoom/text-scale-increase'
+  ;;     `hydra-zoom/text-scale-decrease'
+  ;;     `hydra-zoom/body'
+  ;;
+  ;; In addition, two of them are bound like this:
+  ;;
+  ;;     (global-set-key (kbd "<f2> g") 'hydra-zoom/text-scale-increase)
+  ;;     (global-set-key (kbd "<f2> l") 'hydra-zoom/text-scale-decrease)
+  ;;
+  ;; Note that you can substitute `global-map' with e.g. `emacs-lisp-mode-map' if you need.
+  ;; The functions generated will be the same, except the binding code will change to:
+  ;;
+  ;;     (define-key emacs-lisp-mode-map [f2 103]
+  ;;       (function hydra-zoom/text-scale-increase))
+  ;;     (define-key emacs-lisp-mode-map [f2 108]
+  ;;       (function hydra-zoom/text-scale-decrease))
+
+  ;;** Example 2: move window splitter
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (defhydra hydra-splitter (global-map "C-M-s")
+      "splitter"
+      ("h" hydra-move-splitter-left)
+      ("j" hydra-move-splitter-down)
+      ("k" hydra-move-splitter-up)
+      ("l" hydra-move-splitter-right)))
+
+  ;;** Example 3: jump to error
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (defhydra hydra-error (global-map "M-g")
+      "goto-error"
+      ("h" first-error "first")
+      ("j" next-error "next")
+      ("k" previous-error "prev")
+      ("v" recenter-top-bottom "recenter")
+      ("q" nil "quit")))
+
+  ;; This example introduces only one new thing: since the command
+  ;; passed to the "q" head is nil, it will quit the Hydra without doing
+  ;; anything. Heads that quit the Hydra instead of continuing are
+  ;; referred to as having blue :color. All the other heads have red
+  ;; :color, unless other is specified.
+
+  ;;** Example 4: toggle rarely used modes
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (defvar whitespace-mode nil)
+    (global-set-key
+     (kbd "C-c C-v")
+     (defhydra hydra-toggle-simple (:color blue)
+       "toggle"
+       ("a" abbrev-mode "abbrev")
+       ("d" toggle-debug-on-error "debug")
+       ("f" auto-fill-mode "fill")
+       ("t" toggle-truncate-lines "truncate")
+       ("w" whitespace-mode "whitespace")
+       ("q" nil "cancel"))))
+
+  ;; Note that in this case, `defhydra' returns the `hydra-toggle-simple/body'
+  ;; symbol, which is then passed to `global-set-key'.
+  ;;
+  ;; Another new thing is that both the keymap and the body prefix are
+  ;; skipped.  This means that `defhydra' will bind nothing - that's why
+  ;; `global-set-key' is necessary.
+  ;;
+  ;; One more new thing is that you can assign a :color to the body. All
+  ;; heads will inherit this color. The code above is very much equivalent to:
+  ;;
+  ;;     (global-set-key (kbd "C-c C-v a") 'abbrev-mode)
+  ;;     (global-set-key (kbd "C-c C-v d") 'toggle-debug-on-error)
+  ;;
+  ;; The differences are:
+  ;;
+  ;; * You get a hint immediately after "C-c C-v"
+  ;; * You can cancel and call a command immediately, e.g. "C-c C-v C-n"
+  ;;   is equivalent to "C-n" with Hydra approach, while it will error
+  ;;   that "C-c C-v C-n" isn't bound with the usual approach.
+
+  ;;** Example 5: mini-vi
+  (defun hydra-vi/pre ()
+    (set-cursor-color "#e52b50"))
+
+  (defun hydra-vi/post ()
+    (set-cursor-color "#ffffff"))
+
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (global-set-key
+     (kbd "C-z")
+     (defhydra hydra-vi (:pre hydra-vi/pre :post hydra-vi/post :color amaranth)
+       "vi"
+       ("l" forward-char)
+       ("h" backward-char)
+       ("j" next-line)
+       ("k" previous-line)
+       ("m" set-mark-command "mark")
+       ("a" move-beginning-of-line "beg")
+       ("e" move-end-of-line "end")
+       ("d" delete-region "del" :color blue)
+       ("y" kill-ring-save "yank" :color blue)
+       ("q" nil "quit")))
+    (hydra-set-property 'hydra-vi :verbosity 1))
+
+  ;; This example introduces :color amaranth. It's similar to red,
+  ;; except while you can quit red with any binding which isn't a Hydra
+  ;; head, you can quit amaranth only with a blue head. So you can quit
+  ;; this mode only with "d", "y", "q" or "C-g".
+  ;;
+  ;; Another novelty are the :pre and :post handlers. :pre will be
+  ;; called before each command, while :post will be called when the
+  ;; Hydra quits. In this case, they're used to override the cursor
+  ;; color while Hydra is active.
+
+  ;;** Example 6: selective global bind
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (defhydra hydra-next-error (global-map "C-x")
+      "next-error"
+      ("`" next-error "next")
+      ("j" next-error "next" :bind nil)
+      ("k" previous-error "previous" :bind nil)))
+
+  ;; This example will bind "C-x `" in `global-map', but it will not
+  ;; bind "C-x j" and "C-x k".
+  ;; You can still "C-x `jjk" though.
+
+  ;;** Example 7: toggle with Ruby-style docstring
+  (defvar whitespace-mode nil)
+  (defhydra hydra-toggle (:color pink)
+    "
+  _a_ abbrev-mode:       %`abbrev-mode
+  _d_ debug-on-error:    %`debug-on-error
+  _f_ auto-fill-mode:    %`auto-fill-function
+  _t_ truncate-lines:    %`truncate-lines
+  _w_ whitespace-mode:   %`whitespace-mode
+
+  "
+    ("a" abbrev-mode nil)
+    ("d" toggle-debug-on-error nil)
+    ("f" auto-fill-mode nil)
+    ("t" toggle-truncate-lines nil)
+    ("w" whitespace-mode nil)
+    ("q" nil "quit"))
+  ;; Recommended binding:
+  ;; (global-set-key (kbd "C-c C-v") 'hydra-toggle/body)
+
+  ;; Here, using e.g. "_a_" translates to "a" with proper face.
+  ;; More interestingly:
+  ;;
+  ;;     "foobar %`abbrev-mode" means roughly (format "foobar %S" abbrev-mode)
+  ;;
+  ;; This means that you actually see the state of the mode that you're changing.
+
+  ;;** Example 8: the whole menu for `Buffer-menu-mode'
+  (defhydra hydra-buffer-menu (:color pink
+			       :hint nil)
+    "
+  ^Mark^             ^Unmark^           ^Actions^          ^Search
+  ^^^^^^^^-----------------------------------------------------------------                        (__)
+  _m_: mark          _u_: unmark        _x_: execute       _R_: re-isearch                         (oo)
+  _s_: save          _U_: unmark up     _b_: bury          _I_: isearch                      /------\\/
+  _d_: delete        ^ ^                _g_: refresh       _O_: multi-occur                 / |    ||
+  _D_: delete up     ^ ^                _T_: files only: % -28`Buffer-menu-files-only^^    *  /\\---/\\
+  _~_: modified      ^ ^                ^ ^                ^^                                 ~~   ~~
+  "
+    ("m" Buffer-menu-mark)
+    ("u" Buffer-menu-unmark)
+    ("U" Buffer-menu-backup-unmark)
+    ("d" Buffer-menu-delete)
+    ("D" Buffer-menu-delete-backwards)
+    ("s" Buffer-menu-save)
+    ("~" Buffer-menu-not-modified)
+    ("x" Buffer-menu-execute)
+    ("b" Buffer-menu-bury)
+    ("g" revert-buffer)
+    ("T" Buffer-menu-toggle-files-only)
+    ("O" Buffer-menu-multi-occur :color blue)
+    ("I" Buffer-menu-isearch-buffers :color blue)
+    ("R" Buffer-menu-isearch-buffers-regexp :color blue)
+    ("c" nil "cancel")
+    ("v" Buffer-menu-select "select" :color blue)
+    ("o" Buffer-menu-other-window "other-window" :color blue)
+    ("q" quit-window "quit" :color blue))
+  ;; Recommended binding:
+  ;; (define-key Buffer-menu-mode-map "." 'hydra-buffer-menu/body)
+
+  ;;** Example 9: s-expressions in the docstring
+  ;; You can inline s-expresssions into the docstring like this:
+  (defvar dired-mode-map)
+  (declare-function dired-mark "dired")
+  (when (bound-and-true-p hydra-examples-verbatim)
+    (require 'dired)
+    (defhydra hydra-marked-items (dired-mode-map "")
+      "
+  Number of marked items: %(length (dired-get-marked-files))
+  "
+      ("m" dired-mark "mark")))
+
+  ;; This results in the following dynamic docstring:
+  ;;
+  ;;     (format "Number of marked items: %S\n"
+  ;;             (length (dired-get-marked-files)))
+  ;;
+  ;; You can use `format'-style width specs, e.g. % 10(length nil).
+
+  ;;** Example 10: apropos family
+  (defhydra hydra-apropos (:color blue
+			   :hint nil)
+    "
+  _a_propos        _c_ommand
+  _d_ocumentation  _l_ibrary
+  _v_ariable       _u_ser-option
+  ^ ^          valu_e_"
+    ("a" apropos)
+    ("d" apropos-documentation)
+    ("v" apropos-variable)
+    ("c" apropos-command)
+    ("l" apropos-library)
+    ("u" apropos-user-option)
+    ("e" apropos-value))
+  ;; Recommended binding:
+  ;; (global-set-key (kbd "C-c h") 'hydra-apropos/body)
+
+  ;;** Example 11: rectangle-mark-mode
+  (require 'rect)
+  (defhydra hydra-rectangle (:body-pre (rectangle-mark-mode 1)
+			     :color pink
+			     :post (deactivate-mark))
+    "
+    ^_k_^     _d_elete    _s_tring
+  _h_   _l_   _o_k        _y_ank
+    ^_j_^     _n_ew-copy  _r_eset
+  ^^^^        _e_xchange  _u_ndo
+  ^^^^        ^ ^         _p_aste
+  "
+    ("h" rectangle-backward-char nil)
+    ("l" rectangle-forward-char nil)
+    ("k" rectangle-previous-line nil)
+    ("j" rectangle-next-line nil)
+    ("e" hydra-ex-point-mark nil)
+    ("n" copy-rectangle-as-kill nil)
+    ("d" delete-rectangle nil)
+    ("r" (if (region-active-p)
+	     (deactivate-mark)
+	   (rectangle-mark-mode 1)) nil)
+    ("y" yank-rectangle nil)
+    ("u" undo nil)
+    ("s" string-rectangle nil)
+    ("p" kill-rectangle nil)
+    ("o" nil nil))
+
+  ;; Recommended binding:
+  ;; (global-set-key (kbd "C-x SPC") 'hydra-rectangle/body)
+
+  ;;** Example 12: org-agenda-view
+  (defun org-agenda-cts ()
+    (and (eq major-mode 'org-agenda-mode)
+	 (let ((args (get-text-property
+		      (min (1- (point-max)) (point))
+		      'org-last-args)))
+	   (nth 2 args))))
+
+  (defhydra hydra-org-agenda-view (:hint none)
+    "
+  _d_: ?d? day        _g_: time grid=?g?  _a_: arch-trees
+  _w_: ?w? week       _[_: inactive       _A_: arch-files
+  _t_: ?t? fortnight  _f_: follow=?f?     _r_: clock report=?r?
+  _m_: ?m? month      _e_: entry text=?e? _D_: include diary=?D?
+  _y_: ?y? year       _q_: quit           _L__l__c_: log = ?l?"
+    ("SPC" org-agenda-reset-view)
+    ("d" org-agenda-day-view (if (eq 'day (org-agenda-cts)) "[x]" "[ ]"))
+    ("w" org-agenda-week-view (if (eq 'week (org-agenda-cts)) "[x]" "[ ]"))
+    ("t" org-agenda-fortnight-view (if (eq 'fortnight (org-agenda-cts)) "[x]" "[ ]"))
+    ("m" org-agenda-month-view (if (eq 'month (org-agenda-cts)) "[x]" "[ ]"))
+    ("y" org-agenda-year-view (if (eq 'year (org-agenda-cts)) "[x]" "[ ]"))
+    ("l" org-agenda-log-mode (format "% -3S" org-agenda-show-log))
+    ("L" (org-agenda-log-mode '(4)))
+    ("c" (org-agenda-log-mode 'clockcheck))
+    ("f" org-agenda-follow-mode (format "% -3S" org-agenda-follow-mode))
+    ("a" org-agenda-archives-mode)
+    ("A" (org-agenda-archives-mode 'files))
+    ("r" org-agenda-clockreport-mode (format "% -3S" org-agenda-clockreport-mode))
+    ("e" org-agenda-entry-text-mode (format "% -3S" org-agenda-entry-text-mode))
+    ("g" org-agenda-toggle-time-grid (format "% -3S" org-agenda-use-time-grid))
+    ("D" org-agenda-toggle-diary (format "% -3S" org-agenda-include-diary))
+    ("!" org-agenda-toggle-deadlines)
+    ("[" (let ((org-agenda-include-inactive-timestamps t))
+	   (org-agenda-check-type t 'timeline 'agenda)
+	   (org-agenda-redo)
+	   (message "Display now includes inactive timestamps as well")))
+    ("q" (message "Abort") :exit t)
+    ("v" nil))
+
+  ;; Recommended binding:
+  ;; (define-key org-agenda-mode-map "v" 'hydra-org-agenda-view/body)
+
+  ;;** Example 13: automatic columns
+  (defhydra hydra-movement ()
+    ("j" next-line "down" :column "Vertical")
+    ("k" previous-line "up")
+    ("l" forward-char "forward" :column "Horizontal")
+    ("h" backward-char "back"))
+
+  ;;* Helpers
+  (require 'windmove)
+
+  (defun hydra-move-splitter-left (arg)
+    "Move window splitter left."
+    (interactive "p")
+    (if (let ((windmove-wrap-around))
+	  (windmove-find-other-window 'right))
+	(shrink-window-horizontally arg)
+      (enlarge-window-horizontally arg)))
+
+  (defun hydra-move-splitter-right (arg)
+    "Move window splitter right."
+    (interactive "p")
+    (if (let ((windmove-wrap-around))
+	  (windmove-find-other-window 'right))
+	(enlarge-window-horizontally arg)
+      (shrink-window-horizontally arg)))
+
+  (defun hydra-move-splitter-up (arg)
+    "Move window splitter up."
+    (interactive "p")
+    (if (let ((windmove-wrap-around))
+	  (windmove-find-other-window 'up))
+	(enlarge-window arg)
+      (shrink-window arg)))
+
+  (defun hydra-move-splitter-down (arg)
+    "Move window splitter down."
+    (interactive "p")
+    (if (let ((windmove-wrap-around))
+	  (windmove-find-other-window 'up))
+	(shrink-window arg)
+      (enlarge-window arg)))
+
+  (defvar rectangle-mark-mode)
+  (defun hydra-ex-point-mark ()
+    "Exchange point and mark."
+    (interactive)
+    (if rectangle-mark-mode
+	(rectangle-exchange-point-and-mark)
+      (let ((mk (mark)))
+	(rectangle-mark-mode 1)
+	(goto-char mk))))
+
+  (provide 'hydra-examples)
+
+  ;; Local Variables:
+  ;; no-byte-compile: t
+  ;; End:
+  ;;; hydra-examples.el ends here
+
 #+end_src

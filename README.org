@@ -1,4 +1,4 @@
-#+TITLE: vct's dotfiles
+#+title: vct's dotfiles
 
 This is my dotfiles repo. I hope you find something useful here!
 
@@ -26,19 +26,19 @@ Besides that, there is a series of additional software I have to install to have
 * Instructions
 
 Clone the repository in a folder in your =$HOME= (I keep it as a hidden directory =.dotfiles=), either from [[https://gitlab.com][GitLab]]
-#+BEGIN_SRC sh
+#+begin_src sh
 $ git clone https://gitlab.com/padawanphysicist/dotfiles.git ~/.dotfiles
-#+END_SRC
+#+end_src
 
 or [[https://github.com][GitHub]]:
-#+BEGIN_SRC sh
+#+begin_src sh
 $ git clone https://github.com/padawanphysicist/dotfiles.git ~/.dotfiles
-#+END_SRC
+#+end_src
 
 then enter the directory,
-#+BEGIN_SRC sh
+#+begin_src sh
 $ cd ~/.dotfiles
-#+END_SRC
+#+end_src
 
 tangle the files
 #+begin_src sh
@@ -46,9 +46,9 @@ emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$FILE\"))"
 #+end_src
 
 and link the important files to your =$HOME= directory:
-#+BEGIN_SRC sh
+#+begin_src sh
 $ stow <folder>
-#+END_SRC
+#+end_src
 
 * Configuration files
 

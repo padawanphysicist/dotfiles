@@ -156,6 +156,41 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 #+end_src
 
+*** Show trailing whitespace
+
+Took this from [[https://gist.github.com/ymasory/3794723][here]].
+#+begin_src emacs-lisp
+;; Make carriage returns blue and tabs green
+(custom-set-faces
+ '(my-carriage-return-face ((((class color)) (:background "blue"))) t)
+ '(my-tab-face ((((class color)) (:background "green"))) t))
+
+;; Add custom font locks to all buffers and all files
+(add-hook
+ 'font-lock-mode-hook
+ (function
+  (lambda ()
+    (setq
+     font-lock-keywords
+     (append
+      font-lock-keywords
+      '(("\r" (0 'my-carriage-return-face t))
+        ("\t" (0 'my-tab-face t))))))))
+
+;; Make characters after column 80 purple
+(setq whitespace-style (quote (face trailing tab-mark lines-tail)))
+(add-hook 'prog-mode-hook 'whitespace-mode)
+(add-hook 'text-mode-hook 'whitespace-mode)
+
+;; Transform literal tabs into a right-pointing triangle
+(setq
+ whitespace-display-mappings ;; http://ergoemacs.org/emacs/whitespace-mode.html
+ '(
+   (tab-mark 9 [9654 9] [92 9])
+   ;;others substitutions...
+   ))
+#+end_src
+
 *** Disable tooltips
 
 By default Emacs will display its tooltips in a separate frame. If you want to force Emacs to use the echo area exclusively, you can do that with this handy code snippet:

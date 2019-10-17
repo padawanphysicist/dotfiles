@@ -596,7 +596,8 @@ My personal notes are structured as a kind of a wiki, organized using [[https://
 (setq deft-text-mode 'org-mode)
 (setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
 (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
-(global-set-key [f12] 'deft)
+(global-set-key [f12] 'deft) ;; Open Deft buffer
+(global-set-key (kbd "C-x C-g") 'deft-find-file) ;; Find Org files without deft buffer
 #+end_src
 
 ** Enhance user experience

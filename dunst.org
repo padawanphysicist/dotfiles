@@ -1,32 +1,37 @@
-#+TITLE: Dunst configuration
+#+title: Dunst configuration
+#+property: header-args  :tangle "dunst/.config/dunst/dunstrc"
+#+property: header-args+ :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
 
 [[https://dunst-project.org/][Dunst]] is a lightweight and customizable notification daemon. My configuration is structured in three parts:
 
-#+CAPTION: Source listing for ~dunstrc~.
-#+BEGIN_SRC conf :tangle dunst/.config/dunst/dunstrc :noweb yes :mkdirp yes
-<<Global settings>>
-<<Keyboard shortcuts>>
-<<Colors>>
-#+END_SRC
+* Keyboard shortcuts
+
+#+begin_src conf
+[shortcuts]
+close = ctrl+space
+close_all = ctrl+shift+space
+context = ctrl+shift+period
+#+end_src
 
 * Global settings
 
-#+BEGIN_SRC conf :noweb-ref "Global settings" :noweb-sep "\n"
+#+begin_src conf
 [global]
-font = "SFNS Display 12"
+font = "SFNS Display 14"
 # Allow html markup
 markup = yes
-# El formato de las notificaciones,
-# %s - sumario
-# %p - progreso
-# %b - cuerpo del mensaje
+# Format of the notifications
+# %s - summary
+# %p - progress
+# %b - body of the message
 format = "<b>%s %p</b>\n%b"
-# Ordenar mensajes por prioridad
+# Sort messages by priority
 sort = yes
-# Mostrar cuantas not. hay ocultas
+# Show how many notifications are hidden
 indicate_hidden = true
 idle_threshold = 0
-# Tamaño de  la notificación
+# Size of the notification
 geometry = "300x5-20+20"
 alignment = center
 show_age_threshold = 60
@@ -40,46 +45,34 @@ separator_color = frame
 startup_notification = true
 frame_width = 3
 frame_color = "#6092BE"
-#+END_SRC
-
-* Keyboard shortcuts
-#+BEGIN_SRC conf :noweb-ref "Keyboard shortcuts" :noweb-sep "\n"
-# Atajos de teclado
-[shortcuts]
-close = ctrl+space
-close_all = ctrl+shift+space
-context = ctrl+shift+period
-#+END_SRC
+#+end_src
 
 * Colors
 
-#+BEGIN_SRC conf :noweb-ref "Colors" :noweb-sep "\n"
-# Estilo para las notificaciones de baja prioridad
+#+begin_src conf
 [urgency_low]
 background = "#ffffff"
 foreground = "#000000"
 timeout = 5
 
-# Estilo para las notificaciones de prioridad normal
 [urgency_normal]
 background = "#94DBFF"
 foreground = "#000000"
 timeout = 10
 
-# Estilo para las notificaciones de alta prioridad
 [urgency_critical]
 background = "#ff9999"
 foreground = "#000000"
 timeout = 0
 
-# Se pueden personalizar notificciones en función de su texto
-[test]
-summary = "*test*"
-background="#22dd22"
+# We can also customize notifications as a function of the text
+# [test]
+# summary = "*test*"
+# background="#22dd22"
 
-# Y también se personalizan por aplicación
-[signed_on]
-appname = Pidgin
-summary = "*signed on*"
-urgency = low
-#+END_SRC
+# We can also set per application
+# [signed_on]
+# appname = Pidgin
+# summary = "*signed on*"
+# urgency = low
+#+end_src

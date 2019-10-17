@@ -1,0 +1,31 @@
+#!/bin/bash
+
+USAGE="
+Tangle an Org file
+
+Usage: $(basename "$0") [-h | -f [FILE]]
+
+  -h, --help           Show this message
+  -f, --file [FILE]    File to tangle
+"
+
+case "$1" in
+  -h | --help)
+    echo "${USAGE}"
+    exit 0
+    ;;
+  -f | --file)
+    if [[ ! -z "$2" ]]; then
+      echo "Tangling $2..."
+      emacs -q --batch -l org --eval "(org-babel-tangle-file \"$2\")"
+      exit 0
+    else
+      echo "Missing argument"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "${USAGE}"
+    exit 0
+    ;;
+esac

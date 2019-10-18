@@ -1043,7 +1043,85 @@ $0
 ,#+end_src
 #+end_src
 
-* Inbox/Trash
+* Org LaTeX classes
+** Preprint/notes
+
+#+begin_src emacs-lisp :tangle "emacs/.elisp/org-latex-class-preprint.el"
+;; package --- Summary
+;;; Setup LaTeX class for preprints
+;;; Commentary:
+;; Configures org mode parameters
+
+;;; Code:
+(unless (boundp 'org-latex-classes)
+  (setq org-latex-classes nil))
+
+(setq org-latex-with-hyperref nil)
+
+(setq org-latex-image-default-width ".4\\linewidth")
+
+(setq org-latex-listings 'minted
+      org-latex-pdf-process
+      '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+
+(add-to-list 'org-latex-classes
+             '("preprint"
+               "
+\\pdfoutput=1 % To obtain pdf output rather than dvi when using `latex'
+\\documentclass[10pt,a4paper]{article}
+\\usepackage[margin=2cm]{geometry}
+\\usepackage[]{babel} % Typographical rules for different languages
+\\usepackage[utf8]{inputenc} % Translates from the chosen input encoding to LaTeX internal language
+\\usepackage[T1]{fontenc} % Select font encoding
+\\usepackage{ae,aecompl} % To solve fuzzy fonts on arXiv (https://arxiv.org/help/faq/texprobs)
+
+\\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsopn,amstext,amsthm} % AMS mathematical facilities
+
+\\usepackage{graphicx} % Support for graphics
+\\usepackage[dvipsnames]{xcolor} % Color extensions
+
+\\usepackage{minted}
+\\usemintedstyle{solarized-light}
+%% \\mintedoptions
+
+\\usepackage{mdframed}
+\\surroundwithmdframed{minted}
+
+%% Color choices from here:
+%% https://tex.stackexchange.com/questions/100905/best-practice-for-hyperref-link-colours
+\\newcommand\\vctshade{85}
+\\colorlet{vctlinkcolor}{violet}
+\\colorlet{vctcitecolor}{YellowOrange}
+\\colorlet{vcturlcolor}{Aquamarine}
+
+\\usepackage[%
+  hyperindex,%
+  breaklinks,%
+  colorlinks = true,%
+  linkcolor  = vctlinkcolor!\\vctshade!black,%
+  citecolor  = vctcitecolor!\\vctshade!black,%
+  urlcolor   = vcturlcolor!\\vctshade!black,%
+]{hyperref} % Support for hypertext
+
+\\usepackage[per-mode=symbol]{siunitx} % For using SI units
+\\usepackage{float} % Improved interface for floating objects
+\\usepackage{cancel} % To draw diagonal lines (\"cancel\" a term)
+
+[NO-DEFAULT-PACKAGES]
+[NO-PACKAGES]
+[EXTRA]
+"
+  ("\\section{%s}" . "\\section*{%s}")
+  ("\\subsection{%s}" . "\\subsection*{%s}")
+  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+  ("\\paragraph{%s}" . "\\paragraph*{%s}")))
+
+(message "Loading Org LaTeX class preprint")
+(provide 'org-latex-class-preprint)
+#+end_src
+
+* COMMENT Inbox/Trash
 :properties:
 :header-args: :tangle no
 :end:

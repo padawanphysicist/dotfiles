@@ -573,6 +573,12 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 (straight-use-package 'cdlatex)
 #+end_src
 
+*** Bash
+
+#+begin_src emacs-lisp
+(setq sh-basic-offset 2)
+#+end_src
+
 ** Org mode
 
 Install Org mode to use the last version instead of the version bundled with Emacs:
@@ -740,6 +746,12 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 ;; Make ctrl-Z redo
 (defalias 'redo 'undo-tree-redo)
 (global-set-key (kbd "C-S-z") 'redo)
+#+end_src
+
+*** Visualizing colors
+
+#+begin_src emacs-lisp
+(straight-use-package 'rainbow-mode)
 #+end_src
 
 * Org configuration
@@ -1002,8 +1014,8 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 #+begin_src emacs-lisp
 (add-to-list 'org-babel-default-header-args:R '(:session . "org-R"))
 
-(add-to-list 'org-babel-default-header-args:R
-             '((:width . 640) (:height . 640)))
+;(add-to-list 'org-babel-default-header-args:R
+;             '((:width . 640) (:height . 640)))
 #+end_src
 
 **** SageMath

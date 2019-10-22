@@ -34,6 +34,8 @@ for directory in */ ; do stow $directory ; done
 
 * Configuration files
 
+The configuration files written in literate style are:
+
 #+begin_src sh :results raw :exports results
 for i in *.org; do if [[ $i != "README.org" ]]; then echo '-' [[$i]]; fi ; done
 #+end_src
@@ -51,3 +53,5 @@ for i in *.org; do if [[ $i != "README.org" ]]; then echo '-' [[$i]]; fi ; done
 - [[shell.org]]
 - [[tmux.org]]
 - [[X.org]]
+
+Also, there is the folder [[file:misc][misc]], which contains dotfiles which are too small to worth write in Org, or I'm just too lazy to do it.

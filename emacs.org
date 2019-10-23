@@ -349,6 +349,14 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 (straight-use-package 'avy)
 #+end_src
 
+*** Shortcuts
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-;") 'avy-goto-char-timer)
+(global-set-key (kbd "M-g f") 'avy-goto-line)
+(global-set-key (kbd "M-g w") 'avy-goto-word-1)
+#+end_src
+
 ** Improve window management
 
 Besides Avy, there is the [[https://github.com/abo-abo/ace-window][ace-window]] package, which allows to select a window to switch to.

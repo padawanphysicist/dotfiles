@@ -295,49 +295,50 @@ The only additional setup I like to do is to decrease the delay for which-key bu
 
 ** Improve completion
 
-Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://github.com/abo-abo/swiper][Ivy]] is an interactive interface for completion in Emacs.
+Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
-When active, =ivy-mode= completes the selection process by narrowing available choices while previewing in the minibuffer. Selecting the final candidate is either through simple keyboard character inputs or through powerful regular expressions. I'm using it as an alternative to [[https://github.com/emacs-helm/helm][helm]], as it feels much more lightweight.
-
-*** Install Ivy
+*** Install Helm
 
 #+begin_src emacs-lisp
-(straight-use-package 'swiper)
-(straight-use-package 'counsel)
+(straight-use-package 'helm)
 #+end_src
 
-*** Enable Ivy completion everywhere
+*** Enable Helm for narrowing and selecting
 
 #+begin_src emacs-lisp
-(ivy-mode 1)
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+;; ("C-c h" . helm-mini)
+;; ("C-h a" . helm-apropos)
+;; ("C-x C-b" . helm-buffers-list)
+;; ("C-x b" . helm-buffers-list)
+;; ("M-y" . helm-show-kill-ring)
+;; ("M-x" . helm-M-x)
+;; ("C-x c o" . helm-occur)
+;; ("C-x c s" . helm-swoop)
+;; ("C-x c y" . helm-yas-complete)
+;; ("C-x c Y" . helm-yas-create-snippet-on-region)
+;; ("C-x c b" . my/helm-do-grep-book-notes)
+;; ("C-x c SPC" . helm-all-mark-rings)
 #+end_src
 
-*** Keybindings
-
-Here is a list of commands that are useful to be bound globally, along with some sample bindings: 
-
-**** Ivy-based interface to standard commands
+*** Configuration
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-s") 'swiper-isearch) ;; Default search
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "M-y") 'counsel-yank-pop)
-(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-(global-set-key (kbd "C-c v") 'ivy-push-view)
-(global-set-key (kbd "C-c V") 'ivy-pop-view)
-#+end_src
+(require 'helm-config)
+(setq helm-candidate-number-limit 100)
 
-**** Ivy-resume and other commands
+;; From https://gist.github.com/antifuchs/9238468
+(setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
+      helm-input-idle-delay 0.01  ; this actually updates things
+                                  ; reeeelatively quickly.
+      helm-yas-display-key-on-candidate t
+      helm-quick-update t
+      helm-M-x-requires-pattern nil
+      helm-ff-skip-boring-files t)
 
-#+begin_src emacs-lisp
-;(global-set-key (kbd "C-c C-r") 'ivy-resume)
-;(global-set-key (kbd "C-c b") 'counsel-bookmark)
-;(global-set-key (kbd "C-c d") 'counsel-descbinds)
-;(global-set-key (kbd "C-c g") 'counsel-git)
-;(global-set-key (kbd "C-c o") 'counsel-outline)
-;(global-set-key (kbd "C-c t") 'counsel-load-theme)
-;(global-set-key (kbd "C-c F") 'counsel-org-file)
+(helm-mode 1)
 #+end_src
 
 ** Improve navigation
@@ -400,19 +401,6 @@ By default, suggestions only appear after you have typed a few characters. That 
 
 #+begin_src emacs-lisp
 (setq company-show-numbers t)
-#+end_src
-
-** Sort and filtering completion
-
-[[https://github.com/raxod502/prescient.el][prescient.el]] is a library which sorts and filters lists of candidates, such as appear when you use a package like Ivy or Company.
-
-#+begin_src emacs-lisp
-(straight-use-package 'prescient)
-(straight-use-package 'ivy-prescient)
-;(straight-use-package 'company-prescient)
-
-(ivy-prescient-mode)
-;(company-prescient-mode)
 #+end_src
 
 ** Templating
@@ -613,9 +601,6 @@ I like the selection from [[https://github.com/hlissner/emacs-doom-themes][doom-
 #+begin_src emacs-lisp
 (straight-use-package 'doom-themes)
 (straight-use-package 'all-the-icons)
-(straight-use-package 'all-the-icons-ivy)
-
-(all-the-icons-ivy-setup)
 
 (load-theme 'doom-solarized-light t)
 

@@ -466,6 +466,13 @@ and enable it in programming modes:
 (add-hook 'prog-mode-hook 'flycheck-mode)
 #+end_src
 
+also, enable =rainbow-delimiters=:
+#+begin_src emacs-lisp
+(straight-use-package 'rainbow-delimiters)
+(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+(show-paren-mode 1)
+#+end_src
+
 *** Ruby
 
 **** Enable enhanced ruby mode

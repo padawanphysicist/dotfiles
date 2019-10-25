@@ -1,0 +1,8 @@
+if [ $# -gt 0 ]; then
+  $*
+else
+  # exec openbox-session
+  # exec awesome
+  exec xmonad
+  # exec mate-session
+fi

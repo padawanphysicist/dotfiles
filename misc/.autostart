@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+function run {
+  if ! pgrep -f $1 ;
+  then
+    $@&
+  fi
+}
+
+[[ -f ~/.Xresources_custom ]] && xrdb -merge ~/.Xresources_custom
+xsetroot -cursor_name left_ptr &
+setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
+
+run dunst
+run stalonetray
+run '/home/santos/.local/bin/dropbox start'
+run /opt/OpenDrive/odrive
+run redshift
+run 'systemctl --user restart tmux'
+# run 'systemctl --user restart emacs'

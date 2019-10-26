@@ -10,7 +10,7 @@ Redshift adjusts the color temperature of your screen according to your surround
 #+begin_src conf
 [redshift]
 temp-day=6500
-temp-night=5000
+temp-night=4000
 #+end_src
 
 * Disable the smooth fade between temperatures when Redshift start/stop
@@ -90,8 +90,8 @@ adjustment-method=randr
 ; Keep in mind that longitudes west of Greenwich (e.g. the Americas)
 ; are negative numbers.
 [manual]
-lat=-3.77 ; Fortaleza
-lon=-38.6 ;
+lat=-3.77
+lon=-38.6
 #+end_src
 
 * Configure adjustment method

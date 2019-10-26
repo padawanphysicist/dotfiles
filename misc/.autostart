@@ -1,9 +1,23 @@
 #!/usr/bin/env bash
+#
+# Autostart script
+#
+# This script should be run during the initialization of the
+# window/desktop manager.
+#
+# You should be careful for using this in the startupHook of Xmonad,
+# since it runs each time xmonad is restarted.
+#
 
 function run {
-  if ! pgrep -f $1 ;
-  then
-    $@&
+  PROGRAM_NAME=$1
+  COMMAND=${PROGRAM_NAME}
+
+  if [ ! -z "$2" ]; then COMMAND=$2; fi
+
+  pgrep --full ${PROGRAM_NAME} 2>&1 > /dev/null
+  if [[ "$?" == 1 ]]; then # $PROGRAM_NAME not running
+    ${COMMAND} &
   fi
 }
 
@@ -13,8 +27,9 @@ setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 
 run dunst
 run stalonetray
-run '/home/santos/.local/bin/dropbox start'
-run /opt/OpenDrive/odrive
 run redshift
-run 'systemctl --user restart tmux'
-# run 'systemctl --user restart emacs'
+run odrive '/opt/OpenDrive/odrive'
+run dropbox '/home/santos/.local/bin/dropbox start'
+
+systemctl is-active --user status tmux --quiet && systemctl --user start tmux
+systemctl is-active --user status emacs --quiet && systemctl --user start emacs

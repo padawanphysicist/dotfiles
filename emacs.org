@@ -616,12 +616,34 @@ In this section we use all the previously installed packages to make Emacs a joy
 
 #+begin_src emacs-lisp
 (straight-use-package 'spacemacs-theme)
+(setq spacemacs-theme-org-height nil)
 
 (add-hook 'after-make-frame-functions
   (lambda (frame)
     (select-frame frame)
     (if window-system
       (load-theme 'spacemacs-dark t))))
+
+;; Switch dark/light theme
+(straight-use-package 'heaven-and-hell)
+;; Default is 'light
+(setq heaven-and-hell-theme-type 'dark)
+
+;; Set preferred light and dark themes
+;; default light is emacs default theme, default dark is wombat
+;; Themes can be the list: (dark . (tsdh-dark tango-dark))
+(setq heaven-and-hell-themes
+      '((light . (spacemacs-light))
+        (dark . (spacemacs-dark))))
+;; Optional, load themes without asking for confirmation.
+(setq heaven-and-hell-load-theme-no-confirm t)
+
+;; Add init-hook so heaven-and-hell can load your theme
+(add-hook 'after-init-hook 'heaven-and-hell-init-hook)
+
+;; Set keys to toggle theme and return to default emacs theme
+(global-set-key (kbd "C-c <f6>") 'heaven-and-hell-load-default-theme)
+(global-set-key (kbd "<f6>") 'heaven-and-hell-toggle-theme)
 #+end_src
 
 *** Dashboard

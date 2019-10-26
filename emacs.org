@@ -80,6 +80,7 @@ Since disk space is cheap, I prefer to save a lot!
 (setq kept-new-versions 8)
 (setq kept-old-versions 4)
 (setq version-control t)
+(savehist-mode 1)
 #+end_src
 
 *** Add my elisp directory and other files
@@ -178,7 +179,8 @@ Took this from [[https://gist.github.com/ymasory/3794723][here]].
         ("\t" (0 'my-tab-face t))))))))
 
 ;; Make characters after column 80 purple
-(setq whitespace-style (quote (face trailing tab-mark lines-tail)))
+;(setq whitespace-style (quote (face trailing tab-mark lines-tail)))
+(setq whitespace-style (quote (face trailing tab-mark)))
 (add-hook 'prog-mode-hook 'whitespace-mode)
 (add-hook 'text-mode-hook 'whitespace-mode)
 
@@ -327,7 +329,8 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 
 #+begin_src emacs-lisp
 (require 'helm-config)
-(setq helm-candidate-number-limit 100)
+
+(setq helm-candidate-number-limit nil)
 
 ;; From https://gist.github.com/antifuchs/9238468
 (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
@@ -611,25 +614,14 @@ In this section we use all the previously installed packages to make Emacs a joy
 
 *** Custom themes
 
-I like the selection from [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]:
-
 #+begin_src emacs-lisp
-(straight-use-package 'doom-themes)
-(straight-use-package 'all-the-icons)
+(straight-use-package 'spacemacs-theme)
 
-(load-theme 'doom-solarized-light t)
-
-;; Enable flashing mode-line on errors
-(doom-themes-visual-bell-config)
-
-;; Enable custom neotree theme (all-the-icons must be installed!)
-(doom-themes-neotree-config)
-;; or for treemacs users
-;; (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
-;; (doom-themes-treemacs-config)
-
-;; Corrects (and improves) org-mode's native fontification.
-(doom-themes-org-config)
+(add-hook 'after-make-frame-functions
+  (lambda (frame)
+    (select-frame frame)
+    (if window-system
+      (load-theme 'spacemacs-dark t))))
 #+end_src
 
 *** Dashboard
@@ -670,6 +662,25 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 (straight-use-package 'rainbow-mode)
 #+end_src
 
+*** Custom Functions
+**** Move text to scratch buffer
+
+#+begin_src emacs-lisp
+(defun move-region-to-other-window (start end)
+  "Move selected text to other window"
+  (interactive "r")
+  (if (use-region-p)
+      (let ((count (count-words-region start end)))
+        (save-excursion
+          (kill-region start end)
+          (other-window 1)
+          (yank)
+          (newline))
+        (other-window -1)
+        (message "Moved %s words" count))
+    (message "No region selected")))
+#+end_src
+
 * Org configuration
 :properties:
 :header-args+: :tangle "emacs/.elisp/user-init-org.el"
@@ -701,6 +712,19 @@ Org is so awesome it deserves a package itself:
 
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
+#+end_src
+
+*** Update timestamps
+
+#+begin_src emacs-lisp
+(setq-default org-display-custom-times t)
+(setq org-time-stamp-custom-formats '("<%Y-%m-%d %a %H:%M>" . "<%Y-%m-%d %a %H:%M>"))
+
+; Automatic update of time-stamps
+(setq time-stamp-active t)
+(setq time-stamp-format "<%:y-%02m-%02d %3a %02H:%02M>")
+(setq time-stamp-pattern "10/^#\\+modified: %%$")
+(add-hook 'before-save-hook 'time-stamp) ; Update timestamp on saving
 #+end_src
 
 ** LaTeX

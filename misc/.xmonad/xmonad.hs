@@ -12,7 +12,8 @@ vctBorderWidth = 2  -- I really need this thick!
 vctFocusedBorderColor = "#ff4500"
 vctWorkspaces = ["1:WWW","2:DEV","3:AUX"]
 vctTerminal = "xterm -e 'tmux attach -t santos'"
-vctAdditionalKeys = [((vctModMask, xK_p), spawn "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"), ((vctModMask, xK_z), spawn "emacsclient -c"), ((0, xF86XK_MonBrightnessUp), spawn "sudo xbacklight -i 10"), ((0, xF86XK_MonBrightnessDown), spawn "sudo xbacklight -d 10")]
+vctScreenLock = "xscreensaver-command -lock"
+vctAdditionalKeys = [((vctModMask, xK_p), spawn "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"), ((vctModMask, xK_z), spawn "emacsclient -c"), ((0, xF86XK_MonBrightnessUp), spawn "sudo xbacklight -i 10"), ((0, xF86XK_MonBrightnessDown), spawn "sudo xbacklight -d 10"), ((vctModMask .|. shiftMask, xK_z), spawn vctScreenLock)]
 
 -- The main function.
 main = xmonad =<< statusBar myBar myPP toggleStrutsKey myConfig

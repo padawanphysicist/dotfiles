@@ -28,6 +28,7 @@ setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 run dunst
 run stalonetray
 run redshift
+run xscreensaver 'xscreensaver -no-splash'
 run odrive '/opt/OpenDrive/odrive'
 run dropbox '/home/santos/.local/bin/dropbox start'
 

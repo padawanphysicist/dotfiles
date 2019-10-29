@@ -200,6 +200,16 @@ By default Emacs will display its tooltips in a separate frame. If you want to f
 ;;(tooltip-mode -1)
 #+end_src
 
+*** Save Desktop
+
+Desktop-Save mode is a global mode that automatically saves your Emacs session, so you can load it later and pick up exactly where you left Emacs last time. In practice, Desktop saves your session information and buffers to a file. Next time you start Emacs, you can load your session and have (almost) all your buffers available. The main benefit of Desktop is that it saves the hussle of reopening all the files you need and setting your windows the way you like them.
+
+#+begin_src emacs-lisp
+(desktop-save-mode)
+;; Add variables to desktop saving
+(add-to-list 'desktop-globals-to-save 'register-alist)
+#+end_src
+
 ** Package management
 
 Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
@@ -520,6 +530,14 @@ Since enhanced mode is supposed to replace the default Ruby mode, it is nice to 
 (add-hook 'enh-ruby-mode-hook 'robe-mode)
 #+end_src
 
+*** Crystal
+
+#+begin_src emacs-lisp
+(straight-use-package 'crystal-mode)
+(straight-use-package 'inf-crystal)
+(add-hook 'crystal-mode-hook 'inf-crystal-minor-mode)
+#+end_src
+
 *** Haskell
 
 **** Enable Haskell mode
@@ -701,6 +719,21 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
         (other-window -1)
         (message "Moved %s words" count))
     (message "No region selected")))
+#+end_src
+
+**** Delete all other buffers
+
+#+begin_src emacs-lisp
+(defun vct:kill-other-buffers ()
+  "Kill all buffers except the current one and *Messages* and *scratch* and *dashboard*"
+  (interactive)
+  (mapc 'kill-buffer (remove-if
+                      (lambda (buf)
+                        (or
+                         (eq buf (current-buffer))
+                         (member (buffer-name buf) '("*dashboard*" "*Messages*" "*scratch*"))))
+                      (buffer-list)))
+  (delete-other-windows))
 #+end_src
 
 * Org configuration
@@ -941,6 +974,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 
 #+begin_src emacs-lisp
 (setq haskell-process-type 'stack-ghci)
+(straight-use-package 'ob-crystal)
 
 ;; active Babel languages
 (org-babel-do-load-languages
@@ -954,6 +988,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
    (makefile . t)
    (sagemath . t)
    (haskell . t)
+   (crystal . t)
    (emacs-lisp . t)))
 #+end_src
 

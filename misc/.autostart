@@ -32,5 +32,5 @@ run xscreensaver 'xscreensaver -no-splash'
 run odrive '/opt/OpenDrive/odrive'
 run dropbox '/home/santos/.local/bin/dropbox start'
 
-systemctl is-active --user status tmux --quiet && systemctl --user start tmux
-systemctl is-active --user status emacs --quiet && systemctl --user start emacs
+systemctl is-active --quiet --user tmux --quiet || systemctl --user restart tmux
+systemctl is-active --quiet --user emacs --quiet || systemctl --user restart emacs

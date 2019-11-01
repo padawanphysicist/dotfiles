@@ -16,8 +16,8 @@ unbind C-b
 
 and then define a new prefix
 #+begin_src conf
-set -g prefix C-a
-bind-key C-a send-prefix
+set -g prefix M-x
+bind-key M-x send-prefix
 #+end_src
 
 * Quickly reload tmux configuration

@@ -1,0 +1,299 @@
+#+title: XMonad configuration
+#+property: header-args  :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
+#+property: header-args+ :tangle "xmonad/.xmonad/xmonad.hs"
+
+[[https://xmonad.org/][XMonad]] is a dynamically tiling window manager written and configured in [[https://www.haskell.org/][Haskell]]. It allows you to get things done by automating the aligning and positioning of the windows you open.
+
+* Import libraries
+
+Most of the libraries used here come from the package =xmonad-contrib=.
+
+#+begin_src haskell
+import XMonad -- For default configuration
+import XMonad.Hooks.FadeInactive -- Add transparency to inactive windows
+import XMonad.Util.EZConfig -- For custom keys
+import Graphics.X11.ExtraTypes.XF86 -- For Brightness keys
+import XMonad.Layout.Spacing -- Add spacing (gaps) between windows
+import XMonad.Hooks.ManageDocks -- Automatically manage dock type programs (panel, mainly)
+import XMonad.Hooks.DynamicLog -- For panel
+import XMonad.Layout.Grid -- For Grid layout
+import XMonad.Util.Run -- For spawn
+import XMonad.Config.Desktop -- desktopConfig
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.UrgencyHook
+import GHC.IO.Handle.Types
+#+end_src
+
+* Change prefix key
+
+=modMask= lets you specify which modkey you want to use. The default is =mod1Mask= ("left Alt"). You may also consider using =mod3Mask= ("right Alt"), which does not conflict with emacs keybindings. I prefer the "windows key", which is usually =mod4Mask=.
+
+#+begin_src haskell
+vctModMask :: KeyMask
+vctModMask = mod4Mask
+#+end_src
+
+* Default applications
+** Application launcher
+
+#+begin_src haskell
+vctLauncher :: String
+vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
+#+end_src
+
+** Terminal
+
+#+begin_src haskell
+vctTerminal :: String
+vctTerminal = "xterm -e 'tmux attach-session -t santos'"
+#+end_src
+
+** Screensaver
+
+#+begin_src haskell
+vctScreenSaver :: String
+vctScreenSaver = "xscreensaver-command -lock"
+#+end_src
+
+** Panel
+
+#+begin_src haskell
+vctPanel :: String
+vctPanel = "xmobar"
+#+end_src
+
+* Workspaces
+
+#+begin_src haskell
+vctWorkspaces :: [String]
+vctWorkspaces = ["1:WWW", "2:DEV", "3:AUX"] ++ map show [4..9]
+#+end_src
+
+* Keybindings
+
+#+begin_src haskell
+vctAdditionalKeys :: [((KeyMask, KeySym), X())]
+vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
+                    , ((vctModMask, xK_z), spawn "emacsclient -c")
+                    , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
+                    , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
+                    , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
+                    , ((vctModMask, xK_b), sendMessage ToggleStruts)]
+#+end_src
+
+* Log Hooks
+
+xmonad calls the =logHook= with every internal state update, which is useful for (among other things) outputting status information to an external status bar program such as xmobar or polybar.
+
+** Transparency to inactive windows
+
+The usual behaviour of XMonad for highlight the focused (active) window is to draw a (usually red) border around it. You can change the color and width of the borders as follows:
+
+#+begin_src haskell
+-- Width of windows border
+vctBorderWidth :: Dimension
+vctBorderWidth = 0 -- Change this to a value > 0 to have border
+
+-- Border colors for focused/unfocused windows
+vctFocusedBorderColor :: String
+vctFocusedBorderColor = "#FF0000" 
+vctNormalBorderColor :: String
+vctNormalBorderColor  = "#CCCCCC"
+#+end_src
+
+However, there is a neater way to do this: make the unfocused (inactive) windows transparent. However, in order to do this, you must install a compositor, like Compton of xcompmgr. For now I'm sticking to [[https://github.com/chjj/compton][compton]], by eventually I'll try [[https://github.com/yshui/picom][picom]], which is a fork being activelly maintained.
+
+#+begin_src haskell
+vctTransparentInactive :: X()
+vctTransparentInactive = fadeInactiveLogHook fadeAmount
+    where fadeAmount = 0.75
+#+end_src
+
+** Pretty print to panel
+
+#+begin_src haskell
+vctPP :: Handle -> X()
+vctPP h = dynamicLogWithPP xmobarPP 
+  { ppOutput = hPutStrLn h
+  , ppCurrent = xmobarColor "#ffb90f" "" . wrap "[" "]"
+  , ppTitle = (\str -> "") 
+  }
+#+end_src
+
+** Combine hooks
+
+#+begin_src haskell
+vctLogHook :: Handle -> X()
+vctLogHook h = vctTransparentInactive <+> (vctPP h)
+#+end_src
+
+* Layouts
+
+#+begin_src haskell
+-- Add spacing between windows
+vctLayoutHook = spacing 6 $ tall ||| Grid ||| Mirror tall ||| Full
+  where tall = Tall 1 (3/100) (1/2)
+#+end_src
+
+* Startup hook
+
+Perform an arbitrary action each time xmonad starts or is restarted with =mod-q=. Used by, e.g., XMonad.Layout.PerWorkspace to initialize per-workspace layout choices.
+
+#+begin_src haskell
+vctStartupHook :: X()
+vctStartupHook = do
+  spawn "~/.autostart"
+#+end_src
+
+* Run XMonad
+
+Now we run xmonad with all the settings we defined previously:
+#+begin_src haskell
+main :: IO()
+main = do
+  xmproc <- spawnPipe vctPanel -- spawnPipe returns a Handle
+  xmonad $ withUrgencyHook NoUrgencyHook $ ewmh $ desktopConfig
+    { modMask            = vctModMask
+    , borderWidth        = vctBorderWidth
+    , workspaces         = vctWorkspaces
+    , terminal           = vctTerminal
+    , normalBorderColor  = vctNormalBorderColor
+    , focusedBorderColor = vctFocusedBorderColor
+    , logHook            = vctLogHook xmproc
+    , manageHook         = manageHook desktopConfig <+> manageDocks
+    , layoutHook         = avoidStruts $ vctLayoutHook
+    , startupHook        = vctStartupHook
+    } `additionalKeys` vctAdditionalKeys
+#+end_src
+
+* Xmobar configuration :optional:
+:properties:
+:header-args+: :tangle "xmonad/.xmobarrc"
+:end:
+
+You would like to install/enable [[https://elpa.gnu.org/packages/rainbow-mode.html][rainbow-mode]] to see the colors here =)
+
+#+begin_src haskell
+-- You can take a look at
+-- https://beginners-guide-to-xmonad.readthedocs.io/configure_xmobar.html
+Config
+  {
+  -- appearance
+    font = "xft:Fira Mono:size=12:antialias=true"
+  , additionalFonts = ["xft:FontAwesome:size=12"] -- For the icons  
+  , allDesktops = True
+  , position = TopW L 100
+--  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
+  , sepChar =  "@"   -- delineator between plugin names and straight text
+  , alignSep = "}{"  -- separator between left-right alignment
+  , template = "@UnsafeStdinReader@ | <fc=#4f94cd><fn=1></fn></fc> @multicpu@ | @memory@ | @swap@ | <fc=#4f94cd><fn=1></fn></fc> <fc=#caff70>@uptime@</fc> | <fc=#ffff00><fn=1></fn></fc> @backlight@% | <fc=#008b45><fn=1></fn></fc> @battery@ | <fc=#4f94cd><fn=1></fn></fc> @date@ | <action=`systemctl hibernate`><fc=#ee2c2c><fn=1>  </fn></fc></action> }{  | "
+  , commands =
+    [
+      Run UnsafeStdinReader
+    -- , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
+    , Run MultiCpu       ["-w", "2" -- Fix width of the field
+                         , "-c", "0"-- Padding with zeros
+                         , "--template" , "<total0>% | <total1>% | <total2>% | <total3>%"
+                         , "--Low"      , "50"         -- units: %
+                         , "--High"     , "85"         -- units: %
+                         , "--low"      , "green"
+                         , "--normal"   , "orange"
+                         , "--high"     , "red"
+                         ] 10
+    , Run Memory ["-w", "2", "-c", "0", "-t", "<fc=#4f94cd>RAM</fc>: <usedratio>%"] 10
+    , Run Swap ["-w", "2", "-c", "0", "-t", "<fc=#4f94cd>SWAP</fc>: <usedratio>%"] 10
+    , Run Com "uptime" ["-p"] "" 36000
+    , Run Com "xbacklight" ["-g"] "backlight" 1
+    , Run Date           "<fc=#ABABAB>%F (%a) %H:%M</fc>" "date" 10
+    , Run Battery        [ "--template" , "<acstatus>"
+                         , "--Low"      , "10"        -- units: %
+                         , "--High"     , "80"        -- units: %
+                         , "--low"      , "red"
+                         , "--normal"   , "orange"
+                         , "--high"     , "lightgreen"
+                         , "--" -- battery specific options
+                           -- discharging status
+                         , "-o"         , "<left>% (<timeleft>)"
+                           -- AC "on" status
+                         , "-O"         , "<fc=#dAA520>Charging</fc>"
+                           -- charged status
+                         , "-i"         , "<fc=#006000>Charged</fc>"
+                         ] 50
+    ]
+  }
+#+end_src
+
+* System tray :optional:
+:properties:
+:header-args+: :tangle "xmonad/.stalonetrayrc"
+:end:
+
+#+begin_src conf
+decorations none
+transparent false
+dockapp_mode none
+geometry 1x1-20+0
+background "#000000"
+kludges force_icons_size
+grow_gravity NW
+icon_gravity NW
+icon_size 20
+sticky true
+#window_strut none
+window_type dock
+window_layer bottom
+no_shrink false
+skip_taskbar true
+#+end_src
+
+* Autostart :optional:
+:properties:
+:header-args+: :tangle "xmonad/.autostart"
+:end:
+
+#+begin_src bash
+#!/usr/bin/env bash
+#
+# Autostart script
+#
+# This script should be run during the initialization of the
+# window/desktop manager.
+#
+# You should be careful for using this in the startupHook of Xmonad,
+# since it runs each time xmonad is restarted.
+#
+
+function run {
+  PROGRAM_NAME=$1
+  COMMAND=${PROGRAM_NAME}
+
+  if [ ! -z "$2" ]; then COMMAND=$2; fi
+
+  pgrep --full ${PROGRAM_NAME} 2>&1 > /dev/null
+  if [[ "$?" == 1 ]]; then # $PROGRAM_NAME not running
+    ${COMMAND} &
+  fi
+}
+
+[[ -f ~/.Xresources_custom ]] && xrdb -merge ~/.Xresources_custom
+xsetroot -cursor_name left_ptr &
+setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
+
+~/.fehbg &
+
+run dunst
+run stalonetray
+run redshift
+run xscreensaver 'xscreensaver -no-splash'
+run compton 'compton'
+run odrive '/opt/OpenDrive/odrive'
+run dropbox '/home/santos/.local/bin/dropbox start'
+run xmobar 'xmobar'
+notify-send 'Restarted!'
+
+systemctl is-active --quiet --user tmux --quiet || systemctl --user restart tmux
+# systemctl is-active --quiet --user emacs --quiet || systemctl --user restart emacs
+
+#+end_src

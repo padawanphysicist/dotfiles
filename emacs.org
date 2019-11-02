@@ -598,9 +598,13 @@ Since enhanced mode is supposed to replace the default Ruby mode, it is nice to 
 **** Interactive Haskell mode
 
 #+begin_src emacs-lisp
-(straight-use-package 'intero)
-(add-hook 'haskell-mode-hook 'intero-mode)
-(intero-global-mode 1)
+;(straight-use-package 'intero)
+;(add-hook 'haskell-mode-hook 'intero-mode)
+;(intero-global-mode 1)
+(require 'haskell-interactive-mode)
+(require 'haskell-process)
+
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
 #+end_src
 
 *** SageMath

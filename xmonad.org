@@ -181,8 +181,8 @@ You would like to install/enable [[https://elpa.gnu.org/packages/rainbow-mode.ht
 Config
   {
   -- appearance
-    font = "xft:Fira Mono:size=12:antialias=true"
-  , additionalFonts = ["xft:FontAwesome:size=12"] -- For the icons  
+    font = "xft:Fira Mono:size=16:antialias=true"
+  , additionalFonts = ["xft:FontAwesome:size=16"] -- For the icons
   , allDesktops = True
   , position = TopW L 100
 --  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
@@ -251,6 +251,7 @@ skip_taskbar true
 * Autostart :optional:
 :properties:
 :header-args+: :tangle "xmonad/.autostart"
+:header-args+: :tangle-mode (identity #o755)
 :end:
 
 #+begin_src bash

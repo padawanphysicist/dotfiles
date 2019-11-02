@@ -5,9 +5,59 @@
 
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
+* Early init file
+:properties:
+:header-args+: :tangle "emacs/.config/emacs/early-init.el"
+:header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
+:end:
+
+Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
+
+By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your =.emacs= file in a way that is both performance-oriented and tidy. However, I usually have some issues to sync and reproduce its configuration along different machines, which led me to test [[https://github.com/raxod502/straight.el][straight.el]]. It integrates nicely with git repositories, even pointing to forked repos.
+
+From the [[https://github.com/raxod502/straight.el/blob/develop/README.md#getting-started]["Getting Started" page]], you can setup using the following block:
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+I still want to use MELPA and M-x package-list-packages to peruse the MELPA repo, so I ended up with the following minimal =package.el= config, placed after the =straight.el= bootstrap and config:
+#+begin_src emacs-lisp
+(require 'package)
+(setq package-enable-at-startup nil) ;; Do not activate installed packages when Emacs starts
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  (when no-ssl
+    (warn "\
+Your version of Emacs does not support SSL connections,
+which is unsafe because it allows man-in-the-middle attacks.
+There are two things you can do about this warning:
+1. Install an Emacs version that does support SSL and be safe.
+2. Remove this warning from your init file so you won't see it again."))
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+#+end_src
+
+This doesn’t harm the =straight.el= installation, so for me it’s the best of both worlds.
+
 * Init file
 :properties:
-:header-args+: :tangle "emacs/.emacs"
+:header-args+: :tangle "emacs/.config/emacs/init.el"
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:
 
@@ -239,7 +289,7 @@ Took this from [[https://gist.github.com/ymasory/3794723][here]].
    ))
 #+end_src
 
-*** COMMENT Disable tooltips
+*** Disable tooltips
 
 By default Emacs will display its tooltips in a separate frame. If you want to force Emacs to use the echo area exclusively, you can do that with this handy code snippet:
 #+begin_src emacs-lisp
@@ -256,52 +306,6 @@ Desktop-Save mode is a global mode that automatically saves your Emacs session, 
 (add-to-list 'desktop-globals-to-save 'register-alist)
 #+end_src
 
-** Package management
-
-Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
-
-By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your =.emacs= file in a way that is both performance-oriented and tidy. However, I usually have some issues to sync and reproduce its configuration along different machines, which led me to test [[https://github.com/raxod502/straight.el][straight.el]]. It integrates nicely with git repositories, even pointing to forked repos.
-
-From the [[https://github.com/raxod502/straight.el/blob/develop/README.md#getting-started]["Getting Started" page]], you can setup using the following block:
-
-#+begin_src emacs-lisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
-
-I still want to use MELPA and M-x package-list-packages to peruse the MELPA repo, so I ended up with the following minimal =package.el= config, placed after the =straight.el= bootstrap and config:
-#+begin_src emacs-lisp
-(require 'package)
-(setq package-enable-at-startup nil) ;; Do not activate installed packages when Emacs starts
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (proto (if no-ssl "http" "https")))
-  (when no-ssl
-    (warn "\
-Your version of Emacs does not support SSL connections,
-which is unsafe because it allows man-in-the-middle attacks.
-There are two things you can do about this warning:
-1. Install an Emacs version that does support SSL and be safe.
-2. Remove this warning from your init file so you won't see it again."))
-  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
-  (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
-    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
-#+end_src
-
-This doesn’t harm the =straight.el= installation, so for me it’s the best of both worlds.
-
 ** Load custom configuration
 
 Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
@@ -309,15 +313,16 @@ Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variabl
 This code offloads the =custom-set-variables= to a separate file. This keeps your =init.el= neater and you have the option to gitignore your =custom.el= if you see fit.
 
 #+begin_src emacs-lisp
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (unless (file-exists-p custom-file)
   (write-region "" nil custom-file))
 
 ;;; Load custom file. Don't hide errors. Hide success message
-(load custom-file nil t)
+(if (file-exists-p custom-file)
+  (load custom-file nil t))
 #+end_src
 
-*** Enable PATH within Emacs
+*** COMMENT Enable PATH within Emacs
 
 With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
 #+begin_src emacs-lisp
@@ -766,7 +771,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 *** Set Dark/Light themes
 
 #+begin_src emacs-lisp
-(defvar *vct-themes* '(spacemacs-dark spacemacs-light doom-one doom-solarized-light moe-dark moe-light jbeans whiteboard))
+(defvar *vct-themes* '(tsdh-dark tsdh-light spacemacs-dark spacemacs-light doom-one doom-solarized-light moe-dark moe-light jbeans whiteboard))
 #+end_src
 
 *** Loop over themes
@@ -1188,8 +1193,8 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 
 **** R
 #+begin_src emacs-lisp
-(add-to-list 'org-babel-default-header-args:R '(:session . "*org-R*"))
-(add-to-list 'org-babel-default-header-args:R '(:results . "none"))
+(add-to-list 'org-babel-default-header-args:R '(:session . "org-R"))
+;(add-to-list 'org-babel-default-header-args:R '(:results . "none"))
 
 ;(add-to-list 'org-babel-default-header-args:R
 ;             '((:width . 640) (:height . 640)))
@@ -1210,8 +1215,9 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 **** Ruby
 
 #+begin_src emacs-lisp
-(add-to-list 'org-babel-default-header-args:ruby '(:session . "org-ruby"))
-(add-to-list 'org-babel-default-header-args:ruby '(:results . "none"))
+(setq org-babel-default-header-args:ruby org-babel-default-header-args)
+(add-to-list 'org-babel-default-header-args:ruby '(:session . "org-ruby-session"))
+;;(add-to-list 'org-babel-default-header-args:ruby '(:results . "replace"))
 #+end_src
 
 * Snippets

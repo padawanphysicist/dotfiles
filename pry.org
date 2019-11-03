@@ -36,13 +36,4 @@ Pry::Commands.command /^$/, "repeat last command" do
   _pry_.run_command Pry.history.to_a.last
 end
 #+end_src
-* COMMENT Make Pry play nice with Emacs
 
-#+begin_src ruby
-if ENV['INSIDE_EMACS']
-  Pry.config.correct_indent = false
-  Pry.config.pager = false
-end
-
-Pry.config.editor = ENV['VISUAL']
-#+end_src

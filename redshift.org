@@ -14,8 +14,10 @@ temp-night=4000
 #+end_src
 
 * Disable the smooth fade between temperatures when Redshift start/stop
+
 - 0 will cause an immediate change between screen temperatures.
 - 1 will gradually apply the new screen temperature over a couple of seconds.
+
 #+begin_src conf
 fade=1
 #+end_src
@@ -32,6 +34,7 @@ By default, Redshift will use the current elevation of the sun to determine whet
 * Custom dawn/dusk intervals.
 
 Instead of using the solar elevation, the time intervals of dawn and dusk can be specified manually. The times must be specified as HH:MM in 24-hour format.
+
 #+begin_src conf
 ;dawn-time=6:00-7:45
 ;dusk-time=18:35-20:15
@@ -39,11 +42,11 @@ Instead of using the solar elevation, the time intervals of dawn and dusk can be
 
 * Set screen brightness
 
-Default (maximum) is 1.0
+Default (maximum) is 1.0.
+
+It is also possible to use different settings for day and night.
 
 #+begin_src conf
-; It is also possible to use different settings for day and night
-; since version 1.8.
 ;brightness=0.9
 brightness-day=0.85
 brightness-night=0.75
@@ -51,44 +54,40 @@ brightness-night=0.75
 
 * Set screen gamma
 
-You can set for all colors, or each color channel individually.
+You can set for all colors, or each color channel individually. This can also be set individually for day and night.
 #+begin_src conf
 ; gamma=0.8
 ; gamma=0.8:0.7:0.8
-
-; This can also be set individually for day and night
 gamma-day=0.8:0.7:0.8
 gamma-night=0.75
 #+end_src
 
 * Set location provider
 
+Type =redshift -l list= to see possible values.
+
 #+begin_src conf
-; 'geoclue2', 'manual'
-; type 'redshift -l list' to see possible values.
-; The location provider settings are in a different section.
 location-provider=manual
 #+end_src
 
 * Set adjustment method
 
+Type =redshift -m list= to see all possible values.
+
 #+begin_src conf
-; 'randr', 'vidmode'
-; type 'redshift -m list' to see all possible values.
-; 'randr' is the preferred method, 'vidmode' is an older API.
-; but works in some cases when 'randr' does not.
-; The adjustment method settings are in a different section.
 adjustment-method=randr
 #+end_src
 
 * Configure location provider
 
+Type =redshift -l PROVIDER:help= to see the settings. For example:
+#+begin_example
+redshift -l manual:help
+#+end_example
+
+Keep in mind that longitudes west of Greenwich (e.g. the Americas) are negative numbers.
+
 #+begin_src conf
-; Configuration of the location-provider:
-; type 'redshift -l PROVIDER:help' to see the settings.
-; ex: 'redshift -l manual:help'
-; Keep in mind that longitudes west of Greenwich (e.g. the Americas)
-; are negative numbers.
 [manual]
 lat=-3.77
 lon=-38.6
@@ -96,13 +95,12 @@ lon=-38.6
 
 * Configure adjustment method
 
+Type =redshift -m METHOD:help= to see the settings. For example:
+#+begin_example
+redshift -m randr:help
+#+end_example
+
 #+begin_src conf
-; Configuration of the adjustment-method
-; type 'redshift -m METHOD:help' to see the settings.
-; ex: 'redshift -m randr:help'
-; In this example, randr is configured to adjust only screen 0.
-; Note that the numbering starts from 0, so this is actually the first screen.
-; If this option is not specified, Redshift will try to adjust _all_ screens.
 [randr]
 screen=0
 #+end_src

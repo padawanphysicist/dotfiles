@@ -24,6 +24,8 @@ import XMonad.Config.Desktop -- desktopConfig
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.UrgencyHook
 import GHC.IO.Handle.Types
+import XMonad.Layout.Renamed -- For renaming workspaces
+import XMonad.Layout.ToggleLayouts -- For toggling layouts
 #+end_src
 
 * Change prefix key
@@ -76,11 +78,11 @@ vctWorkspaces = ["1:WWW", "2:DEV", "3:AUX"] ++ map show [4..9]
 #+begin_src haskell
 vctAdditionalKeys :: [((KeyMask, KeySym), X())]
 vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
-                    , ((vctModMask, xK_z), spawn "emacsclient -c")
                     , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
                     , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
                     , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
-                    , ((vctModMask, xK_b), sendMessage ToggleStruts)]
+                    , ((vctModMask, xK_b), sendMessage ToggleStruts)
+                    , ((vctModMask, xK_z), sendMessage (Toggle "Full"))]
 #+end_src
 
 * Log Hooks
@@ -130,11 +132,27 @@ vctLogHook h = vctTransparentInactive <+> (vctPP h)
 #+end_src
 
 * Layouts
+** Tall
+The Tall layout has the master pane on the left, taking half of the screen. All other windows share the right half of the screen, and are stacked vertically, top to bottom.
+
+This my the go-to layout, meant to be the first one that you get when running xmonad. It's common to have one window in focus while a couple secondary windows are in view, so the Tall layout works great. It's very useful in many situations, but the windows on the right start to feel a little crowded beyond five windows.
 
 #+begin_src haskell
--- Add spacing between windows
-vctLayoutHook = spacing 6 $ tall ||| Grid ||| Mirror tall ||| Full
-  where tall = Tall 1 (3/100) (1/2)
+vctLayoutTall = Tall 1 (3/100) (1/2)
+#+end_src
+
+** Layout mirror
+
+Mirrored version of =Tall=.
+
+#+begin_src haskell
+vctLayoutMirror = Mirror (Tall 1 (3/100) (3/5))
+#+end_src
+
+** Create hook
+
+#+begin_src haskell
+vctLayoutHook = renamed [CutWordsLeft 1] $ spacingRaw True (Border 0 10 10 10) True (Border 10 10 10 10) True $ toggleLayouts Full vctLayoutTall ||| vctLayoutMirror ||| Full
 #+end_src
 
 * Startup hook

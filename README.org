@@ -1,51 +1,57 @@
-#+TITLE: vct's dotfiles
+#+title: vct's dotfiles
 
 This is my dotfiles repo. I hope you find something useful here!
 
+The files should contain all my (public) personal system configuration, structured within the [[http://www.literateprogramming.com/][Literate Programming]] methodology introduced by [[https://cs.stanford.edu/~knuth/][Donald Knuth]]. This setup allows me to migrate the configuration across different machines easily and, at the same time, understand why my settings are the way they are.
+
 * Dependencies
 
-- [[https://www.gnu.org/software/stow/][GNU Stow]] for symlinking
-- [[https://www.gnu.org/software/emacs/][GNU Emacs]] for tangling the files
+The literate programming setup heavily depends on [[https://orgmode.org/][Org mode]] for [[https://orgmode.org/manual/Extracting-source-code.html][tangling]] the files. Therefore, it is almost mandatory to have [[https://www.gnu.org/software/emacs/][GNU Emacs]] installed to generate the configuration files without a hassle.
+
+Tangling the files will result in a directory structure usable with [[https://www.gnu.org/software/stow/][GNU Stow]]. So, unless you want to be Spartan and manually create the symlinks, I recommend to install it.
 
 * Instructions
 
-Clone the repository in a folder in your =$HOME= (I keep it as a hidden directory =.dotfiles=), either from [[https://gitlab.com][GitLab]]
-#+BEGIN_SRC sh
-$ git clone https://github.com/padawanphysicist/dotfiles.git ~/.dotfiles
-#+END_SRC
-
-or [[https://github.com][GitHub]]:
-#+BEGIN_SRC sh
-$ git clone https://gitlab.com/padawanphysicist/dotfiles.git ~/.dotfiles
-#+END_SRC
+Clone the repository in a folder in your =$HOME= (I keep it as a hidden directory =.dotfiles=):
+#+begin_src sh
+git clone https://gitlab.com/padawanphysicist/dotfiles.git ~/.dotfiles
+#+end_src
 
 then enter the directory,
-#+BEGIN_SRC sh
-$ cd ~/.dotfiles
-#+END_SRC
+#+begin_src sh
+cd ~/.dotfiles
+#+end_src
 
 tangle the files
 #+begin_src sh
-emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$FILE\"))"
+for file in *.org ; do emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$file\"))"; done
 #+end_src
 
-and link the important files to your =$HOME= directory:
-#+BEGIN_SRC sh
-$ stow <folder>
-#+END_SRC
+and create the symlinks to your =$HOME= directory:
+#+begin_src sh
+for directory in */ ; do stow $directory ; done
+#+end_src
 
 * Configuration files
 
+The configuration files written in literate style are:
+
+#+begin_src sh :results raw :exports results
+for i in *.org; do if [[ $i != "README.org" ]]; then echo '-' [[$i]]; fi ; done
+#+end_src
+
+#+RESULTS:
+- [[conky.org]]
 - [[dunst.org]]
 - [[emacs.org]]
 - [[git.org]]
 - [[openbox.org]]
-- [[polybar.org]]
+- [[pry.org]]
 - [[ranger.org]]
+- [[redshift.org]]
+- [[rofi.org]]
 - [[shell.org]]
 - [[tmux.org]]
 - [[X.org]]
 
-* Thanks
-
-This setup is inspired by [[https://github.com/holman/dotfiles][holman's dotfiles]].
+Also, there is the folder [[file:misc][misc]], which contains dotfiles which are too small to worth write in Org, or I'm just too lazy to do it.

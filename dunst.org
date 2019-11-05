@@ -1,85 +1,235 @@
-#+TITLE: Dunst configuration
+#+title: Dunst configuration
+#+property: header-args  :tangle "dunst/.config/dunst/dunstrc"
+#+property: header-args+ :mkdirp yes
+#+property: header-args+ :noweb yes
+#+property: header-args+ :tangle-mode (identity #o444)
 
 [[https://dunst-project.org/][Dunst]] is a lightweight and customizable notification daemon. My configuration is structured in three parts:
 
-#+CAPTION: Source listing for ~dunstrc~.
-#+BEGIN_SRC conf :tangle dunst/.config/dunst/dunstrc :noweb yes :mkdirp yes
-<<Global settings>>
-<<Keyboard shortcuts>>
-<<Colors>>
-#+END_SRC
+* Keyboard shortcuts
+
+Idle thresholds can be set letting the notification stay onscreen if the user is idle longer than the threshold. The shortcuts are important so we can change a bit the behavior of the notification.
+
+Shortcuts are specified as =[modifier+][modifier+]...key=. The available modifiers are: =ctrl=, =mod1= (=alt= key), =mod2=, =mod3= and =mod4= (=win= key). The section is structured in the configuration as follows:
+#+begin_src conf :noweb yes
+[shortcuts]
+  <<shortcut>>
+#+end_src
+
+For more info about the available actions, see [[https://github.com/dunst-project/dunst/blob/master/dunstrc][the configuration example]].
+
+** Close notification(s)
+
+Mapped to =Win+c= (does not clash with any important XMonad shortcut)
+
+#+begin_src conf :tangle no :noweb-ref shortcut
+close = mod4+c
+#+end_src
 
 * Global settings
 
-#+BEGIN_SRC conf :noweb-ref "Global settings" :noweb-sep "\n"
+#+begin_src conf :noweb yes
 [global]
-font = "SFNS Display 12"
-# Allow html markup
-markup = yes
-# El formato de las notificaciones,
-# %s - sumario
-# %p - progreso
-# %b - cuerpo del mensaje
-format = "<b>%s %p</b>\n%b"
-# Ordenar mensajes por prioridad
-sort = yes
-# Mostrar cuantas not. hay ocultas
-indicate_hidden = true
-idle_threshold = 0
-# Tamaño de  la notificación
-geometry = "300x5-20+20"
-alignment = center
-show_age_threshold = 60
-sticky_history = yes
-follow = mouse
-word_wrap = yes
-separator_height = 2
-padding = 10
-horizontal_padding = 10
-separator_color = frame
-startup_notification = true
-frame_width = 3
-frame_color = "#6092BE"
-#+END_SRC
+  <<global>>
+#+end_src
+** Display
+*** Display notification on focused monitor
 
-* Keyboard shortcuts
-#+BEGIN_SRC conf :noweb-ref "Keyboard shortcuts" :noweb-sep "\n"
-# Atajos de teclado
-[shortcuts]
-close = ctrl+space
-close_all = ctrl+shift+space
-context = ctrl+shift+period
-#+END_SRC
+Since I'm using [[https://xmonad.org/][XMonad]], the focus always follow the window with keyboard focus:
+#+begin_src conf :tangle no :noweb-ref global
+follow = keyboard
+#+end_src
+
+*** Geometry of the window
+
+The geometry of the message window. It is defined as follows:
+#+begin_example
+[{width}]x{height}[+/-{x}+/-{y}]
+#+end_example
+
+The height is measured in number of notifications everything else in pixels. If the width is omitted but the height is given ("-geometry x2"), the message window expands over the whole screen (dmenu-like). If width is 0, the window expands to the longest message displayed. A positive x is measured from the left, a negative from the right side of the screen. Y is measured from the top and down respectively.
+
+The width can be negative. In this case the actual width is the screen width minus the width defined in within the geometry option.
+
+#+begin_src conf :tangle no :noweb-ref global
+geometry = "300x5-30+20"
+#+end_src
+*** Show how many messages are currently hidden
+
+#+begin_src conf :tangle no :noweb-ref global
+indicate_hidden = true
+#+end_src
+
+*** Transparency of the window
+
+The is [0; 100]. This option will only work if a compositing window manager is present (e.g. xcompmgr, compiz, etc.).
+
+#+begin_src conf :tangle no :noweb-ref global
+transparency = 30
+#+end_src
+
+*** Padding between text and separator
+
+#+begin_src conf :tangle no :noweb-ref global
+padding = 10
+#+end_src
+
+*** Horizontal padding
+
+#+begin_src conf :tangle no :noweb-ref global
+horizontal_padding = 10
+#+end_src
+
+*** Width of frame around the notification window
+Set to 0 to disable.
+
+#+begin_src conf :tangle no :noweb-ref global
+frame_width = 0
+#+end_src
+
+*** Color of the frame around the notification window
+
+#+begin_src conf :tangle no :noweb-ref global
+frame_color = "#6092BE"
+#+end_src
+
+*** Color for the separator
+
+possible values are:
+- auto: dunst tries to find a color fitting to the background;
+- foreground: use the same color as the foreground;
+- frame: use the same color as the frame;
+- anything else will be interpreted as a X color.
+
+#+begin_src conf :tangle no :noweb-ref global
+separator_color = frame
+#+end_src
+*** Sort messages by priority
+
+#+begin_src conf :tangle no :noweb-ref global
+sort = yes
+#+end_src
+
+*** Time for remove the notification
+
+Don't remove messages, if the user is idle (no mouse or keyboard input) for longer than =idle_threshold= seconds. Set to 0 to disable.
+
+#+begin_src conf :tangle no :noweb-ref global
+idle_threshold = 120
+#+end_src
+
+** Text
+*** Font
+
+#+begin_src conf :tangle no :noweb-ref global
+font = "SFNS Display 18"
+#+end_src
+
+*** Allow HTML markup
+
+Possible values are:
+- full :: Allow a small subset of html markup in notifications:
+  - <b>bold</b>
+  - <i>italic</i>
+  - <s>strikethrough</s>
+  - <u>underline</u>
+- strip :: This setting is provided for compatibility with some broken clients that send markup even though it's not enabled on the server. Dunst will try to strip the markup but the parsing is simplistic so using this option outside of matching rules for specific applications *IS GREATLY DISCOURAGED*.
+- no :: Disable markup parsing, incoming notifications will be treated as plain text. Dunst will not advertise that it has the body-markup capability if this is set as a global setting.
+
+It's important to note that markup inside the format option will be parsed regardless of what this is set to.
+
+#+begin_src conf :tangle no :noweb-ref global
+markup = full
+#+end_src
+
+*** Format of the notifications
+
+The format of the message. Possible variables are:
+- %a  appname
+- %s  summary
+- %b  body
+- %i  iconname (including its path)
+- %I  iconname (without its path)
+- %p  progress value if set ([  0%] to [100%]) or nothing
+- %n  progress value if set without any extra characters
+- %%  Literal %
+
+#+begin_src conf :tangle no :noweb-ref global
+format = "%s %p\n%b"
+#+end_src
+
+*** Alignment of text
+
+Possible values are "left", "center" and "right".
+
+#+begin_src conf :tangle no :noweb-ref global
+alignment = center
+#+end_src
+
+*** Show age of message
+
+Show age of message if message is older than =show_age_threshold= seconds. Set to -1 to disable.
+
+#+begin_src conf :tangle no :noweb-ref global
+show_age_threshold = 60
+#+end_src
+
+*** Split notification text
+
+Split notifications into multiple lines if they don't fit into geometry.
+
+#+begin_src conf :tangle no :noweb-ref global
+word_wrap = yes
+#+end_src
+
+** Icons
+*** Path for default icons
+
+#+begin_src conf :tangle no :noweb-ref global
+icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
+#+end_src
+
+** History
+*** Sticky notification
+
+Should a notification popped up from history be sticky or timeout as if it would normally do.
+
+#+begin_src conf :tangle no :noweb-ref global
+sticky_history = yes
+#+end_src
+
+** Misc/Advanced
+*** Print a notification on startup
+
+#+begin_src conf :tangle no :noweb-ref global
+startup_notification = true
+#+end_src
+
+*** Corner radius of the notification window
+
+If the radius is 0, you have no rounded corners.
+
+The radius will be automatically lowered if it exceeds half of the notification height to avoid clipping text and/or icons.
+
+#+begin_src conf :tangle no :noweb-ref global
+corner_radius = 0
+#+end_src
 
 * Colors
 
-#+BEGIN_SRC conf :noweb-ref "Colors" :noweb-sep "\n"
-# Estilo para las notificaciones de baja prioridad
+#+begin_src conf
 [urgency_low]
-background = "#ffffff"
-foreground = "#000000"
-timeout = 5
+  background = "#222222"
+  foreground = "#AAAAAA"
+  timeout = 10
 
-# Estilo para las notificaciones de prioridad normal
 [urgency_normal]
-background = "#94DBFF"
-foreground = "#000000"
-timeout = 10
+  background = "#285577"
+  foreground = "#ffffff"
+  timeout = 10
 
-# Estilo para las notificaciones de alta prioridad
 [urgency_critical]
-background = "#ff9999"
-foreground = "#000000"
-timeout = 0
-
-# Se pueden personalizar notificciones en función de su texto
-[test]
-summary = "*test*"
-background="#22dd22"
-
-# Y también se personalizan por aplicación
-[signed_on]
-appname = Pidgin
-summary = "*signed on*"
-urgency = low
-#+END_SRC
+  background = "#900000"
+  foreground = "#ffffff"
+  timeout = 0
+#+end_src

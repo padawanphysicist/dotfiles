@@ -775,7 +775,9 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 *** Set Dark/Light themes
 
 #+begin_src emacs-lisp
-(defvar *vct-themes* '(doom-one doom-solarized-light spacemacs-dark spacemacs-light moe-dark moe-light tsdh-dark tsdh-light jbeans whiteboard))
+;; In the case you want to use multiple themes
+;; (defvar *vct-themes* '(doom-one doom-solarized-light spacemacs-dark spacemacs-light moe-dark moe-light tsdh-dark tsdh-light jbeans whiteboard))
+(defvar *vct-themes* '(spacemacs-dark spacemacs-light tsdh-dark tsdh-light))
 #+end_src
 
 *** Loop over themes

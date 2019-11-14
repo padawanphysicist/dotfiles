@@ -656,6 +656,14 @@ Install Org mode to use the last version instead of the version bundled with Ema
 (require 'init-org)
 #+end_src
 
+** Pdf viewer
+
+Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
+#+begin_src emacs-lisp
+(straight-use-package 'pdf-tools)
+(pdf-tools-install)
+#+end_src
+
 ** COMMENT Configure Wiki
 
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.

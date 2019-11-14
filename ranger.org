@@ -1,0 +1,244 @@
+#+title: Ranger configuration
+#+property: header-args  :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
+
+[[https://ranger.github.io/][ranger]] is a text-based file manager feature vi-style keybindings.
+
+* Startup commands and key bindings
+:properties:
+:header-args+: :tangle "ranger/.config/ranger/rc.conf"
+:end:
+
+** Move to trash
+
+#+begin_src conf
+map DD shell mv %s ${HOME}/.local/share/Trash/files/
+#+end_src
+
+** Display images inline
+
+#+begin_src conf
+set preview_images true
+set draw_borders true
+#+end_src
+
+* Commands
+:properties:
+:header-args+: :tangle "ranger/.config/ranger/commands.py"
+:end:
+
+This section concerns commands launched with =:=.
+
+** Import all default commands
+
+#+begin_src python 
+import os
+from ranger.api.commands import *
+from ranger.core.loader import CommandLoader
+#+end_src
+
+** Empty trash
+
+#+begin_src python
+class empty(Command):
+    """:empty
+
+    Empties the trash directory ~/.Trash
+    """
+
+    def execute(self):
+        self.fm.run("rm -rf /home/santos/.local/share/Trash/files/{*,.[^.]*}")
+#+end_src
+
+** Archive extraction
+
+#+begin_src python
+class extracthere(Command):
+    def execute(self):
+        """ Extract copied files to current directory """
+        copied_files = tuple(self.fm.copy_buffer)
+
+        if not copied_files:
+            return
+
+        def refresh(_):
+            cwd = self.fm.get_directory(original_path)
+            cwd.load_content()
+
+        one_file = copied_files[0]
+        cwd = self.fm.thisdir
+        original_path = cwd.path
+        au_flags = ['-X', cwd.path]
+        au_flags += self.line.split()[1:]
+        au_flags += ['-e']
+
+        self.fm.copy_buffer.clear()
+        self.fm.cut_buffer = False
+        if len(copied_files) == 1:
+            descr = "extracting: " + os.path.basename(one_file.path)
+        else:
+            descr = "extracting files from: " + os.path.basename(one_file.dirname)
+        obj = CommandLoader(args=['aunpack'] + au_flags \
+                + [f.path for f in copied_files], descr=descr, read=True)
+
+        obj.signal_bind('after', refresh)
+        self.fm.loader.add(obj)
+#+end_src
+
+** Archive compression
+
+#+begin_src python
+class compress(Command):
+    def execute(self):
+        """ Compress marked files to current directory """
+        cwd = self.fm.thisdir
+        marked_files = cwd.get_selection()
+
+        if not marked_files:
+            return
+
+        def refresh(_):
+            cwd = self.fm.get_directory(original_path)
+            cwd.load_content()
+
+        original_path = cwd.path
+        parts = self.line.split()
+        au_flags = parts[1:]
+
+        descr = "compressing files in: " + os.path.basename(parts[1])
+        obj = CommandLoader(args=['apack'] + au_flags + \
+                [os.path.relpath(f.path, cwd.path) for f in marked_files], descr=descr, read=True)
+
+        obj.signal_bind('after', refresh)
+        self.fm.loader.add(obj)
+
+    def tab(self, tabnum):
+        """ Complete with current folder name """
+
+        extension = ['.zip', '.tar.gz', '.rar', '.7z']
+        return ['compress ' + os.path.basename(self.fm.thisdir.path) + ext for ext in extension]
+#+end_src
+
+* COMMENT Colorschemes
+:properties:
+:header-args+: :tangle "ranger/.config/ranger/colorschemes/vct.py"
+:end:
+
+#+begin_src python
+from ranger.gui.colorscheme import ColorScheme
+from ranger.gui.color import *
+
+class ColorScheme(ColorScheme):
+
+    def use(self, context):
+        fg, bg, attr = default_colors
+
+        if context.reset:
+            return default_colors
+
+        elif context.in_browser:
+            if context.selected:
+                attr = reverse
+            else:
+                attr = normal
+            if context.empty or context.error:
+                fg = 6
+                bg = 1
+            if context.border:
+                fg = white
+            if context.image:
+                fg = 201
+            if context.video:
+                fg = 13
+            if context.audio:
+                fg = 10
+            if context.document:
+                fg = 12
+            if context.container:
+                attr |= bold
+                fg = 1
+            if context.directory:
+                attr |= normal
+                fg = 3
+            elif context.executable and not \
+                    any((context.media, context.container,
+                       context.fifo, context.socket)):
+                attr |= bold
+                fg = 2
+            if context.socket:
+                fg = 21
+                attr |= bold
+            if context.fifo or context.device:
+                fg = 21
+                if context.device:
+                    attr |= bold
+            if context.link:
+                fg = context.good and 6 or 1
+            if context.bad:
+                fg = 0
+                bg = 1
+            if context.tag_marker and not context.selected:
+                attr |= bold
+                fg = 88
+            if not context.selected and (context.cut or context.copied):
+                attr = reverse
+            if context.main_column:
+                if context.selected:
+                    attr |= bold
+                if context.marked:
+                    attr |= bold
+                    fg = 8
+            if context.badinfo:
+                if attr & reverse:
+                    bg = 1
+                else:
+                    fg = 7
+
+        elif context.in_titlebar:
+            attr |= bold
+            if context.hostname:
+                fg = context.bad and 1 or 5
+            elif context.directory:
+                fg = 5
+            elif context.tab:
+                if context.good:
+                    bg = 2
+
+        elif context.in_statusbar:
+            if context.permissions:
+                if context.good:
+                    fg = 2
+                    bg = 0
+                elif context.bad:
+                    fg = 1
+            if context.marked:
+                attr |= bold | reverse
+                fg = 88
+            if context.message:
+                if context.bad:
+                    attr |= bold
+                    fg = 9
+            if context.loaded:
+                bg = 1
+
+
+        if context.text:
+            if context.highlight:
+                attr |= reverse
+
+        if context.in_taskview:
+            if context.title:
+                fg = 4
+
+            if context.selected:
+                attr |= reverse
+
+            if context.loaded:
+                if context.selected:
+                    fg = 1
+                else:
+                    bg = 1
+
+        return fg, bg, attr
+#+end_src

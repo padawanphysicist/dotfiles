@@ -554,13 +554,6 @@ Since enhanced mode is supposed to replace the default Ruby mode, it is nice to 
 (setq inf-ruby-default-implementation "pry")
 #+end_src
 
-**** Integrate with RVM
-
-#+begin_src emacs-lisp
-(straight-use-package 'rvm)
-(rvm-use-default)
-#+end_src
-
 **** Enable Rubocop
 
 #+begin_src emacs-lisp
@@ -575,7 +568,6 @@ Since enhanced mode is supposed to replace the default Ruby mode, it is nice to 
 
 (eval-after-load 'company '(push 'company-robe company-backends))
 
-;;(add-hook 'enh-ruby-mode 'robe-mode)
 (add-hook 'enh-ruby-mode-hook 'robe-mode)
 #+end_src
 
@@ -1218,7 +1210,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 
 #+begin_src emacs-lisp
 ;; Ob-sagemath supports only evaluating with a session.
-(setq org-babel-default-header-args:sage '((:session . t)
+(setq org-babel-default-header-args:sage '((:session . "org-sage-session")
                                            (:results . "output")))
 
 ;; C-c c for asynchronous evaluating (only for SageMath code blocks).
@@ -1229,9 +1221,9 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 **** Ruby
 
 #+begin_src emacs-lisp
-(setq org-babel-default-header-args:ruby org-babel-default-header-args)
-(add-to-list 'org-babel-default-header-args:ruby '(:session . "org-ruby-session"))
-;;(add-to-list 'org-babel-default-header-args:ruby '(:results . "replace"))
+;; (setq org-babel-default-header-args:ruby org-babel-default-header-args)
+(setq org-babel-default-header-args:ruby '((:session . "org-ruby-session")
+                                           (:results . "output")))
 #+end_src
 
 * Snippets

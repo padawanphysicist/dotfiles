@@ -37,3 +37,18 @@ Pry::Commands.command /^$/, "repeat last command" do
 end
 #+end_src
 
+* Quick fix for Org Babel
+
+When using =:session= parameter together with =:results output=, Babel has a hardcoded line which assumes you are using irb. The piece of code concerns disabling echoing the return value of an expression, using =config.echo=. Since I'm not willing to modify the Babel code, it's easier to create this dummy class so Pry does not complain about Org code.
+
+#+begin_src ruby
+class Foo
+  @echo = true
+  @prompt_mode = :RVM
+  attr_accessor :echo
+  attr_accessor :prompt_mode
+end
+
+conf = Foo.new
+#+end_src
+

@@ -531,6 +531,25 @@ set visible-stats On
 set menu-complete-display-prefix On
 #+end_src
 
+** Bindings for specific applications
+*** Bash
+
+#+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
+$if bash
+  "\C-o": "> ttt.txt"
+$endif
+#+end_src
+
+*** R
+
+#+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
+$if R
+  "<<": "<- "
+  "\C-j": "\C-a(\C-e)"
+  "\C-xd": "q('no')\n"
+$endif
+#+end_src
+
 * Dircolors
 
 #+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"

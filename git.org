@@ -56,3 +56,18 @@ Commit history shown via the [[https://git-scm.com/docs/git-log][default =git lo
 #+begin_src conf :tangle no :noweb-ref alias
 glog = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 #+end_src
+
+** Undo
+
+One of the best things in life is the capability to undo things!
+
+#+begin_src conf :tangle no :noweb-ref alias
+undo = reset HEAD~1 --mixed
+#+end_src
+
+** Checking out easily
+
+#+begin_src conf :tangle no :noweb-ref alias
+st = status
+co = checkout
+#+end_src

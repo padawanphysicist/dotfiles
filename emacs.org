@@ -1226,6 +1226,12 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
                                            (:results . "output")))
 #+end_src
 
+** Async eval
+
+#+begin_src emacs-lisp
+(straight-use-package 'ob-async)
+#+end_src
+
 * Snippets
 ** Org
 :properties:

@@ -66,6 +66,19 @@ vctPanel :: String
 vctPanel = "xmobar"
 #+end_src
 
+** Editor
+
+#+begin_src haskell
+vctEditor :: String
+vctEditor = "emacsclient --create-frame"
+#+end_src
+
+** Web browser
+
+#+begin_src haskell
+vctWebBrowser :: String
+vctWebBrowser = "firefox"
+#+end_src
 * Workspaces
 
 #+begin_src haskell
@@ -79,6 +92,8 @@ vctWorkspaces = ["1:WWW", "2:DEV", "3:AUX"] ++ map show [4..9]
 vctAdditionalKeys :: [((KeyMask, KeySym), X())]
 vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
                     , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
+                    , ((vctModMask, xK_e), spawn vctEditor)
+                    , ((vctModMask, xK_f), spawn vctWebBrowser)
                     , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
                     , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
                     , ((vctModMask, xK_b), sendMessage ToggleStruts)
@@ -202,7 +217,7 @@ Config
     font = "xft:Fira Mono:size=16:antialias=true"
   , additionalFonts = ["xft:FontAwesome:size=16"] -- For the icons
   , allDesktops = True
-  , position = TopW L 100
+  , position = BottomW L 100
 --  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
   , sepChar =  "@"   -- delineator between plugin names and straight text
   , alignSep = "}{"  -- separator between left-right alignment
@@ -252,7 +267,7 @@ Config
 decorations none
 transparent false
 dockapp_mode none
-geometry 1x1-20+0
+geometry 1x1-20+1060
 background "#000000"
 kludges force_icons_size
 grow_gravity NW

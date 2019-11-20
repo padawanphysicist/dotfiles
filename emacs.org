@@ -13,26 +13,9 @@
 
 Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
 
-By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your =.emacs= file in a way that is both performance-oriented and tidy. However, I usually have some issues to sync and reproduce its configuration along different machines, which led me to test [[https://github.com/raxod502/straight.el][straight.el]]. It integrates nicely with git repositories, even pointing to forked repos.
+By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your =.emacs= file in a way that is both performance-oriented and tidy.
 
-From the [[https://github.com/raxod502/straight.el/blob/develop/README.md#getting-started]["Getting Started" page]], you can setup using the following block:
-
-#+begin_src emacs-lisp
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
-
-I still want to use MELPA and M-x package-list-packages to peruse the MELPA repo, so I ended up with the following minimal =package.el= config, placed after the =straight.el= bootstrap and config:
+This piece if modified from https://melpa.org/#/getting-started:
 #+begin_src emacs-lisp
 (require 'package)
 (setq package-enable-at-startup nil) ;; Do not activate installed packages when Emacs starts
@@ -51,9 +34,21 @@ There are two things you can do about this warning:
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+(unless package--initialized (package-initialize))
 #+end_src
 
-This doesn’t harm the =straight.el= installation, so for me it’s the best of both worlds.
+and now we configure use-package:
+#+begin_src emacs-lisp
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+
+;; Causes all packages to be installed automatically if not already
+;; present in the system
+(setq use-package-always-ensure t)
+#+end_src
 
 * Init file
 :properties:
@@ -326,12 +321,22 @@ This code offloads the =custom-set-variables= to a separate file. This keeps you
 
 With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
 #+begin_src emacs-lisp
-(straight-use-package 'exec-path-from-shell)
+(use-package exec-path-from-shell
+  :config
+  (progn
+    (setq exec-path-from-shell-check-startup-files nil)
+    (exec-path-from-shell-initialize)))
 #+end_src
 
 #+begin_src emacs-lisp
-(setq exec-path-from-shell-check-startup-files nil)
-(exec-path-from-shell-initialize)
+
+#+end_src
+
+** Diminish minor modes
+
+[[https://github.com/myrjola/diminish.el][diminish]] allows hiding or abbreviate minor mode display on the modeline:
+#+begin_src emacs-lisp
+(use-package diminish)
 #+end_src
 
 ** Make Emacs discoverable
@@ -342,68 +347,47 @@ However, after enabling a whole plethora of available packages you can get lost 
 
 [[https://github.com/justbur/emacs-which-key][which-key]] is a minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup. This provides a way to discover shortcuts globally.
 
-We first install the package,
 #+begin_src emacs-lisp
-(straight-use-package 'which-key)
-#+end_src
-
-and then enable it globally:
-#+begin_src emacs-lisp
-(which-key-mode)
-#+end_src
-
-The only additional setup I like to do is to decrease the delay for which-key buffer to popup. The default value is 1.0, which is too long for me:
-#+begin_src emacs-lisp
-(setq which-key-idle-delay 0.02)
+(use-package which-key
+  :init 
+  (setq which-key-idle-delay 0.02)
+  :diminish
+  (which-key-mode . " ω ")
+  :config 
+  (which-key-mode)) ;; Decrease the delay for which-key buffer to popup
 #+end_src
 
 ** Completion framework
 
 Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
-*** Install Helm
 
 #+begin_src emacs-lisp
-(straight-use-package 'helm)
-#+end_src
-
-*** Enable Helm for narrowing and selecting
-
-#+begin_src emacs-lisp
-(global-set-key (kbd "M-x") #'helm-M-x)
-(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
-(global-set-key (kbd "C-x C-f") #'helm-find-files)
-(global-set-key (kbd "C-x C-r") #'helm-recentf)
-(global-set-key (kbd "C-x C-b") #'helm-mini)
-(global-set-key (kbd "C-h a") #'helm-apropos)
-(global-set-key (kbd "M-y") #'helm-show-kill-ring)
-;; (global-set-key (kbd "C-c h") #'helm-mini)
-;; (global-set-key (kbd "C-x C-b") #'helm-buffers-list)
-;; ("C-x c o" . helm-occur)
-;; ("C-x c s" . helm-swoop)
-;; ("C-x c y" . helm-yas-complete)
-;; ("C-x c Y" . helm-yas-create-snippet-on-region)
-;; ("C-x c b" . my/helm-do-grep-book-notes)
-;; ("C-x c SPC" . helm-all-mark-rings)
-#+end_src
-
-*** Configuration
-
-#+begin_src emacs-lisp
-(require 'helm-config)
-
-(setq helm-candidate-number-limit nil)
-
-;; From https://gist.github.com/antifuchs/9238468
-(setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
-      helm-input-idle-delay 0.01  ; this actually updates things
-                                  ; reeeelatively quickly.
-      helm-yas-display-key-on-candidate t
-      helm-quick-update t
-      helm-M-x-requires-pattern nil
-      helm-ff-skip-boring-files t)
-
-(helm-mode 1)
+(use-package helm
+  :defer t
+  :diminish 
+  (helm-mode . " η ")
+  :bind
+  ("M-x" . helm-M-x)
+  ("C-x r b" . helm-filtered-bookmarks)
+  ("C-x C-f" . helm-find-files)
+  ("C-x C-r" . helm-recentf)
+  ("C-x C-b" . helm-mini)
+  ("C-h a" . helm-apropos)
+  ("M-y" . helm-show-kill-ring)
+  :config
+  (require 'helm-config)
+  (setq helm-candidate-number-limit nil)
+  
+  ;; From https://gist.github.com/antifuchs/9238468
+  (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
+        helm-input-idle-delay 0.01  ; this actually updates things
+                                    ; reeeelatively quickly.
+        helm-yas-display-key-on-candidate t
+        helm-quick-update t
+        helm-M-x-requires-pattern nil
+        helm-ff-skip-boring-files t)
+  (helm-mode 1))
 #+end_src
 
 ** Improve navigation
@@ -411,69 +395,13 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 [[https://github.com/abo-abo/avy][Avy]] allows you to navigate to every visible portion of your Emacs (buffers & windows) with only a handful of keystrokes.
 
 #+begin_src emacs-lisp
-(straight-use-package 'avy)
-#+end_src
-
-*** Shortcuts
-
-#+begin_src emacs-lisp
-(global-set-key (kbd "C-;") 'avy-goto-char-timer)
-(global-set-key (kbd "M-g l") 'avy-goto-line)
-(global-set-key (kbd "M-g w") 'avy-goto-word-1)
-#+end_src
-
-** COMMENT Improve window management
-
-Besides Avy, there is the [[https://github.com/abo-abo/ace-window][ace-window]] package, which allows to select a window to switch to.
-
-#+begin_src emacs-lisp
-(straight-use-package 'ace-window)
-#+end_src
-
-** COMMENT Improve completion
-
-[[https://company-mode.github.io/][Company]] is a text completion framework for Emacs. The name stands for "complete anything". It uses pluggable back-ends and front-ends to retrieve and display completion candidates.
-
-#+begin_src emacs-lisp
-(straight-use-package 'company)
-
-;; Enable in all buffers
-(add-hook 'after-init-hook 'global-company-mode)
-#+end_src
-
-*** Instant suggestions
-
-What most of us want is instant suggestions. That is, suggestions that appear immediately after one starts typing. By default, Company Mode does not immediately show suggestions. To show suggestions without delay:
-
-#+begin_src emacs-lisp
-(setq company-idle-delay 0)
-#+end_src
-
-*** Suggestions after first character
-
-By default, suggestions only appear after you have typed a few characters. That introduces an unacceptable delay, and wastes keystrokes. Suggestions should appear right after the first letter is entered. To achieve this:
-
-#+begin_src emacs-lisp
-(setq company-minimum-prefix-length 1)
-#+end_src
-
-*** Loop over selection list after reach end
-
-#+begin_src emacs-lisp
-(setq company-selection-wrap-around t)
-#+end_src
-
-*** Use tab key to cycle through suggestions
-
-#+begin_src emacs-lisp
-; ('tng' means 'tab and go')
-(company-tng-configure-default)
-#+end_src
-
-*** Using digits to select company-mode candidates
-
-#+begin_src emacs-lisp
-(setq company-show-numbers t)
+(use-package avy
+  :bind
+  ("C-;" . avy-goto-char-timer)
+  ("M-g l" . 'avy-goto-line)
+  ("M-g w" . 'avy-goto-word-1)
+  :config
+  (setq avy-background t))
 #+end_src
 
 ** Templating
@@ -481,20 +409,15 @@ By default, suggestions only appear after you have typed a few characters. That 
 [[https://github.com/joaotavora/yasnippet][YASnippet]] is a nice templating system for Emacs.
 
 #+begin_src emacs-lisp
-(straight-use-package 'yasnippet)
-#+end_src
-
-Then we populate with snippets folder:
-#+begin_src emacs-lisp
-(yas-global-mode 1)
-
-;(yas-global-mode 1)
-;(setq yas-snippet-dirs (append yas-snippet-dirs '("~/.yasnippet")))
-(setq yas-snippet-dirs '("~/.yasnippet"))
-(define-key yas-minor-mode-map (kbd "<tab>") nil)
-(define-key yas-minor-mode-map (kbd "TAB") nil)
-(define-key yas-minor-mode-map (kbd "<C-tab>") 'yas-expand)
-(yas-reload-all)
+(use-package yasnippet
+  :init
+  (yas-global-mode 1)
+  :config
+  (setq yas-snippet-dirs '("~/.yasnippet"))
+  (define-key yas-minor-mode-map (kbd "<tab>") nil)
+  (define-key yas-minor-mode-map (kbd "TAB") nil)
+  (define-key yas-minor-mode-map (kbd "<C-tab>") 'yas-expand)
+  (yas-reload-all))
 #+end_src
 
 ** Git configuration
@@ -502,101 +425,80 @@ Then we populate with snippets folder:
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
 
 #+begin_src emacs-lisp
-(straight-use-package 'magit)
-(straight-use-package 'git-gutter-fringe)
-(global-set-key (kbd "C-x g") 'magit-status)
-(global-git-gutter-mode t)
+(use-package magit
+  :bind
+  ("C-x g" . magit-status))
+
+(use-package git-gutter-fringe
+  :config
+  (global-git-gutter-mode t))
 #+end_src
 
-** Programming languages
+** Programming/markup languages
 
-In this section I try to setup some support for programming languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
+In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
 
 The first thing to enable is [[https://github.com/flycheck/flycheck][flycheck]]:
 
 #+begin_src emacs-lisp
-(straight-use-package 'flycheck)
-#+end_src
-
-and enable it in programming modes:
-#+begin_src emacs-lisp
-(add-hook 'prog-mode-hook 'flycheck-mode)
+(use-package flycheck
+  :config
+  (add-hook 'prog-mode-hook 'flycheck-mode))
 #+end_src
 
 also, enable =rainbow-delimiters=:
 #+begin_src emacs-lisp
-(straight-use-package 'rainbow-delimiters)
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-(show-paren-mode 1)
+(use-package rainbow-delimiters
+  :config
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+  (show-paren-mode 1))
 #+end_src
 
 *** Ruby
-
 **** Enable enhanced ruby mode
 
 Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
 
 #+begin_src emacs-lisp
-(straight-use-package 'enh-ruby-mode)
-#+end_src
-
-Since enhanced mode is supposed to replace the default Ruby mode, it is nice to enable it for all common Ruby files:
-#+begin_src emacs-lisp
-(add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode))
+(use-package enh-ruby-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode)))
 #+end_src
 
 **** Enable inferior Ruby
 
 #+begin_src emacs-lisp
-(straight-use-package 'inf-ruby)
-
-(add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
-(setq inf-ruby-default-implementation "pry")
+(use-package inf-ruby
+  :config
+  (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
+  (setq inf-ruby-default-implementation "pry"))
 #+end_src
 
 **** Enable Rubocop
 
 #+begin_src emacs-lisp
-(straight-use-package 'rubocop)
-(add-hook 'ruby-mode-hook 'rubocop-mode)
+(use-package rubocop
+  :config
+  (add-hook 'ruby-mode-hook 'rubocop-mode))
 #+end_src
 
 **** Enable Robe
 
 #+begin_src emacs-lisp
-(straight-use-package 'robe)
-
-(eval-after-load 'company '(push 'company-robe company-backends))
-
-(add-hook 'enh-ruby-mode-hook 'robe-mode)
-#+end_src
-
-*** Crystal
-
-#+begin_src emacs-lisp
-(straight-use-package 'crystal-mode)
-(straight-use-package 'inf-crystal)
-(add-hook 'crystal-mode-hook 'inf-crystal-minor-mode)
+(use-package robe
+  :config
+  (add-hook 'enh-ruby-mode-hook 'robe-mode))
 #+end_src
 
 *** Haskell
-
 **** Enable Haskell mode
 
 #+begin_src emacs-lisp
-(straight-use-package 'haskell-mode)
-#+end_src
-
-**** Interactive Haskell mode
-
-#+begin_src emacs-lisp
-;(straight-use-package 'intero)
-;(add-hook 'haskell-mode-hook 'intero-mode)
-;(intero-global-mode 1)
-(require 'haskell-interactive-mode)
-(require 'haskell-process)
-
-(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+(use-package haskell-mode
+  :config
+  (require 'haskell-interactive-mode)
+  (require 'haskell-process)
+  (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
 #+end_src
 
 *** SageMath
@@ -604,32 +506,33 @@ Since enhanced mode is supposed to replace the default Ruby mode, it is nice to 
 [[https://github.com/sagemath/sage-shell-mode][This package]] enable to run [[http://www.sagemath.org/][SageMath]] within Emacs.
 
 #+begin_src emacs-lisp
-(straight-use-package 'sage-shell-mode)
+(use-package sage-shell-mode
+  :config
+  ;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
+  (sage-shell:define-alias)
 
-;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
-(sage-shell:define-alias)
-
-;; Turn on eldoc-mode in Sage terminal and in Sage source files
-(add-hook 'sage-shell-mode-hook #'eldoc-mode)
-(add-hook 'sage-shell:sage-mode-hook #'eldoc-mode)
+  ;; Turn on eldoc-mode in Sage terminal and in Sage source files
+  (add-hook 'sage-shell-mode-hook #'eldoc-mode)
+  (add-hook 'sage-shell:sage-mode-hook #'eldoc-mode))
 #+end_src
 
 For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][ob-sagemath]]:
 #+begin_src emacs-lisp
-(straight-use-package 'ob-sagemath)
+(use-package ob-sagemath)
 #+end_src
 
 *** R
 
 #+begin_src emacs-lisp
-(straight-use-package 'ess)
+(use-package ess)
 #+end_src
 
 *** LaTeX
 
 #+begin_src emacs-lisp
-(straight-use-package 'auctex)
-(straight-use-package 'cdlatex)
+(use-package auctex
+  :defer t)
+(use-package cdlatex)
 #+end_src
 
 *** Bash
@@ -638,12 +541,16 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 (setq sh-basic-offset 2)
 #+end_src
 
-** Org mode
+*** Org
 
 Install Org mode to use the last version instead of the version bundled with Emacs:
 
 #+begin_src emacs-lisp
-(straight-use-package 'org)
+;(use-package org-plus-contrib
+;  :pin org)
+(use-package org
+  :ensure org-plus-contrib
+  :pin org)
 
 (require 'init-org)
 #+end_src
@@ -652,8 +559,10 @@ Install Org mode to use the last version instead of the version bundled with Ema
 
 Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 #+begin_src emacs-lisp
-(straight-use-package 'pdf-tools)
-(pdf-tools-install)
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-width))
 #+end_src
 
 ** Configure Wiki
@@ -661,22 +570,23 @@ Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
 #+begin_src emacs-lisp
-(straight-use-package 'deft)
-
-(setq deft-directory "~/.wiki")
-(setq deft-default-extension "org")
-(setq deft-extensions '("org"))
-(setq deft-recursive t)
-(setq deft-use-filename-as-title nil)
-(setq deft-use-filter-string-for-filename nil)
-(setq deft-file-naming-rules '((noslash . "-")
-                               (nospace . "-")
-                               (case-fn . downcase)))
-(setq deft-text-mode 'org-mode)
-(setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
-(setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
-(global-set-key [f12] 'deft) ;; Open Deft buffer
-(global-set-key (kbd "C-x C-g") 'deft-find-file) ;; Find Org files without deft buffer
+(use-package deft
+  :bind
+  ("<f12>" . deft)
+  ("C-x C-g" . deft-find-file)
+  :config
+  (setq deft-directory "~/.wiki")
+  (setq deft-default-extension "org")
+  (setq deft-extensions '("org"))
+  (setq deft-recursive t)
+  (setq deft-use-filename-as-title nil)
+  (setq deft-use-filter-string-for-filename nil)
+  (setq deft-file-naming-rules '((noslash . "-")
+				 (nospace . "-")
+				 (case-fn . downcase)))
+  (setq deft-text-mode 'org-mode)
+  (setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
+  (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$"))
 #+end_src
 
 ** Enhance user experience
@@ -688,25 +598,23 @@ In this section we use all the previously installed packages to make Emacs a joy
 The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
 
 #+begin_src emacs-lisp
-(straight-use-package 'undo-tree)
-
-;; Turn on everywhere
-(global-undo-tree-mode 1)
-;; Each node in the tree should have a timestamp
-(setq undo-tree-visualizer-timestamps t)
-;; Show a diff window displaying changes between undo nodes
-(setq undo-tree-visualizer-diff t)
-;; Make ctrl-z undo
- (global-set-key (kbd "C-z") 'undo)
-;; Make ctrl-Z redo
-(defalias 'redo 'undo-tree-redo)
-(global-set-key (kbd "C-S-z") 'redo)
+(use-package undo-tree
+  :bind
+  ("C-z" . undo)
+  ("C-S-z" . redo)
+  :config
+  ;; Turn on everywhere
+  (global-undo-tree-mode 1)
+  ;; Each node in the tree should have a timestamp
+  (setq undo-tree-visualizer-timestamps t)
+  ;; Show a diff window displaying changes between undo nodes
+  (setq undo-tree-visualizer-diff t))
 #+end_src
 
 *** Visualizing colors
 
 #+begin_src emacs-lisp
-(straight-use-package 'rainbow-mode)
+(use-package rainbow-mode)
 #+end_src
 
 *** Custom Functions
@@ -748,28 +656,16 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 **** Doom themes
 
 #+begin_src emacs-lisp
-(straight-use-package 'doom-themes)
+(use-package doom-themes)
 #+end_src
 
 **** Spacemacs theme
 
 #+begin_src emacs-lisp
-(straight-use-package 'spacemacs-theme)
-
-(setq spacemacs-theme-org-height nil)
-#+end_src
-
-**** Moe theme
-
-#+begin_src emacs-lisp
-(straight-use-package
- '(moe-theme :type git :host github :repo "kuanyui/moe-theme.el"))
-#+end_src
-
-**** Jellybeans
-
-#+begin_src emacs-lisp
-(straight-use-package 'jbeans-theme)
+(use-package spacemacs-theme
+  :defer t
+  :config
+  (setq spacemacs-theme-org-height nil))
 #+end_src
 
 *** Set Dark/Light themes
@@ -845,43 +741,22 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 *** Modeline
 
 #+begin_src emacs-lisp
-(straight-use-package 'doom-modeline)
-
-(setq doom-modeline-minor-modes t)
-(setq doom-modeline-icon t)
-(doom-modeline-mode 1)
-#+end_src
-
-**** COMMENT Change the colors based on major mode
-
-Taken from [[https://stackoverflow.com/questions/15906332/change-emacs-mode-line-color-based-on-major-mode][here]]:
-
-#+begin_src emacs-lisp
-;; (add-hook 'after-change-major-mode-hook 'my-set-mode-line-colors)
-;;
-;; (defvar my-mode-line-colors
-;;   '((emacs-lisp-mode :background "#6a4b99")
-;;     (lisp-interaction-mode :background "#6a4b99")
-;;     (enh-ruby-mode :background "#6e0e0e")
-;;     (haskell-mode :background "#4a137d")
-;;     (org-mode :background "#33547d")))
-;; (defun my-set-mode-line-colors ()
-;;   (face-remap-add-relative
-;;    'mode-line (list (or (cdr (assq major-mode my-mode-line-colors))
-;;                         '(:background "#4a3569"))
-;;                     'mode-line)))
+(use-package doom-modeline
+  :config
+  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-icon t)
+  (doom-modeline-mode 1))
 #+end_src
 
 *** Dashboard
 
 #+begin_src emacs-lisp
-(straight-use-package 'dashboard)
-
-(dashboard-setup-startup-hook)
-
-;; Set the banner
-(setq dashboard-startup-banner 'logo)
-(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook)
+  ;; Set the banner
+  (setq dashboard-startup-banner 'logo)
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src
 
 * Org configuration
@@ -945,7 +820,7 @@ Org is so awesome it deserves a package itself:
 *** Bullets
 
 #+begin_src emacs-lisp
-(straight-use-package 'org-bullets)
+(use-package org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 (setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
 #+end_src
@@ -1147,7 +1022,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 [[https://github.com/jkitchin/org-ref][org-ref]] is a set of org-mode modules for citations, cross-references, bibliographies in org-mode and useful bibtex tools.
 
 #+begin_src emacs-lisp
-(straight-use-package 'org-ref)
+(use-package org-ref)
 #+end_src
 
 ** Babel
@@ -1172,7 +1047,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 
 #+begin_src emacs-lisp
 (setq haskell-process-type 'stack-ghci)
-(straight-use-package 'ob-crystal)
+;;(use-package 'ob-crystal)
 
 ;; active Babel languages
 (org-babel-do-load-languages
@@ -1186,7 +1061,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
    (makefile . t)
    (sagemath . t)
    (haskell . t)
-   (crystal . t)
+   ;; (crystal . t)
    (emacs-lisp . t)))
 #+end_src
 
@@ -1237,7 +1112,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 ** Async eval
 
 #+begin_src emacs-lisp
-(straight-use-package 'ob-async)
+(use-package ob-async)
 #+end_src
 
 * Snippets

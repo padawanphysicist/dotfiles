@@ -77,6 +77,12 @@ If this option is set, tmux will generate xterm-style function key sequences; th
 setw -g xterm-keys on
 #+end_src
 
+* Fix delayed Esc with VIM
+
+#+begin_src conf
+set -sg escape-time 0
+#+end_src
+
 * Horizontal splits with =-=
 
 #+begin_src conf

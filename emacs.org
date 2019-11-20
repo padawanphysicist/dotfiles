@@ -656,7 +656,7 @@ Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 (pdf-tools-install)
 #+end_src
 
-** COMMENT Configure Wiki
+** Configure Wiki
 
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
@@ -1140,6 +1140,14 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (add-hook 'post-command-hook 'org-latex-fragment-toggle-auto)
 (setq org-latex-fragment-toggle-helper (byte-compile 'org-latex-fragment-toggle-helper))
 (setq org-latex-fragment-toggle-auto (byte-compile 'org-latex-fragment-toggle-auto))
+#+end_src
+
+*** Citations
+
+[[https://github.com/jkitchin/org-ref][org-ref]] is a set of org-mode modules for citations, cross-references, bibliographies in org-mode and useful bibtex tools.
+
+#+begin_src emacs-lisp
+(straight-use-package 'org-ref)
 #+end_src
 
 ** Babel

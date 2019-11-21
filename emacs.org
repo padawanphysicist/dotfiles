@@ -530,9 +530,27 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 *** LaTeX
 
 #+begin_src emacs-lisp
-(use-package auctex
-  :defer t)
-(use-package cdlatex)
+(use-package tex
+  :ensure auctex
+  :mode ("\\.tex\\'" . latex-mode)
+  :config
+  (setq TeX-source-correlate-mode t)
+  (setq TeX-source-correlate-method 'synctex)
+  (setq TeX-auto-save t)
+
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  (setq TeX-PDF-mode t) ;; pdf mode by default
+  (setq reftex-plug-into-auctex t)
+  (pdf-tools-install)
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+	TeX-source-correlate-start-server t)
+  ;; Update PDF buffers after successful LaTeX runs
+  (add-hook 'TeX-after-compilation-finished-functions
+	    #'TeX-revert-document-buffer)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex))
+;; (use-package cdlatex)
+(use-package helm-bibtex)
 #+end_src
 
 *** Bash
@@ -743,7 +761,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 #+begin_src emacs-lisp
 (use-package doom-modeline
   :config
-  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-minor-modes nil)
   (setq doom-modeline-icon t)
   (doom-modeline-mode 1))
 #+end_src

@@ -554,7 +554,7 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
   (add-hook 'TeX-after-compilation-finished-functions
 	    #'TeX-revert-document-buffer)
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex))
-;; (use-package cdlatex)
+(use-package cdlatex)
 (use-package helm-bibtex)
 #+end_src
 
@@ -570,9 +570,11 @@ Install Org mode to use the last version instead of the version bundled with Ema
 
 #+begin_src emacs-lisp
 (quelpa '(org :url "https://code.orgmode.org/bzg/org-mode.git" :fetcher git
-             :files ("lisp/*.el" "contrib/lisp/*.el" "doc/dir" "doc/*.texi") :upgrade nil))
+              :files ("lisp/*.el" "contrib/lisp/*.el" "doc/dir" "doc/*.texi") :upgrade nil))
+;; (use-package org)
 
-(require 'init-org)
+(with-eval-after-load 'org
+  (require 'init-org))
 #+end_src
 
 ** Pdf viewer
@@ -831,6 +833,18 @@ Org is so awesome it deserves a package itself:
 (add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
+*** Startup with LaTeX previews
+
+#+begin_src emacs-lisp
+(setq org-startup-with-latex-preview t)
+#+end_src
+
+*** Startup with inline image previews
+
+#+begin_src emacs-lisp
+(setq org-startup-with-inline-images t)
+#+end_src
+
 *** Folding symbol
 
 #+begin_src emacs-lisp
@@ -840,9 +854,10 @@ Org is so awesome it deserves a package itself:
 *** Bullets
 
 #+begin_src emacs-lisp
-(use-package org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
+(use-package org-bullets
+  :config
+  (setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode t))))
 #+end_src
 
 ** LaTeX
@@ -868,8 +883,7 @@ Org is so awesome it deserves a package itself:
 Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
 
 #+begin_src emacs-lisp
-(with-eval-after-load "org"
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 
 (defun update-org-latex-fragments ()
   (org-latex-preview '(4)) ;; Clear all fragments in the buffer
@@ -879,7 +893,10 @@ Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/quest
     (princ (plist-get org-format-latex-options :scale)))
   (org-latex-preview '(3))) ;; Display all fragments in the buffer
 
-(add-hook 'text-scale-mode-hook 'update-org-latex-fragments)
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'text-scale-mode-hook
+		      'update-org-latex-fragments nil 'make-it-local)))
 #+end_src
 
 *** Fix fragment preview numbering
@@ -935,15 +952,17 @@ In org-mode we can use LaTeX equations, and toggle an overlay that shows what th
 This code changes the color of the fragment based on the current theme.
 
 #+begin_src emacs-lisp
-(with-eval-after-load "org"
-  (setq org-format-latex-options (plist-put org-format-latex-options :foreground 'auto))
-  (setq org-format-latex-options (plist-put org-format-latex-options :background 'auto)))
-
 (defun vct-update-org-latex-fragment-colors ()
   (org-latex-preview '(4))
+  (setq org-format-latex-options (plist-put org-format-latex-options :foreground 'auto))
+  (setq org-format-latex-options (plist-put org-format-latex-options :background 'auto))
   (org-latex-preview '(3)))
 
-(add-hook 'after-load-theme-hook 'vct-update-org-latex-fragment-colors)
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'after-load-theme-hook
+		      'vct-update-org-latex-fragment-colors nil 'make-it-local)))
+;; (add-hook 'after-load-theme-hook 'vct-update-org-latex-fragment-colors)
 #+end_src
 
 *** Automatic LaTeX fragment previewing toggle

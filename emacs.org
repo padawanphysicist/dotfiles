@@ -48,6 +48,11 @@ and now we configure use-package:
 ;; Causes all packages to be installed automatically if not already
 ;; present in the system
 (setq use-package-always-ensure t)
+
+;; Install Quelpa
+(use-package quelpa-use-package
+  :init (setq quelpa-update-melpa-p nil)
+  :config (quelpa-use-package-activate-advice))
 #+end_src
 
 * Init file
@@ -564,11 +569,8 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 Install Org mode to use the last version instead of the version bundled with Emacs:
 
 #+begin_src emacs-lisp
-;(use-package org-plus-contrib
-;  :pin org)
-(use-package org
-  :ensure org-plus-contrib
-  :pin org)
+(quelpa '(org :url "https://code.orgmode.org/bzg/org-mode.git" :fetcher git
+             :files ("lisp/*.el" "contrib/lisp/*.el" "doc/dir" "doc/*.texi") :upgrade nil))
 
 (require 'init-org)
 #+end_src

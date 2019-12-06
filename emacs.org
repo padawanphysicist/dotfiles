@@ -18,7 +18,10 @@ By using the [[https://github.com/jwiegley/use-package][use-package]] macro one 
 This piece if modified from https://melpa.org/#/getting-started:
 #+begin_src emacs-lisp
 (require 'package)
-(setq package-enable-at-startup nil) ;; Do not activate installed packages when Emacs starts
+
+;; Do not activate installed packages when Emacs starts
+(setq package-enable-at-startup nil)
+
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
@@ -30,10 +33,10 @@ There are two things you can do about this warning:
 1. Install an Emacs version that does support SSL and be safe.
 2. Remove this warning from your init file so you won't see it again."))
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  (add-to-list 'package-archives (cons "org" (concat proto "://orgmode.org/elpa/")) t)
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+
 (unless package--initialized (package-initialize))
 #+end_src
 
@@ -42,20 +45,16 @@ and now we configure use-package:
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
 (eval-when-compile
   (require 'use-package))
 
 ;; Causes all packages to be installed automatically if not already
 ;; present in the system
 (setq use-package-always-ensure t)
-
-;; Install Quelpa
-(use-package quelpa-use-package
-  :init (setq quelpa-update-melpa-p nil)
-  :config (quelpa-use-package-activate-advice))
 #+end_src
 
-* Init file
+* COMMENT Init file
 :properties:
 :header-args+: :tangle "emacs/.config/emacs/init.el"
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
@@ -781,7 +780,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src
 
-* Org configuration
+* COMMENT Org configuration
 :properties:
 :header-args+: :tangle "emacs/.elisp/init-org.el"
 :end:
@@ -1154,7 +1153,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (use-package ob-async)
 #+end_src
 
-* Snippets
+* COMMENT Snippets
 ** Org
 :properties:
 :header-args+: :tangle-mode (identity #o666)

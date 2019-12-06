@@ -54,7 +54,7 @@ and now we configure use-package:
 (setq use-package-always-ensure t)
 #+end_src
 
-* COMMENT Init file
+* Init file
 :properties:
 :header-args+: :tangle "emacs/.config/emacs/init.el"
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
@@ -108,12 +108,6 @@ Ensure that the mouse wheel scroll the window the mouse is over.
 (setq scroll-step 1)
 #+end_src
 
-**** COMMENT Keep cursor at same position when scrolling
-
-#+begin_src emacs-lisp
-(setq scroll-preserve-screen-position 1)
-#+end_src
-
 **** Scroll window up/down by one line
 
 Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here]]:
@@ -132,7 +126,7 @@ Lazy people like me never want to type "yes" when "y" will suffice.
 
 *** Show matching brackets
 
-=[[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]]= allows one to see matching pairs of parentheses and other characters. 
+[[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]] allows one to see matching pairs of parentheses and other characters. 
 #+begin_src emacs-lisp
 (show-paren-mode 1)
 #+end_src
@@ -252,59 +246,6 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 #+end_src
 
-*** COMMENT Show trailing whitespace
-
-Took this from [[https://gist.github.com/ymasory/3794723][here]].
-#+begin_src emacs-lisp
-;; Make carriage returns blue and tabs green
-(custom-set-faces
- '(my-carriage-return-face ((((class color)) (:background "blue"))) t)
- '(my-tab-face ((((class color)) (:background "green"))) t))
-
-;; Add custom font locks to all buffers and all files
-(add-hook
- 'font-lock-mode-hook
- (function
-  (lambda ()
-    (setq
-     font-lock-keywords
-     (append
-      font-lock-keywords
-      '(("\r" (0 'my-carriage-return-face t))
-        ("\t" (0 'my-tab-face t))))))))
-
-;; Make characters after column 80 purple
-;(setq whitespace-style (quote (face trailing tab-mark lines-tail)))
-(setq whitespace-style (quote (face trailing tab-mark)))
-(add-hook 'prog-mode-hook 'whitespace-mode)
-(add-hook 'text-mode-hook 'whitespace-mode)
-
-;; Transform literal tabs into a right-pointing triangle
-(setq
- whitespace-display-mappings ;; http://ergoemacs.org/emacs/whitespace-mode.html
- '(
-   (tab-mark 9 [9654 9] [92 9])
-   ;;others substitutions...
-   ))
-#+end_src
-
-*** Disable tooltips
-
-By default Emacs will display its tooltips in a separate frame. If you want to force Emacs to use the echo area exclusively, you can do that with this handy code snippet:
-#+begin_src emacs-lisp
-;;(tooltip-mode -1)
-#+end_src
-
-*** COMMENT Save Desktop
-
-Desktop-Save mode is a global mode that automatically saves your Emacs session, so you can load it later and pick up exactly where you left Emacs last time. In practice, Desktop saves your session information and buffers to a file. Next time you start Emacs, you can load your session and have (almost) all your buffers available. The main benefit of Desktop is that it saves the hussle of reopening all the files you need and setting your windows the way you like them.
-
-#+begin_src emacs-lisp
-(desktop-save-mode)
-;; Add variables to desktop saving
-(add-to-list 'desktop-globals-to-save 'register-alist)
-#+end_src
-
 ** Load custom configuration
 
 Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
@@ -354,23 +295,19 @@ However, after enabling a whole plethora of available packages you can get lost 
 #+begin_src emacs-lisp
 (use-package which-key
   :init 
+  ;; Decrease the delay for which-key buffer to popup
   (setq which-key-idle-delay 0.02)
-  :diminish
-  (which-key-mode . " ω ")
   :config 
-  (which-key-mode)) ;; Decrease the delay for which-key buffer to popup
+  (which-key-mode))
 #+end_src
 
 ** Completion framework
 
 Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
-
 #+begin_src emacs-lisp
 (use-package helm
   :defer t
-  :diminish 
-  (helm-mode . " η ")
   :bind
   ("M-x" . helm-M-x)
   ("C-x r b" . helm-filtered-bookmarks)
@@ -424,7 +361,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (yas-reload-all))
 #+end_src
 
-** Git configuration
+** COMMENT Git configuration
 
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
 
@@ -433,12 +370,12 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   :bind
   ("C-x g" . magit-status))
 
-(use-package git-gutter-fringe
-  :config
-  (global-git-gutter-mode t))
+;; (use-package git-gutter-fringe
+;;   :config
+;;   (global-git-gutter-mode t))
 #+end_src
 
-** Programming/markup languages
+** COMMENT Programming/markup languages
 
 In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
 
@@ -576,7 +513,7 @@ Install Org mode to use the last version instead of the version bundled with Ema
   (require 'init-org))
 #+end_src
 
-** Pdf viewer
+** COMMENT Pdf viewer
 
 Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 #+begin_src emacs-lisp
@@ -586,7 +523,7 @@ Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
   (setq-default pdf-view-display-size 'fit-width))
 #+end_src
 
-** Configure Wiki
+** COMMENT Configure Wiki
 
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
@@ -610,7 +547,7 @@ My personal notes are structured as a kind of a wiki, organized using [[https://
   (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$"))
 #+end_src
 
-** Enhance user experience
+** COMMENT Enhance user experience
 
 In this section we use all the previously installed packages to make Emacs a joy to use!
 
@@ -672,7 +609,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   (delete-other-windows))
 #+end_src
 
-** User interface
+** COMMENT User interface
 *** Download themes
 **** Doom themes
 

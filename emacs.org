@@ -94,34 +94,7 @@ and now we configure use-package:
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:
 
-** Load custom configuration
-
-Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
-
-This code offloads the =custom-set-variables= to a separate file. This keeps your =init.el= neater and you have the option to gitignore your =custom.el= if you see fit.
-
-#+begin_src emacs-lisp
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(unless (file-exists-p custom-file)
-  (write-region "" nil custom-file))
-
-;; Load custom file. Don't hide errors. Hide success message
-(if (file-exists-p custom-file)
-  (load custom-file nil t))
-#+end_src
-
-*** COMMENT Enable PATH within Emacs
-
-With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
-#+begin_src emacs-lisp
-(use-package exec-path-from-shell
-  :config
-  (progn
-    (setq exec-path-from-shell-check-startup-files nil)
-    (exec-path-from-shell-initialize)))
-#+end_src
-
-** COMMENT Better defaults
+** Better defaults
 
 The settings here modify the default behaviour of Emacs, and do not depend on any package.
 
@@ -293,6 +266,63 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 (set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 #+end_src
+
+*** Load custom configuration
+
+ Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
+
+ This code offloads the =custom-set-variables= to a separate file. This keeps your =init.el= neater and you have the option to gitignore your =custom.el= if you see fit.
+
+ #+begin_src emacs-lisp
+ (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+ (unless (file-exists-p custom-file)
+   (write-region "" nil custom-file))
+
+ ;; Load custom file. Don't hide errors. Hide success message
+ (if (file-exists-p custom-file)
+   (load custom-file nil t))
+ #+end_src
+
+**** COMMENT Enable PATH within Emacs
+
+ With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
+ #+begin_src emacs-lisp
+ (use-package exec-path-from-shell
+   :config
+   (progn
+     (setq exec-path-from-shell-check-startup-files nil)
+     (exec-path-from-shell-initialize)))
+ #+end_src
+
+*** Improve garbage collection
+
+ The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] in Emacs is very simple. You allocate some bytes and once you pass a certain threshold, it garbage collects.
+
+ It turns out that the default behavior is to garbage collect very often. And because there is so little garbage to collect each time, you will not notice any lag. The problem is when you use memory-intensive features like =helm= on a large collection. The solution is mentioned in the manual:
+
+ #+begin_example
+ The initial threshold value is GC_DEFAULT_THRESHOLD, defined in alloc.c. Since it's defined in word_size units, the value is 400,000 for the default 32-bit configuration and 800,000 for the 64-bit one. If you specify a larger value, garbage collection will happen less often. This reduces the amount of time spent garbage collecting, but increases total memory use. You may want to do this when running a program that creates lots of Lisp data. 
+ #+end_example
+
+ #+begin_src emacs-lisp
+ (defun vct--minibuffer-setup-hook ()
+   (setq gc-cons-threshold most-positive-fixnum))
+
+ (defun vct--minibuffer-exit-hook ()
+   (setq gc-cons-threshold 800000))
+
+ (add-hook 'minibuffer-setup-hook #'vct--minibuffer-setup-hook)
+ (add-hook 'minibuffer-exit-hook #'vct--minibuffer-exit-hook)
+ #+end_src
+
+ Therefore, while the minibuffer is open, garbage collection will never occur, but once we make a selection, or cancel, garbage collection will kick off immediately and then revert back to the default, sensible behavior. This should fix any random freezing within Emacs.
+
+*** Disable splash screen
+
+ #+begin_src emacs-lisp
+ (setq inhibit-startup-message t) 
+ ;; (setq initial-scratch-message nil)
+ #+end_src
 
 ** COMMENT User interface
 *** Dashboard
@@ -1292,9 +1322,3 @@ $0
 (provide 'org-latex-class-preprint)
 #+end_src
 
-* COMMENT Inbox/Trash
-:properties:
-:header-args: :tangle no
-:end:
-
-I use to keep in this section code I'm testing and I dont want to put in the configuration file.

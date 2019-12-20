@@ -94,7 +94,7 @@ and now we configure use-package:
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:
 
-** Better defaults
+** Sane defaults
 
 The settings here modify the default behaviour of Emacs, and do not depend on any package.
 
@@ -707,6 +707,7 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-hook 'enh-ruby-mode-hook 'robe-mode))
 #+end_src
 
+
 *** COMMENT Haskell
 **** Enable Haskell mode
 
@@ -777,30 +778,31 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 (setq sh-basic-offset 2)
 #+end_src
 
-*** Org
+** Load Org configuration
+
+Org mode configuration is defered to a separate package:
 
 #+begin_src emacs-lisp
 (with-eval-after-load 'org
   (require 'init-org))
 #+end_src
 
-* COMMENT Org configuration
+* Org configuration
 :properties:
 :header-args+: :tangle "emacs/.elisp/init-org.el"
 :end:
 
 Org is so awesome it deserves a package itself:
 #+begin_src emacs-lisp
-;; package --- Summary
-;;; configure org mode
+;;; init-org.el --- Configure Org mode                -*- lexical-binding: t; -*-
 ;;; Commentary:
-;; Configures org mode parameters
+;; Org mode custom settings
 
 ;;; Code:
 
 <<org-conf>>
 
-(message "configuring org-mode")
+(message "configuring org-mode...")
 (provide 'init-org)
 ;;; init-org.el ends here
 #+end_src
@@ -811,7 +813,31 @@ Org is so awesome it deserves a package itself:
 :header-args+: :tangle no
 :end:
 
+*** Clean view
+Org’s default outline with stars and no indents can become too cluttered for short documents. For book-like long documents, the effect is not as noticeable. Org provides an alternate stars and indentation scheme, as shown on the right in the following table. It uses only one star and indents text to line with the heading: 
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+*** Bullets
+
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :config
+  (setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode t))))
+#+end_src
+
+*** Folding symbol
+
+#+begin_src emacs-lisp
+(setq org-ellipsis "  ")
+#+end_src
+
 *** Fix tag position
+
+The default position of tags is quite sensitive to the font size.
 
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
@@ -826,44 +852,23 @@ Org is so awesome it deserves a package itself:
 ;; Automatic update of time-stamps
 (setq time-stamp-active t)
 (setq time-stamp-format "<%:y-%02m-%02d %3a %02H:%02M>")
-(setq time-stamp-pattern "10/^#\\+modified: %%$")
+(setq time-stamp-pattern "10/^#\\+[mM][oO][dD][iI][fF][iI][eE][dD]: %%$")
 (add-hook 'before-save-hook 'time-stamp) ;; Update timestamp on saving
 #+end_src
 
-*** Clean view
-
-#+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'org-indent-mode)
-#+end_src
-
-*** Startup with LaTeX previews
+*** COMMENT Startup with LaTeX previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-latex-preview t)
 #+end_src
 
-*** Startup with inline image previews
+*** COMMENT Startup with inline image previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-inline-images t)
 #+end_src
 
-*** Folding symbol
-
-#+begin_src emacs-lisp
-(setq org-ellipsis "  ") ;; folding symbol
-#+end_src
-
-*** Bullets
-
-#+begin_src emacs-lisp
-(use-package org-bullets
-  :config
-  (setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode t))))
-#+end_src
-
-*** Fix Org bullets when changing theme
+*** COMMENT Fix Org bullets when changing theme
 
 Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_custom_theme_leading_stars/][here]].
 
@@ -880,7 +885,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 		    (buffer-list)))))
 #+end_src
 
-** LaTeX
+** COMMENT LaTeX
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -1083,7 +1088,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (use-package org-ref)
 #+end_src
 
-** Babel
+** COMMENT Babel
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -1159,8 +1164,8 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
                                            (:results . "output")))
 #+end_src
 
-** Agenda
-** Org agenda configuration
+** COMMENT Agenda
+** COMMENT Org agenda configuration
 
 #+begin_src emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol

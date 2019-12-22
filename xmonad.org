@@ -49,7 +49,8 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "xterm -e 'tmux attach-session -t santos'"
+-- vctTerminal = "xterm -e 'tmux attach-session -t santos'"
+vctTerminal = "mate-terminal --hide-menubar --command 'tmux attach-session -t santos'"
 #+end_src
 
 ** Screensaver
@@ -97,6 +98,8 @@ vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
                     , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
                     , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
                     , ((vctModMask, xK_b), sendMessage ToggleStruts)
+                    , ((vctModMask .|. shiftMask, xK_Delete), spawn "sudo systemctl hibernate")
+                    , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
                     , ((vctModMask, xK_z), sendMessage (Toggle "Full"))]
 #+end_src
 
@@ -111,11 +114,11 @@ The usual behaviour of XMonad for highlight the focused (active) window is to dr
 #+begin_src haskell
 -- Width of windows border
 vctBorderWidth :: Dimension
-vctBorderWidth = 0 -- Change this to a value > 0 to have border
+vctBorderWidth = 4 -- Change this to a value > 0 to have border
 
 -- Border colors for focused/unfocused windows
 vctFocusedBorderColor :: String
-vctFocusedBorderColor = "#FF0000" 
+vctFocusedBorderColor = "#FFAA00"
 vctNormalBorderColor :: String
 vctNormalBorderColor  = "#CCCCCC"
 #+end_src

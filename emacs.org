@@ -324,7 +324,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
  ;; (setq initial-scratch-message nil)
  #+end_src
 
-** COMMENT User interface
+** User interface
 *** Dashboard
 
 #+begin_src emacs-lisp
@@ -336,7 +336,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src
 
-*** COMMENT Set theme
+*** Set theme
 **** Install themes
 
  #+begin_src emacs-lisp
@@ -374,23 +374,6 @@ I use =F6= and =S-F6= to loop forward/backward into the list of defined themes
     (add-hook 'after-make-frame-functions #'vct--load-theme-frame)
   (vct--load-theme-no-frame))
 
-
-;; (add-hook 'after-make-frame-functions
-;; 	  (lambda (frame)
-;; 	    (select-frame frame)
-;; 	    (if (display-graphic-p)
-;; 		;; Or whatever you want to run for GUI frames.
-;; 		(progn
-;; 		  (load-theme (elt *vct-themes* *vct-current-theme-index*) t)
-;; 		  (setq *vct-current-theme-index* (1+ *vct-current-theme-index*)))
-;; 	      ;; Terminal config
-
-;; 	      )))
-	;; (progn
-	;; 	  (load-theme (elt *vct-themes* *vct-current-theme-index*) t)
-	;; 	  (setq *vct-current-theme-index* (1+ *vct-current-theme-index*)))
-  
-
 (defun vct--loop-over-theme (arg)
   (interactive)
   ;; Disable all custom enabled themes
@@ -422,7 +405,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-*** COMMENT Modeline
+*** Modeline
 
 #+begin_src emacs-lisp
 (use-package doom-modeline
@@ -1327,3 +1310,4 @@ $0
 (provide 'org-latex-class-preprint)
 #+end_src
 
+* COMMENT Archive

@@ -352,7 +352,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
  ;; In the case you want to use multiple themes
  ;; (defvar *vct-themes* '(doom-one doom-solarized-light spacemacs-dark spacemacs-light moe-dark moe-light tsdh-dark tsdh-light jbeans whiteboard))
 
- (defvar *vct-themes* '(spacemacs-light spacemacs-dark))
+ (defvar *vct-themes* '(spacemacs-dark spacemacs-light))
  #+end_src
 
 **** Loop over themes
@@ -502,14 +502,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 (global-set-key "\C-c\C-k" 'vct/copy-line)
 #+end_src
 
-** COMMENT Diminish minor modes
-
-[[https://github.com/myrjola/diminish.el][diminish]] allows hiding or abbreviate minor mode display on the modeline:
-#+begin_src emacs-lisp
-(use-package diminish)
-#+end_src
-
-** COMMENT Make Emacs discoverable
+** Make Emacs discoverable
 
 Emacs by default is built around this idea of discoverability. It is a self-documented editor. To see this, check =C-h ?=. 
 
@@ -1311,3 +1304,10 @@ $0
 #+end_src
 
 * COMMENT Archive
+** COMMENT Diminish minor modes
+
+[[https://github.com/myrjola/diminish.el][diminish]] allows hiding or abbreviate minor mode display on the modeline:
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+

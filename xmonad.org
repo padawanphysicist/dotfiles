@@ -217,7 +217,7 @@ You would like to install/enable [[https://elpa.gnu.org/packages/rainbow-mode.ht
 Config
   {
   -- appearance
-    font = "xft:Fira Mono:size=16:antialias=true"
+    font = "xft:Inconsolata for Powerline:size=20:antialias=true"
   , additionalFonts = ["xft:FontAwesome:size=16"] -- For the icons
   , allDesktops = True
   , position = BottomW L 100

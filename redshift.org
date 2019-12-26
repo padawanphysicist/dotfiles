@@ -9,11 +9,11 @@ Redshift adjusts the color temperature of your screen according to your surround
 
 #+begin_src conf
 [redshift]
-temp-day=6500
-temp-night=4000
+temp-day=5500
+temp-night=3000
 #+end_src
 
-* Disable the smooth fade between temperatures when Redshift start/stop
+* Enable the smooth fade between temperatures when Redshift start/stop
 
 - 0 will cause an immediate change between screen temperatures.
 - 1 will gradually apply the new screen temperature over a couple of seconds.

@@ -74,7 +74,7 @@ setw -g mouse off
 If this option is set, tmux will generate xterm-style function key sequences; these have a number included to indicate modifiers such as Shift, Alt or Ctrl.
 
 #+begin_src conf
-setw -g xterm-keys on
+set-window-option -g xterm-keys on
 #+end_src
 
 * Fix delayed Esc with VIM
@@ -100,8 +100,8 @@ unbind v
 unbind ^V
 unbind %
 unbind '\'
-unbind '/'
-bind \ split-window -h -c "#{pane_current_path}"
+unbind /
+bind '\' split-window -h -c "#{pane_current_path}"
 bind / split-window -h -c "#{pane_current_path}"
 #+end_src
 

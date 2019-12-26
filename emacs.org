@@ -229,11 +229,12 @@ Line numbering is really helpful for simple file movement.
 (setq-default display-line-numbers-widen t)
 #+end_src
 
-**** Enable only for some modes
+**** Keybinding for toggling
+
+The default is no line numbers. One can then toggle with =<f9>=.
 
 #+begin_src emacs-lisp
-(add-hook 'text-mode-hook #'display-line-numbers-mode)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(global-set-key (kbd "<f9>") 'display-line-numbers-mode)
 #+end_src
 
 **** Show cursor position within line
@@ -519,7 +520,7 @@ However, after enabling a whole plethora of available packages you can get lost 
   (which-key-mode))
 #+end_src
 
-** COMMENT Completion framework
+** Completion framework
 
 Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
@@ -549,7 +550,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (helm-mode 1))
 #+end_src
 
-** COMMENT Improve navigation
+** Improve navigation
 
 [[https://github.com/abo-abo/avy][Avy]] allows you to navigate to every visible portion of your Emacs (buffers & windows) with only a handful of keystrokes.
 
@@ -563,7 +564,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (setq avy-background t))
 #+end_src
 
-** COMMENT Templating
+** Templating
 
 [[https://github.com/joaotavora/yasnippet][YASnippet]] is a nice templating system for Emacs.
 
@@ -579,7 +580,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (yas-reload-all))
 #+end_src
 
-** COMMENT Git configuration
+** Git configuration
 
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
 
@@ -587,13 +588,9 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 (use-package magit
   :bind
   ("C-x g" . magit-status))
-
-;; (use-package git-gutter-fringe
-;;   :config
-;;   (global-git-gutter-mode t))
 #+end_src
 
-** COMMENT Pdf viewer
+** Pdf viewer
 
 Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 #+begin_src emacs-lisp
@@ -603,7 +600,7 @@ Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
   (setq-default pdf-view-display-size 'fit-width))
 #+end_src
 
-** COMMENT Configure Wiki
+** Configure Wiki
 
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
@@ -683,7 +680,6 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-hook 'enh-ruby-mode-hook 'robe-mode))
 #+end_src
 
-
 *** COMMENT Haskell
 **** Enable Haskell mode
 
@@ -752,6 +748,14 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 
 #+begin_src emacs-lisp
 (setq sh-basic-offset 2)
+#+end_src
+
+** Distraction-free writing
+
+#+begin_src emacs-lisp
+(use-package darkroom
+  :bind
+  (("M-<f11>" . darkroom-tentative-mode)))
 #+end_src
 
 ** Load Org configuration
@@ -1206,7 +1210,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq org-refile-use-outline-path t)          ; Show full paths for refiling
 #+end_src
 
-* COMMENT Snippets
+* Snippets
 ** Org
 :properties:
 :header-args+: :tangle-mode (identity #o666)

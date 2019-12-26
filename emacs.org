@@ -21,6 +21,15 @@ This helps reduce initialization time.
 (setq gc-cons-threshold most-positive-fixnum)
 #+end_src
 
+** Unset =file-name-handler-alist=
+
+Every file opened and loaded by Emacs will run through this list to check for a proper handler for the file, but during startup, it won’t need any of them.
+
+#+begin_src emacs-lisp
+(defvar file-name-handler-alist-original file-name-handler-alist)
+(setq file-name-handler-alist nil)
+#+end_src
+
 ** Disable menu bar
 
 You can always use =F10= to open the menu.

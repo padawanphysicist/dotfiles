@@ -561,6 +561,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   ("M-g l" . 'avy-goto-line)
   ("M-g w" . 'avy-goto-word-1)
   :config
+  (setq avy-timeout-seconds 1.0)
   (setq avy-background t))
 #+end_src
 

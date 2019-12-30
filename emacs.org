@@ -898,19 +898,19 @@ The default position of tags is quite sensitive to the font size.
 (add-hook 'before-save-hook 'time-stamp) ;; Update timestamp on saving
 #+end_src
 
-*** COMMENT Startup with LaTeX previews
+*** Startup with LaTeX previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-latex-preview t)
 #+end_src
 
-*** COMMENT Startup with inline image previews
+*** Startup with inline image previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-inline-images t)
 #+end_src
 
-*** COMMENT Fix Org bullets when changing theme
+*** Fix Org bullets when changing theme
 
 Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_custom_theme_leading_stars/][here]].
 

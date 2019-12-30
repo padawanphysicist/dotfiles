@@ -462,6 +462,21 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (doom-modeline-mode 1))
 #+end_src
 
+*** Posframe
+
+#+begin_src emacs-lisp
+(use-package helm-posframe
+  :config
+  (setq helm-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
+  (setq helm-posframe-width 150)
+  (helm-posframe-enable))
+
+(use-package which-key-posframe
+  :config
+  (setq which-key-posframe-poshandler 'posframe-poshandler-frame-bottom-center)
+  (which-key-posframe-mode))
+#+end_src
+
 ** COMMENT Enhance user experience
 *** Sane undo/redo
 

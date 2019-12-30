@@ -468,7 +468,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
 (use-package helm-posframe
   :config
   (setq helm-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
-  (setq helm-posframe-width 150)
+  ;; (setq helm-posframe-width 150)
   (helm-posframe-enable))
 
 (use-package which-key-posframe
@@ -927,7 +927,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 		    (buffer-list)))))
 #+end_src
 
-** COMMENT LaTeX
+** LaTeX
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -1130,7 +1130,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (use-package org-ref)
 #+end_src
 
-** COMMENT Babel
+** Babel
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -1206,8 +1206,8 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
                                            (:results . "output")))
 #+end_src
 
-** COMMENT Agenda
-** COMMENT Org agenda configuration
+** Agenda
+** Org agenda configuration
 
 #+begin_src emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol

@@ -15,7 +15,7 @@ Emacs 27+ introduces =early-init.el=, which is run before =init.el=, before pack
 
 ** Defer garbage collection further back in the startup process
 
-This helps reduce initialization time.
+The Garbage Collector eats up quite a bit of time, easily doubling startup time. The trick is to turn up the memory threshold as early as possible. This helps reduce initialization time.
 
 #+begin_src emacs-lisp
 (setq gc-cons-threshold most-positive-fixnum)
@@ -28,6 +28,12 @@ Every file opened and loaded by Emacs will run through this list to check for a 
 #+begin_src emacs-lisp
 (defvar file-name-handler-alist-original file-name-handler-alist)
 (setq file-name-handler-alist nil)
+#+end_src
+
+** Disable =site-run-file=
+
+#+begin_src emacs-lisp
+(setq site-run-file nil)
 #+end_src
 
 ** Disable menu bar
@@ -306,26 +312,57 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 
 *** Improve garbage collection
 
- The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] in Emacs is very simple. You allocate some bytes and once you pass a certain threshold, it garbage collects.
+The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] in Emacs is very simple. You allocate some bytes and once you pass a certain threshold, it garbage collects.
 
- It turns out that the default behavior is to garbage collect very often. And because there is so little garbage to collect each time, you will not notice any lag. The problem is when you use memory-intensive features like =helm= on a large collection. The solution is mentioned in the manual:
+It turns out that the default behavior is to garbage collect very often. And because there is so little garbage to collect each time, you will not notice any lag. The problem is when you use memory-intensive features like =helm= on a large collection. The solution is mentioned in the manual:
 
- #+begin_example
- The initial threshold value is GC_DEFAULT_THRESHOLD, defined in alloc.c. Since it's defined in word_size units, the value is 400,000 for the default 32-bit configuration and 800,000 for the 64-bit one. If you specify a larger value, garbage collection will happen less often. This reduces the amount of time spent garbage collecting, but increases total memory use. You may want to do this when running a program that creates lots of Lisp data. 
- #+end_example
+#+begin_example
+The initial threshold value is GC_DEFAULT_THRESHOLD, defined in alloc.c. Since it's defined in word_size units, the value is 400,000 for the default 32-bit configuration and 800,000 for the 64-bit one. If you specify a larger value, garbage collection will happen less often. This reduces the amount of time spent garbage collecting, but increases total memory use. You may want to do this when running a program that creates lots of Lisp data. 
+#+end_example
 
- #+begin_src emacs-lisp
- (defun vct--minibuffer-setup-hook ()
-   (setq gc-cons-threshold most-positive-fixnum))
+*** Set =gc-cons-threshold= smaller for interactive use
 
- (defun vct--minibuffer-exit-hook ()
-   (setq gc-cons-threshold 800000))
+I first define a new threshold for triggering the collector:
+#+begin_src emacs-lisp
+(defvar better-gc-cons-threshold 67108864 ; 64mb
+  "The default value to use for `gc-cons-threshold'.
+If you experience freezing, decrease this. If you experience stuttering, increase this.")
 
- (add-hook 'minibuffer-setup-hook #'vct--minibuffer-setup-hook)
- (add-hook 'minibuffer-exit-hook #'vct--minibuffer-exit-hook)
- #+end_src
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold better-gc-cons-threshold)
+            (setq file-name-handler-alist file-name-handler-alist-original)
+            (makunbound 'file-name-handler-alist-original)))
+#+end_src
 
- Therefore, while the minibuffer is open, garbage collection will never occur, but once we make a selection, or cancel, garbage collection will kick off immediately and then revert back to the default, sensible behavior. This should fix any random freezing within Emacs.
+*** Garbage Collect When Emacs is Out of Focus
+
+#+begin_src emacs-lisp
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (if (boundp 'after-focus-change-function)
+                (add-function :after after-focus-change-function
+                              (lambda ()
+                                (unless (frame-focus-state)
+                                  (garbage-collect))))
+              (add-hook 'after-focus-change-function 'garbage-collect))
+#+end_src
+
+*** Avoid Garbage Collect When Using Minibuffer
+
+#+begin_src emacs-lisp
+(defun gc-minibuffer-setup-hook ()
+  (setq gc-cons-threshold (* better-gc-cons-threshold 2)))
+
+(defun gc-minibuffer-exit-hook ()
+  (garbage-collect)
+  (setq gc-cons-threshold better-gc-cons-threshold))
+
+(add-hook 'minibuffer-setup-hook #'gc-minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'gc-minibuffer-exit-hook)))
+#+end_src
+
+Therefore, while the minibuffer is open, garbage collection will never occur, but once we make a selection, or cancel, garbage collection will kick off immediately and then revert back to the default, sensible behavior. This should fix any random freezing within Emacs.
 
 *** Disable splash screen
 

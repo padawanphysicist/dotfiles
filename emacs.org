@@ -299,7 +299,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
    (load custom-file nil t))
  #+end_src
 
-**** COMMENT Enable PATH within Emacs
+**** Enable PATH within Emacs
 
  With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
  #+begin_src emacs-lisp
@@ -477,7 +477,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (which-key-posframe-mode))
 #+end_src
 
-** COMMENT Enhance user experience
+** Enhance user experience
 *** Sane undo/redo
 
 The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:

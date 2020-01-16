@@ -18,6 +18,8 @@ and then define a new prefix
 #+begin_src conf
 set -g prefix M-x
 bind-key M-x send-prefix
+#set -g prefix IC
+#bind-key IC send-prefix
 #+end_src
 
 * Quickly reload tmux configuration
@@ -26,6 +28,14 @@ When you are playing around with your tmux config you often need to repeatedly o
 
 #+begin_src conf
 bind-key r source-file ~/.tmux.conf \; display-message "~/.tmux.conf reloaded!"
+#+end_src
+
+* Vi mode
+
+#+begin_src conf
+set-window-option -g mode-keys vi
+bind-key -T copy-mode-vi 'v' send -X begin-selection
+bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
 #+end_src
 
 * Start window numbering at 1

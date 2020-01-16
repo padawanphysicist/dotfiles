@@ -5,7 +5,82 @@
 
 [[https://www.gnu.org/software/emacs/][GNU Emacs]] is an extensible, customizable, [[https://www.gnu.org/philosophy/free-sw.html][free/libre]] text editor. It is an interpreter for Emacs Lisp, a dialect of the Lisp programming language with extensions to support text editing.
 
-* Early init file
+* Common Settings
+:properties:
+:header-args+: :noweb-ref common-settings
+:end:
+
+In this section I put settings which might be common to any configuration.
+
+** Add my elisp directory and other files
+
+Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.elisp")
+#+end_src
+
+** Create a hook for when theme changes
+
+Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_hook_for_when_the_theme_changes/][here]].
+
+#+begin_src emacs-lisp
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+#+end_src
+
+** Configure Wiki
+
+My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
+
+#+begin_src emacs-lisp
+(setq deft-directory "~/.wiki")
+(setq deft-default-extension "org")
+(setq deft-extensions '("org"))
+(setq deft-recursive t)
+(setq deft-use-filename-as-title nil)
+(setq deft-use-filter-string-for-filename nil)
+(setq deft-file-naming-rules '((noslash . "-")
+			 (nospace . "-")
+			 (case-fn . downcase)))
+(setq deft-text-mode 'org-mode)
+(setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
+(setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
+#+end_src
+
+** Setup visual lines
+
+Visual line mode actually does several things. From a user's point of view, it:
+- Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
+- Makes up/down arrow keys move by a visual line. (controlled by the var line-move-visual.)
+- Makes the kill-line command delete by a visual line, as opposed to a logical line.
+- Turns off the display of little return arrow at the edge of window. (controlled by the var fringe-indicator-alist.)
+
+Enable by default:
+#+begin_src emacs-lisp
+(global-visual-line-mode t)
+#+end_src
+
+and this code enable a visual hint whether a paragraph is hard or soften wrapped:
+#+begin_src emacs-lisp
+(defface my-custom-curly-face
+  '((t (:foreground "orange")))
+  "Face for fringe curly bitmaps."
+  :group 'basic-faces)
+(setq-default left-fringe-width 10)
+(set-fringe-bitmap-face 'left-curly-arrow 'my-custom-curly-face)
+(set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+#+end_src
+
+* COMMENT Vanilla Emacs Configuration
+
+This is my own "starter-kit".
+
+** Early init file
 :properties:
 :header-args+: :tangle "emacs/.config/emacs/early-init.el"
 :header-args+: :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
@@ -13,15 +88,30 @@
 
 Emacs 27+ introduces =early-init.el=, which is run before =init.el=, before package and UI initialization happens. Therefore we can customize in it variables that affect frame appearance as well as the package initialization process.
 
-** Defer garbage collection further back in the startup process
+*** Defer garbage collection further back in the startup process
 
-This helps reduce initialization time.
+The Garbage Collector eats up quite a bit of time, easily doubling startup time. The trick is to turn up the memory threshold as early as possible. This helps reduce initialization time.
 
 #+begin_src emacs-lisp
 (setq gc-cons-threshold most-positive-fixnum)
 #+end_src
 
-** Disable menu bar
+*** Unset =file-name-handler-alist=
+
+Every file opened and loaded by Emacs will run through this list to check for a proper handler for the file, but during startup, it won’t need any of them.
+
+#+begin_src emacs-lisp
+(defvar file-name-handler-alist-original file-name-handler-alist)
+(setq file-name-handler-alist nil)
+#+end_src
+
+*** Disable =site-run-file=
+
+#+begin_src emacs-lisp
+(setq site-run-file nil)
+#+end_src
+
+*** Disable menu bar
 
 You can always use =F10= to open the menu.
 
@@ -29,7 +119,7 @@ You can always use =F10= to open the menu.
 (push '(menu-bar-lines . 0) default-frame-alist)
 #+end_src
 
-** Remove tool bar
+*** Remove tool bar
 
 I never use it.
 
@@ -37,13 +127,13 @@ I never use it.
 (push '(tool-bar-lines . 0) default-frame-alist)
 #+end_src
 
-** Remove scroll bar
+*** Remove scroll bar
 
 #+begin_src emacs-lisp
 (push '(vertical-scroll-bars) default-frame-alist)
 #+end_src
 
-** Package management
+*** Package management
 
 Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
 
@@ -88,18 +178,18 @@ and now we configure use-package:
 (setq use-package-always-ensure t)
 #+end_src
 
-* Init file
+** Init file
 :properties:
 :header-args+: :tangle "emacs/.config/emacs/init.el"
 :header-args+: :shebang ";; -*- mode: emacs-lisp -*-"
 :end:
 
-** Sane defaults
+*** Sane defaults
 
 The settings here modify the default behaviour of Emacs, and do not depend on any package.
 
-*** Smooth Scrolling
-**** Scroll one line at a time
+**** Smooth Scrolling
+***** Scroll one line at a time
 
 This is less "jumpy" than the default behaviour.
 
@@ -107,7 +197,7 @@ This is less "jumpy" than the default behaviour.
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
 #+end_src
 
-**** Don't accelerate scrolling
+***** Don't accelerate scrolling
 
 The original behaviour is to scroll as fast as the user moves the wheel.
 
@@ -115,7 +205,7 @@ The original behaviour is to scroll as fast as the user moves the wheel.
 (setq mouse-wheel-progressive-speed nil)
 #+end_src
 
-**** Scroll window under mouse
+***** Scroll window under mouse
 
 Ensure that the mouse wheel scroll the window the mouse is over.
 
@@ -123,13 +213,13 @@ Ensure that the mouse wheel scroll the window the mouse is over.
 (setq mouse-wheel-follow-mouse 't)
 #+end_src
 
-**** Keyboard scroll one line at a time
+***** Keyboard scroll one line at a time
 
 #+begin_src emacs-lisp
 (setq scroll-step 1)
 #+end_src
 
-**** Scroll window up/down by one line
+***** Scroll window up/down by one line
 
 Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here]]:
 #+begin_src emacs-lisp
@@ -137,7 +227,7 @@ Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here
 (global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
 #+end_src
 
-*** Change "yes or no" to "y or n"
+**** Change "yes or no" to "y or n"
 
 Lazy people like me never want to type "yes" when "y" will suffice.
 
@@ -145,7 +235,7 @@ Lazy people like me never want to type "yes" when "y" will suffice.
 (fset 'yes-or-no-p 'y-or-n-p)
 #+end_src
 
-*** Show matching brackets
+**** Show matching brackets
 
 [[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]] allows one to see matching pairs of parentheses and other characters. 
 #+begin_src emacs-lisp
@@ -157,13 +247,13 @@ By default, there’s a small delay before showing a matching parenthesis. It ca
 (setq show-paren-delay 0)
 #+end_src
 
-*** Disable bell sound
+**** Disable bell sound
 
 #+begin_src emacs-lisp
 (setq ring-bell-function 'ignore)
 #+end_src
 
-*** Change backup behaviour
+**** Change backup behaviour
 
 This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
 
@@ -181,55 +271,55 @@ Since disk space is cheap, I prefer to save a lot!
 (setq version-control t)
 #+end_src
 
-*** Save minibuffer history
+**** Save minibuffer history
 
 #+begin_src emacs-lisp
 (savehist-mode 1)
 #+end_src
 
-*** Add my elisp directory and other files
+**** COMMENT Add my elisp directory and other files
 
 Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb-ref add-elisp-folder
 (add-to-list 'load-path "~/.elisp")
 #+end_src
 
-*** Line numbering
+**** Line numbering
 
 Line numbering is really helpful for simple file movement.
 
-**** Number of columns reserved for line number display
+***** Number of columns reserved for line number display
 
 #+begin_src emacs-lisp
 (setq-default display-line-numbers-width 4)
 #+end_src
 
-**** Do not shrink line number width
+***** Do not shrink line number width
 
 #+begin_src emacs-lisp
 (setq display-line-numbers-grow-only t)
 #+end_src
 
-**** Relative line numbers taking into account screen lines
+***** Relative line numbers taking into account screen lines
 
 #+begin_src emacs-lisp
 (setq-default display-line-numbers-type 'visual)
 #+end_src
 
-**** Display the absolute number of the current line
+***** Display the absolute number of the current line
 
 #+begin_src emacs-lisp
 (setq-default display-line-numbers-current-absolute t)
 #+end_src
 
-**** Disregard narrowing when showing line numbers
+***** Disregard narrowing when showing line numbers
 
 #+begin_src emacs-lisp
 (setq-default display-line-numbers-widen t)
 #+end_src
 
-**** Keybinding for toggling
+***** Keybinding for toggling
 
 The default is no line numbers. One can then toggle with =<f9>=.
 
@@ -237,13 +327,13 @@ The default is no line numbers. One can then toggle with =<f9>=.
 (global-set-key (kbd "<f9>") 'display-line-numbers-mode)
 #+end_src
 
-**** Show cursor position within line
+***** Show cursor position within line
 
 #+begin_src emacs-lisp
 (column-number-mode 1)
 #+end_src
 
-*** Setup visual lines
+**** COMMENT Setup visual lines
 
 Visual line mode actually does several things. From a user's point of view, it:
 - Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
@@ -268,7 +358,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 #+end_src
 
-*** Load custom configuration
+**** Load custom configuration
 
  Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
 
@@ -284,7 +374,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
    (load custom-file nil t))
  #+end_src
 
-**** COMMENT Enable PATH within Emacs
+***** Enable PATH within Emacs
 
  With [[https://github.com/purcell/exec-path-from-shell][this]] package Emacs read =$PATH= from the shell:
  #+begin_src emacs-lisp
@@ -295,38 +385,69 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
      (exec-path-from-shell-initialize)))
  #+end_src
 
-*** Improve garbage collection
+**** Improve garbage collection
 
- The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] in Emacs is very simple. You allocate some bytes and once you pass a certain threshold, it garbage collects.
+The [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Garbage-Collection.html][garbage collection]] in Emacs is very simple. You allocate some bytes and once you pass a certain threshold, it garbage collects.
 
- It turns out that the default behavior is to garbage collect very often. And because there is so little garbage to collect each time, you will not notice any lag. The problem is when you use memory-intensive features like =helm= on a large collection. The solution is mentioned in the manual:
+It turns out that the default behavior is to garbage collect very often. And because there is so little garbage to collect each time, you will not notice any lag. The problem is when you use memory-intensive features like =helm= on a large collection. The solution is mentioned in the manual:
 
- #+begin_example
- The initial threshold value is GC_DEFAULT_THRESHOLD, defined in alloc.c. Since it's defined in word_size units, the value is 400,000 for the default 32-bit configuration and 800,000 for the 64-bit one. If you specify a larger value, garbage collection will happen less often. This reduces the amount of time spent garbage collecting, but increases total memory use. You may want to do this when running a program that creates lots of Lisp data. 
- #+end_example
+#+begin_example
+The initial threshold value is GC_DEFAULT_THRESHOLD, defined in alloc.c. Since it's defined in word_size units, the value is 400,000 for the default 32-bit configuration and 800,000 for the 64-bit one. If you specify a larger value, garbage collection will happen less often. This reduces the amount of time spent garbage collecting, but increases total memory use. You may want to do this when running a program that creates lots of Lisp data. 
+#+end_example
 
- #+begin_src emacs-lisp
- (defun vct--minibuffer-setup-hook ()
-   (setq gc-cons-threshold most-positive-fixnum))
+**** Set =gc-cons-threshold= smaller for interactive use
 
- (defun vct--minibuffer-exit-hook ()
-   (setq gc-cons-threshold 800000))
+I first define a new threshold for triggering the collector:
+#+begin_src emacs-lisp
+(defvar better-gc-cons-threshold 67108864 ; 64mb
+  "The default value to use for `gc-cons-threshold'.
+If you experience freezing, decrease this. If you experience stuttering, increase this.")
 
- (add-hook 'minibuffer-setup-hook #'vct--minibuffer-setup-hook)
- (add-hook 'minibuffer-exit-hook #'vct--minibuffer-exit-hook)
- #+end_src
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold better-gc-cons-threshold)
+            (setq file-name-handler-alist file-name-handler-alist-original)
+            (makunbound 'file-name-handler-alist-original)))
+#+end_src
 
- Therefore, while the minibuffer is open, garbage collection will never occur, but once we make a selection, or cancel, garbage collection will kick off immediately and then revert back to the default, sensible behavior. This should fix any random freezing within Emacs.
+**** Garbage Collect When Emacs is Out of Focus
 
-*** Disable splash screen
+#+begin_src emacs-lisp
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (if (boundp 'after-focus-change-function)
+                (add-function :after after-focus-change-function
+                              (lambda ()
+                                (unless (frame-focus-state)
+                                  (garbage-collect))))
+              (add-hook 'after-focus-change-function 'garbage-collect))
+#+end_src
+
+**** Avoid Garbage Collect When Using Minibuffer
+
+#+begin_src emacs-lisp
+(defun gc-minibuffer-setup-hook ()
+  (setq gc-cons-threshold (* better-gc-cons-threshold 2)))
+
+(defun gc-minibuffer-exit-hook ()
+  (garbage-collect)
+  (setq gc-cons-threshold better-gc-cons-threshold))
+
+(add-hook 'minibuffer-setup-hook #'gc-minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'gc-minibuffer-exit-hook)))
+#+end_src
+
+Therefore, while the minibuffer is open, garbage collection will never occur, but once we make a selection, or cancel, garbage collection will kick off immediately and then revert back to the default, sensible behavior. This should fix any random freezing within Emacs.
+
+**** Disable splash screen
 
  #+begin_src emacs-lisp
  (setq inhibit-startup-message t) 
  ;; (setq initial-scratch-message nil)
  #+end_src
 
-** User interface
-*** Dashboard
+*** User interface
+**** Dashboard
 
 #+begin_src emacs-lisp
 (use-package dashboard
@@ -337,8 +458,8 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src
 
-*** Set theme
-**** Install themes
+**** Set theme
+***** Install themes
 
  #+begin_src emacs-lisp
  (use-package spacemacs-theme
@@ -347,7 +468,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
    (setq spacemacs-theme-org-height nil))
  #+end_src
 
-**** Set Dark/Light themes
+***** Set Dark/Light themes
 
  #+begin_src emacs-lisp
  ;; In the case you want to use multiple themes
@@ -356,7 +477,7 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
  (defvar *vct-themes* '(spacemacs-dark spacemacs-light))
  #+end_src
 
-**** Loop over themes
+***** Loop over themes
 
 I use =F6= and =S-F6= to loop forward/backward into the list of defined themes
 
@@ -394,7 +515,7 @@ I use =F6= and =S-F6= to loop forward/backward into the list of defined themes
 (global-set-key (kbd "S-<f6>") 'vct--loop-over-backward)
 #+end_src
 
-**** Create a hook for when theme changes
+***** COMMENT Create a hook for when theme changes
 
 Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_hook_for_when_the_theme_changes/][here]].
 
@@ -406,7 +527,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-*** Modeline
+**** Modeline
 
 #+begin_src emacs-lisp
 (use-package doom-modeline
@@ -416,8 +537,23 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (doom-modeline-mode 1))
 #+end_src
 
-** COMMENT Enhance user experience
-*** Sane undo/redo
+**** Posframe
+
+#+begin_src emacs-lisp
+(use-package helm-posframe
+  :config
+  (setq helm-posframe-poshandler #'posframe-poshandler-frame-bottom-center)
+  ;; (setq helm-posframe-width 150)
+  (helm-posframe-enable))
+
+(use-package which-key-posframe
+  :config
+  (setq which-key-posframe-poshandler 'posframe-poshandler-frame-bottom-center)
+  (which-key-posframe-mode))
+#+end_src
+
+*** Enhance user experience
+**** Sane undo/redo
 
 The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo history as a branching tree of changes:
 
@@ -435,14 +571,14 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   (setq undo-tree-visualizer-diff t))
 #+end_src
 
-*** Visualizing colors
+**** Visualizing colors
 
 #+begin_src emacs-lisp
 (use-package rainbow-mode)
 #+end_src
 
-*** Custom Functions
-**** Move text to scratch buffer
+**** Custom Functions
+***** Move text to scratch buffer
 
 #+begin_src emacs-lisp
 (defun vct/move-region-to-other-window (start end)
@@ -460,7 +596,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
     (message "No region selected")))
 #+end_src
 
-**** Delete all other buffers
+***** Delete all other buffers
 
 #+begin_src emacs-lisp
 (defun vct/kill-other-buffers ()
@@ -475,7 +611,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
   (delete-other-windows))
 #+end_src
 
-**** Copy line
+***** Copy line
 
 #+begin_src emacs-lisp
 (defun vct/copy-line (arg)
@@ -503,7 +639,7 @@ The =undo-tree-mode= replaces Emacs' undo system with a system that treats undo 
 (global-set-key "\C-c\C-k" 'vct/copy-line)
 #+end_src
 
-** Make Emacs discoverable
+*** Make Emacs discoverable
 
 Emacs by default is built around this idea of discoverability. It is a self-documented editor. To see this, check =C-h ?=. 
 
@@ -520,7 +656,7 @@ However, after enabling a whole plethora of available packages you can get lost 
   (which-key-mode))
 #+end_src
 
-** Completion framework
+*** Completion framework
 
 Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
@@ -550,7 +686,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (helm-mode 1))
 #+end_src
 
-** Improve navigation
+*** Improve navigation
 
 [[https://github.com/abo-abo/avy][Avy]] allows you to navigate to every visible portion of your Emacs (buffers & windows) with only a handful of keystrokes.
 
@@ -565,7 +701,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (setq avy-background t))
 #+end_src
 
-** Templating
+*** Templating
 
 [[https://github.com/joaotavora/yasnippet][YASnippet]] is a nice templating system for Emacs.
 
@@ -581,7 +717,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (yas-reload-all))
 #+end_src
 
-** Git configuration
+*** Git configuration
 
 [[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
 
@@ -591,7 +727,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   ("C-x g" . magit-status))
 #+end_src
 
-** Pdf viewer
+*** Pdf viewer
 
 Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
 #+begin_src emacs-lisp
@@ -601,7 +737,7 @@ Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
   (setq-default pdf-view-display-size 'fit-width))
 #+end_src
 
-** Configure Wiki
+*** Configure Wiki
 
 My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
@@ -625,7 +761,7 @@ My personal notes are structured as a kind of a wiki, organized using [[https://
   (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$"))
 #+end_src
 
-** COMMENT Programming/markup languages
+*** Programming/markup languages
 
 In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
 
@@ -645,8 +781,8 @@ also, enable =rainbow-delimiters=:
   (show-paren-mode 1))
 #+end_src
 
-*** Ruby
-**** Enable enhanced ruby mode
+**** Ruby
+***** Enable enhanced ruby mode
 
 Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
 
@@ -656,7 +792,7 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode)))
 #+end_src
 
-**** Enable inferior Ruby
+***** Enable inferior Ruby
 
 #+begin_src emacs-lisp
 (use-package inf-ruby
@@ -665,7 +801,7 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (setq inf-ruby-default-implementation "pry"))
 #+end_src
 
-**** Enable Rubocop
+***** Enable Rubocop
 
 #+begin_src emacs-lisp
 (use-package rubocop
@@ -673,7 +809,7 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-hook 'ruby-mode-hook 'rubocop-mode))
 #+end_src
 
-**** Enable Robe
+***** Enable Robe
 
 #+begin_src emacs-lisp
 (use-package robe
@@ -681,8 +817,8 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-hook 'enh-ruby-mode-hook 'robe-mode))
 #+end_src
 
-*** COMMENT Haskell
-**** Enable Haskell mode
+**** COMMENT Haskell
+***** Enable Haskell mode
 
 #+begin_src emacs-lisp
 (use-package haskell-mode
@@ -693,7 +829,7 @@ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
   (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
 #+end_src
 
-*** SageMath
+**** SageMath
 
 [[https://github.com/sagemath/sage-shell-mode][This package]] enable to run [[http://www.sagemath.org/][SageMath]] within Emacs.
 
@@ -713,13 +849,13 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 (use-package ob-sagemath)
 #+end_src
 
-*** R
+**** R
 
 #+begin_src emacs-lisp
 (use-package ess)
 #+end_src
 
-*** LaTeX
+**** LaTeX
 
 #+begin_src emacs-lisp
 (use-package tex
@@ -745,13 +881,13 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
 (use-package helm-bibtex)
 #+end_src
 
-*** Bash
+**** Bash
 
 #+begin_src emacs-lisp
 (setq sh-basic-offset 2)
 #+end_src
 
-** Distraction-free writing
+*** Distraction-free writing
 
 #+begin_src emacs-lisp
 (use-package darkroom
@@ -759,7 +895,7 @@ For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][
   (("M-<f11>" . darkroom-tentative-mode)))
 #+end_src
 
-** Load Org configuration
+*** Load Org configuration
 
 Org mode configuration is defered to a separate package:
 
@@ -768,14 +904,452 @@ Org mode configuration is defered to a separate package:
   (require 'init-org))
 #+end_src
 
+* Spacemacs Configuration
+
+This is the configuration I use in [[http://spacemacs.org/][Spacemacs]], a sophisticated and polished set-up focused on ergonomics, mnemonics and consistency.
+
+** Layers
+:properties:
+:header-args+: :noweb-ref spacemacs-layers
+:ID:       c43571ca-1504-4e0d-b74f-66595c109e2d
+:end:
+
+#+begin_src emacs-lisp
+helm
+(auto-completion :variables
+  auto-completion-private-snippets-directory "~/.yasnippet")
+better-defaults
+emacs-lisp
+git
+deft
+org
+common-lisp
+bibtex
+ess
+haskell
+html
+latex
+(ruby :variables
+      ruby-enable-enh-ruby-mode t
+      ruby-version-manager 'rvm)
+scheme
+themes-megapack
+colors
+pdf-tools
+(shell :variables
+       shell-default-height 30
+       shell-default-position 'bottom)
+spell-checking
+syntax-checking
+#+end_src
+
+** Additional packages
+:properties:
+:header-args+: :noweb-ref additional-packages
+:end:
+
+Add here packages which don't belong to any layer
+#+begin_src emacs-lisp
+cdlatex
+regex-tool
+yasnippet-snippets
+sed-mode
+sage-shell-mode
+ob-sagemath
+#+end_src
+
+** Excluded packages
+:properties:
+:header-args+: :noweb-ref excluded-packages
+:end:
+
+#+begin_src emacs-lisp
+org-present
+org-projectile
+org-pomodoro
+toc-org
+org-brain
+ox-reveal
+#+end_src
+
+** User config
+:properties:
+:header-args+: :noweb-ref spacemacs-user-config
+:end:
+
+*** Open this dotfile
+
+#+begin_src emacs-lisp
+(defun vct--open-this-dotfile ()
+  (interactive)
+  (find-file "~/.dotfiles/emacs.org"))
+(spacemacs/set-leader-keys "fed" 'vct--open-this-dotfile)
+#+end_src
+
+*** Modify navigation
+
+#+begin_src emacs-lisp
+(setq avy-timeout-seconds 0.9)
+(spacemacs/set-leader-keys "jj" 'avy-goto-char-timer)
+#+end_src
+
+*** Modify Ruby configuration
+
+#+begin_src emacs-lisp
+(defun vct--robe-start ()
+  (interactive)
+  (rvm-use "ruby-2.7.0" "default")
+  (robe-start))
+(spacemacs/set-leader-keys-for-major-mode 'enh-ruby-mode "msi" 'vct--robe-start)
+#+end_src
+
+** Custom Org
+:properties:
+:header-args+: :noweb-ref spacemacs-custom-org
+:end:
+
+*** Declare custom prefix for Org mode
+
+#+begin_src emacs-lisp
+(spacemacs/declare-prefix-for-mode 'org-mode "o" "custom")
+#+end_src
+
+*** Add Shortcut for tangle 
+
+#+begin_src emacs-lisp
+(spacemacs/set-leader-keys-for-major-mode 'org-mode "ot" 'org-babel-tangle)
+#+end_src
+
+** Configuration file
+:properties:
+:header-args+: :tangle "emacs/.spacemacs"
+:end:
+
+#+begin_src emacs-lisp
+;; -*- mode: emacs-lisp -*-
+;; This file is loaded by Spacemacs at startup.
+;; It must be stored in your home directory.
+
+(defun dotspacemacs/layers ()
+  "Configuration Layers declaration.
+You should not put any user code in this function besides modifying the variable
+values."
+  (setq-default
+   ;; Base distribution to use. This is a layer contained in the directory
+   ;; `+distribution'. For now available distributions are `spacemacs-base'
+   ;; or `spacemacs'. (default 'spacemacs)
+   dotspacemacs-distribution 'spacemacs
+   ;; Lazy installation of layers (i.e. layers are installed only when a file
+   ;; with a supported type is opened). Possible values are `all', `unused'
+   ;; and `nil'. `unused' will lazy install only unused layers (i.e. layers
+   ;; not listed in variable `dotspacemacs-configuration-layers'), `all' will
+   ;; lazy install any layer that support lazy installation even the layers
+   ;; listed in `dotspacemacs-configuration-layers'. `nil' disable the lazy
+   ;; installation feature and you have to explicitly list a layer in the
+   ;; variable `dotspacemacs-configuration-layers' to install it.
+   ;; (default 'unused)
+   dotspacemacs-enable-lazy-installation 'unused
+   ;; If non-nil then Spacemacs will ask for confirmation before installing
+   ;; a layer lazily. (default t)
+   dotspacemacs-ask-for-lazy-installation t
+   ;; If non-nil layers with lazy install support are lazy installed.
+   ;; List of additional paths where to look for configuration layers.
+   ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
+   dotspacemacs-configuration-layer-path '()
+   ;; List of configuration layers to load.
+   dotspacemacs-configuration-layers
+   '(
+     <<spacemacs-layers>>
+     )
+   ;; List of additional packages that will be installed without being
+   ;; wrapped in a layer. If you need some configuration for these
+   ;; packages, then consider creating a layer. You can also put the
+   ;; configuration in `dotspacemacs/user-config'.
+   dotspacemacs-additional-packages '(
+     <<additional-packages>>
+   )
+   ;; A list of packages that cannot be updated.
+   dotspacemacs-frozen-packages '()
+   ;; A list of packages that will not be installed and loaded.
+   dotspacemacs-excluded-packages '(
+     <<excluded-packages>>
+   )
+   ;; Defines the behaviour of Spacemacs when installing packages.
+   ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
+   ;; `used-only' installs only explicitly used packages and uninstall any
+   ;; unused packages as well as their unused dependencies.
+   ;; `used-but-keep-unused' installs only the used packages but won't uninstall
+   ;; them if they become unused. `all' installs *all* packages supported by
+   ;; Spacemacs and never uninstall them. (default is `used-only')
+   dotspacemacs-install-packages 'used-only))
+
+(defun dotspacemacs/init ()
+  "Initialization function.
+This function is called at the very startup of Spacemacs initialization
+before layers configuration.
+You should not put any user code in there besides modifying the variable
+values."
+  ;; This setq-default sexp is an exhaustive list of all the supported
+  ;; spacemacs settings.
+  (setq-default
+   ;; If non nil ELPA repositories are contacted via HTTPS whenever it's
+   ;; possible. Set it to nil if you have no way to use HTTPS in your
+   ;; environment, otherwise it is strongly recommended to let it set to t.
+   ;; This variable has no effect if Emacs is launched with the parameter
+   ;; `--insecure' which forces the value of this variable to nil.
+   ;; (default t)
+   dotspacemacs-elpa-https t
+   ;; Maximum allowed time in seconds to contact an ELPA repository.
+   dotspacemacs-elpa-timeout 5
+   ;; If non nil then spacemacs will check for updates at startup
+   ;; when the current branch is not `develop'. Note that checking for
+   ;; new versions works via git commands, thus it calls GitHub services
+   ;; whenever you start Emacs. (default nil)
+   dotspacemacs-check-for-update nil
+   ;; If non-nil, a form that evaluates to a package directory. For example, to
+   ;; use different package directories for different Emacs versions, set this
+   ;; to `emacs-version'.
+   dotspacemacs-elpa-subdirectory nil
+   ;; One of `vim', `emacs' or `hybrid'.
+   ;; `hybrid' is like `vim' except that `insert state' is replaced by the
+   ;; `hybrid state' with `emacs' key bindings. The value can also be a list
+   ;; with `:variables' keyword (similar to layers). Check the editing styles
+   ;; section of the documentation for details on available variables.
+   ;; (default 'vim)
+   dotspacemacs-editing-style 'hybrid
+   ;; If non nil output loading progress in `*Messages*' buffer. (default nil)
+   dotspacemacs-verbose-loading nil
+   ;; Specify the startup banner. Default value is `official', it displays
+   ;; the official spacemacs logo. An integer value is the index of text
+   ;; banner, `random' chooses a random text banner in `core/banners'
+   ;; directory. A string value must be a path to an image format supported
+   ;; by your Emacs build.
+   ;; If the value is nil then no banner is displayed. (default 'official)
+   dotspacemacs-startup-banner 'official
+   ;; List of items to show in startup buffer or an association list of
+   ;; the form `(list-type . list-size)`. If nil then it is disabled.
+   ;; Possible values for list-type are:
+   ;; `recents' `bookmarks' `projects' `agenda' `todos'."
+   ;; List sizes may be nil, in which case
+   ;; `spacemacs-buffer-startup-lists-length' takes effect.
+   dotspacemacs-startup-lists '((recents . 5)
+                                (projects . 7))
+   ;; True if the home buffer should respond to resize events.
+   dotspacemacs-startup-buffer-responsive t
+   ;; Default major mode of the scratch buffer (default `text-mode')
+   dotspacemacs-scratch-mode 'text-mode
+   ;; List of themes, the first of the list is loaded when spacemacs starts.
+   ;; Press <SPC> T n to cycle to the next theme in the list (works great
+   ;; with 2 themes variants, one dark and one light)
+   dotspacemacs-themes '(spacemacs-dark
+                         spacemacs-light)
+   ;; If non nil the cursor color matches the state color in GUI Emacs.
+   dotspacemacs-colorize-cursor-according-to-state t
+   ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
+   ;; quickly tweak the mode-line size to make separators look not too crappy.
+   dotspacemacs-default-font '("Monego"
+                               :size 15
+                               :weight normal
+                               :width normal
+                               :powerline-scale 1.5)
+   ;; The leader key
+   dotspacemacs-leader-key "SPC"
+   ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
+   ;; (default "SPC")
+   dotspacemacs-emacs-command-key "SPC"
+   ;; The key used for Vim Ex commands (default ":")
+   dotspacemacs-ex-command-key ":"
+   ;; The leader key accessible in `emacs state' and `insert state'
+   ;; (default "M-m")
+   dotspacemacs-emacs-leader-key "M-m"
+   ;; Major mode leader key is a shortcut key which is the equivalent of
+   ;; pressing `<leader> m`. Set it to `nil` to disable it. (default ",")
+   dotspacemacs-major-mode-leader-key ","
+   ;; Major mode leader key accessible in `emacs state' and `insert state'.
+   ;; (default "C-M-m")
+   dotspacemacs-major-mode-emacs-leader-key "C-M-m"
+   ;; These variables control whether separate commands are bound in the GUI to
+   ;; the key pairs C-i, TAB and C-m, RET.
+   ;; Setting it to a non-nil value, allows for separate commands under <C-i>
+   ;; and TAB or <C-m> and RET.
+   ;; In the terminal, these pairs are generally indistinguishable, so this only
+   ;; works in the GUI. (default nil)
+   dotspacemacs-distinguish-gui-tab nil
+   ;; If non nil `Y' is remapped to `y$' in Evil states. (default nil)
+   dotspacemacs-remap-Y-to-y$ nil
+   ;; If non-nil, the shift mappings `<' and `>' retain visual state if used
+   ;; there. (default t)
+   dotspacemacs-retain-visual-state-on-shift t
+   ;; If non-nil, J and K move lines up and down when in visual mode.
+   ;; (default nil)
+   dotspacemacs-visual-line-move-text nil
+   ;; If non nil, inverse the meaning of `g' in `:substitute' Evil ex-command.
+   ;; (default nil)
+   dotspacemacs-ex-substitute-global nil
+   ;; Name of the default layout (default "Default")
+   dotspacemacs-default-layout-name "Default"
+   ;; If non nil the default layout name is displayed in the mode-line.
+   ;; (default nil)
+   dotspacemacs-display-default-layout nil
+   ;; If non nil then the last auto saved layouts are resume automatically upon
+   ;; start. (default nil)
+   dotspacemacs-auto-resume-layouts nil
+   ;; Size (in MB) above which spacemacs will prompt to open the large file
+   ;; literally to avoid performance issues. Opening a file literally means that
+   ;; no major mode or minor modes are active. (default is 1)
+   dotspacemacs-large-file-size 1
+   ;; Location where to auto-save files. Possible values are `original' to
+   ;; auto-save the file in-place, `cache' to auto-save the file to another
+   ;; file stored in the cache directory and `nil' to disable auto-saving.
+   ;; (default 'cache)
+   dotspacemacs-auto-save-file-location 'cache
+   ;; Maximum number of rollback slots to keep in the cache. (default 5)
+   dotspacemacs-max-rollback-slots 5
+   ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
+   dotspacemacs-helm-resize nil
+   ;; if non nil, the helm header is hidden when there is only one source.
+   ;; (default nil)
+   dotspacemacs-helm-no-header nil
+   ;; define the position to display `helm', options are `bottom', `top',
+   ;; `left', or `right'. (default 'bottom)
+   dotspacemacs-helm-position 'bottom
+   ;; Controls fuzzy matching in helm. If set to `always', force fuzzy matching
+   ;; in all non-asynchronous sources. If set to `source', preserve individual
+   ;; source settings. Else, disable fuzzy matching in all sources.
+   ;; (default 'always)
+   dotspacemacs-helm-use-fuzzy 'always
+   ;; If non nil the paste micro-state is enabled. When enabled pressing `p`
+   ;; several times cycle between the kill ring content. (default nil)
+   dotspacemacs-enable-paste-transient-state nil
+   ;; Which-key delay in seconds. The which-key buffer is the popup listing
+   ;; the commands bound to the current keystroke sequence. (default 0.4)
+   dotspacemacs-which-key-delay 0.4
+   ;; Which-key frame position. Possible values are `right', `bottom' and
+   ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
+   ;; right; if there is insufficient space it displays it at the bottom.
+   ;; (default 'bottom)
+   dotspacemacs-which-key-position 'bottom
+   ;; If non nil a progress bar is displayed when spacemacs is loading. This
+   ;; may increase the boot time on some systems and emacs builds, set it to
+   ;; nil to boost the loading time. (default t)
+   dotspacemacs-loading-progress-bar t
+   ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
+   ;; (Emacs 24.4+ only)
+   dotspacemacs-fullscreen-at-startup nil
+   ;; If non nil `spacemacs/toggle-fullscreen' will not use native fullscreen.
+   ;; Use to disable fullscreen animations in OSX. (default nil)
+   dotspacemacs-fullscreen-use-non-native nil
+   ;; If non nil the frame is maximized when Emacs starts up.
+   ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
+   ;; (default nil) (Emacs 24.4+ only)
+   dotspacemacs-maximized-at-startup nil
+   ;; A value from the range (0..100), in increasing opacity, which describes
+   ;; the transparency level of a frame when it's active or selected.
+   ;; Transparency can be toggled through `toggle-transparency'. (default 90)
+   dotspacemacs-active-transparency 90
+   ;; A value from the range (0..100), in increasing opacity, which describes
+   ;; the transparency level of a frame when it's inactive or deselected.
+   ;; Transparency can be toggled through `toggle-transparency'. (default 90)
+   dotspacemacs-inactive-transparency 90
+   ;; If non nil show the titles of transient states. (default t)
+   dotspacemacs-show-transient-state-title t
+   ;; If non nil show the color guide hint for transient state keys. (default t)
+   dotspacemacs-show-transient-state-color-guide t
+   ;; If non nil unicode symbols are displayed in the mode line. (default t)
+   dotspacemacs-mode-line-unicode-symbols t
+   ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
+   ;; scrolling overrides the default behavior of Emacs which recenters point
+   ;; when it reaches the top or bottom of the screen. (default t)
+   dotspacemacs-smooth-scrolling t
+   ;; Control line numbers activation.
+   ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
+   ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
+   ;; This variable can also be set to a property list for finer control:
+   ;; '(:relative nil
+   ;;   :disabled-for-modes dired-mode
+   ;;                       doc-view-mode
+   ;;                       markdown-mode
+   ;;                       org-mode
+   ;;                       pdf-view-mode
+   ;;                       text-mode
+   ;;   :size-limit-kb 1000)
+   ;; (default nil)
+   dotspacemacs-line-numbers nil
+   ;; Code folding method. Possible values are `evil' and `origami'.
+   ;; (default 'evil)
+   dotspacemacs-folding-method 'evil
+   ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
+   ;; (default nil)
+   dotspacemacs-smartparens-strict-mode nil
+   ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
+   ;; over any automatically added closing parenthesis, bracket, quote, etc…
+   ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
+   dotspacemacs-smart-closing-parenthesis nil
+   ;; Select a scope to highlight delimiters. Possible values are `any',
+   ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
+   ;; emphasis the current one). (default 'all)
+   dotspacemacs-highlight-delimiters 'all
+   ;; If non nil, advise quit functions to keep server open when quitting.
+   ;; (default nil)
+   dotspacemacs-persistent-server nil
+   ;; List of search tool executable names. Spacemacs uses the first installed
+   ;; tool of the list. Supported tools are `ag', `pt', `ack' and `grep'.
+   ;; (default '("ag" "pt" "ack" "grep"))
+   dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
+   ;; The default package repository used if no explicit repository has been
+   ;; specified with an installed package.
+   ;; Not used for now. (default nil)
+   dotspacemacs-default-package-repository nil
+   ;; Delete whitespace while saving buffer. Possible values are `all'
+   ;; to aggressively delete empty line and long sequences of whitespace,
+   ;; `trailing' to delete only the whitespace at end of lines, `changed'to
+   ;; delete only whitespace for changed lines or `nil' to disable cleanup.
+   ;; (default nil)
+   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-mode-line-theme '(all-the-icons :separator wave)
+   ))
+
+(defun dotspacemacs/user-init ()
+  "Initialization function for user code.
+It is called immediately after `dotspacemacs/init', before layer configuration
+executes.
+ This function is mostly useful for variables that need to be set
+before packages are loaded. If you are unsure, you should try in setting them in
+`dotspacemacs/user-config' first."
+  )
+
+(defun dotspacemacs/user-config ()
+  "Configuration function for user code.
+This function is called at the very end of Spacemacs initialization after
+layers configuration.
+This is the place where most of your configurations should be done. Unless it is
+explicitly specified that a variable should be set before a package is loaded,
+you should place your code here."
+
+  <<common-settings>>
+  <<spacemacs-user-config>>
+  
+  ;; Load Org configuration
+  (with-eval-after-load 'org
+    <<spacemacs-custom-org>>
+    (require 'org-configuration))
+  )
+
+;; Do not write anything past this comment. This is where Emacs will
+;; auto-generate custom variable definitions.
+#+end_src
+
+#+RESULTS:
+: dotspacemacs/user-config
+
 * Org configuration
 :properties:
-:header-args+: :tangle "emacs/.elisp/init-org.el"
+:header-args+: :tangle "emacs/.elisp/org-configuration.el"
 :end:
 
 Org is so awesome it deserves a package itself:
 #+begin_src emacs-lisp
-;;; init-org.el --- Configure Org mode                -*- lexical-binding: t; -*-
+;;; org-configuration.el --- Configure Org mode                -*- lexical-binding: t; -*-
 ;;; Commentary:
 ;; Org mode custom settings
 
@@ -783,9 +1357,9 @@ Org is so awesome it deserves a package itself:
 
 <<org-conf>>
 
-(message "configuring org-mode...")
-(provide 'init-org)
-;;; init-org.el ends here
+(message "Configuring org-mode...")
+(provide 'org-configuration)
+;;; org-configuration.el ends here
 #+end_src
 
 ** General configuration
@@ -804,10 +1378,25 @@ Org’s default outline with stars and no indents can become too cluttered for s
 *** Bullets
 
 #+begin_src emacs-lisp
-(use-package org-bullets
-  :config
-  (setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode t))))
+(setq org-bullets-bullet-list '("⚫" "⚫" "⚫" "⚫"))
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode t)))
+#+end_src
+
+**** Fix Org bullets when changing theme
+
+Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_custom_theme_leading_stars/][here]]. For this to work, I've created a hook triggered by theme changes.
+
+#+begin_src emacs-lisp
+(add-hook 'after-load-theme-hook
+	  (lambda ()
+	    (save-current-buffer
+	      (mapc (lambda (b)
+		      (set-buffer b)
+		      (when (equal major-mode 'org-mode)
+                  (progn
+                    (font-lock-fontify-buffer)
+                    (set-face-attribute 'org-hide nil :foreground (face-attribute 'default :background)))))
+		    (buffer-list)))))
 #+end_src
 
 *** Folding symbol
@@ -837,36 +1426,19 @@ The default position of tags is quite sensitive to the font size.
 (add-hook 'before-save-hook 'time-stamp) ;; Update timestamp on saving
 #+end_src
 
-*** COMMENT Startup with LaTeX previews
+*** Startup with LaTeX previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-latex-preview t)
 #+end_src
 
-*** COMMENT Startup with inline image previews
+*** Startup with inline image previews
 
 #+begin_src emacs-lisp
 (setq org-startup-with-inline-images t)
 #+end_src
 
-*** COMMENT Fix Org bullets when changing theme
-
-Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_custom_theme_leading_stars/][here]].
-
-#+begin_src emacs-lisp
-(add-hook 'after-load-theme-hook
-	  (lambda ()
-	    (save-current-buffer
-	      (mapc (lambda (b)
-		      (set-buffer b)
-		      (when (equal major-mode 'org-mode)
-                  (progn
-                    (font-lock-fontify-buffer)
-                    (set-face-attribute 'org-hide nil :foreground (face-attribute 'default :background)))))
-		    (buffer-list)))))
-#+end_src
-
-** COMMENT LaTeX
+** LaTeX
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -884,93 +1456,8 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 (setq org-highlight-latex-and-related '(native latex script entities))
 #+end_src
 
-*** Fix fragment preview size
-
-Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
-
-#+begin_src emacs-lisp
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-
-(defun update-org-latex-fragments ()
-  (org-latex-preview '(4)) ;; Clear all fragments in the buffer
-  (let ((text-scale-factor (expt text-scale-mode-step text-scale-mode-amount)))
-    (plist-put org-format-latex-options :scale (* 2.3 text-scale-factor))
-    ;; Print scale factor on *Messages* buffer
-    (princ (plist-get org-format-latex-options :scale)))
-  (org-latex-preview '(3))) ;; Display all fragments in the buffer
-
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (add-hook 'text-scale-mode-hook
-		      'update-org-latex-fragments nil 'make-it-local)))
-#+end_src
-
-*** Fix fragment preview numbering
-
-In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
-
-#+begin_src emacs-lisp
-(require 'cl-lib)
-(require 'cl)
-(defun org-renumber-environment (orig-func &rest args)
-  "Improve equation numbering"
-  (let ((results '())
-        (counter -1)
-        (numberp))
-    (setq results (loop for (begin . env) in
-                        (org-element-map (org-element-parse-buffer) 'latex-environment
-                          (lambda (env)
-                            (cons
-                             (org-element-property :begin env)
-                             (org-element-property :value env))))
-                        collect
-                        (cond
-                         ((and (string-match "\\\\begin{equation}" env)
-                               (not (string-match "\\\\tag{" env)))
-                          (incf counter)
-                          (cons begin counter))
-                         ((string-match "\\\\begin{align}" env)
-                          (prog2
-                              (incf counter)
-                              (cons begin counter)
-                            (with-temp-buffer
-                              (insert env)
-                              (goto-char (point-min))
-                              ;; \\ is used for a new line. Each one leads to a number
-                              (incf counter (count-matches "\\\\$"))
-                              ;; unless there are nonumbers.
-                              (goto-char (point-min))
-                              (decf counter (count-matches "\\nonumber")))))
-                         (t
-                          (cons begin nil)))))
-    (when (setq numberp (cdr (assoc (point) results)))
-      (setf (car args)
-            (concat
-             (format "\\setcounter{equation}{%s}\n" numberp)
-             (car args)))))
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'org-renumber-environment)
-#+end_src
-
-*** Fix fragment color
-
-This code changes the color of the fragment based on the current theme.
-
-#+begin_src emacs-lisp
-(defun vct-update-org-latex-fragment-colors ()
-  (org-latex-preview '(4))
-  (setq org-format-latex-options (plist-put org-format-latex-options :foreground 'auto))
-  (setq org-format-latex-options (plist-put org-format-latex-options :background 'auto))
-  (org-latex-preview '(3)))
-
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (add-hook 'after-load-theme-hook
-		      'vct-update-org-latex-fragment-colors nil 'make-it-local)))
-#+end_src
-
-*** Automatic LaTeX fragment previewing toggle
+*** Previewing fragments
+**** Automatic LaTeX fragment previewing toggle
 
 This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_org-mode.html][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
 #+begin_src emacs-lisp
@@ -1061,7 +1548,93 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (setq org-latex-fragment-toggle-auto (byte-compile 'org-latex-fragment-toggle-auto))
 #+end_src
 
-*** Citations
+**** Fix fragment preview size
+
+Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]:
+
+#+begin_src emacs-lisp
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+(defun update-org-latex-fragments ()
+  (org-latex-preview '(4)) ;; Clear all fragments in the buffer
+  (let ((text-scale-factor (expt text-scale-mode-step text-scale-mode-amount)))
+    (plist-put org-format-latex-options :scale (* 2.3 text-scale-factor))
+    ;; Print scale factor on *Messages* buffer
+    (princ (plist-get org-format-latex-options :scale)))
+  (org-latex-preview '(3))) ;; Display all fragments in the buffer
+
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'text-scale-mode-hook
+		      'update-org-latex-fragments nil 'make-it-local)))
+#+end_src
+
+**** Fix fragment preview numbering
+
+In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
+
+#+begin_src emacs-lisp
+(require 'cl-lib)
+(require 'cl)
+(defun org-renumber-environment (orig-func &rest args)
+  "Improve equation numbering"
+  (let ((results '())
+        (counter -1)
+        (numberp))
+    (setq results (loop for (begin . env) in
+                        (org-element-map (org-element-parse-buffer) 'latex-environment
+                          (lambda (env)
+                            (cons
+                             (org-element-property :begin env)
+                             (org-element-property :value env))))
+                        collect
+                        (cond
+                         ((and (string-match "\\\\begin{equation}" env)
+                               (not (string-match "\\\\tag{" env)))
+                          (incf counter)
+                          (cons begin counter))
+                         ((string-match "\\\\begin{align}" env)
+                          (prog2
+                              (incf counter)
+                              (cons begin counter)
+                            (with-temp-buffer
+                              (insert env)
+                              (goto-char (point-min))
+                              ;; \\ is used for a new line. Each one leads to a number
+                              (incf counter (count-matches "\\\\$"))
+                              ;; unless there are nonumbers.
+                              (goto-char (point-min))
+                              (decf counter (count-matches "\\nonumber")))))
+                         (t
+                          (cons begin nil)))))
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+            (concat
+             (format "\\setcounter{equation}{%s}\n" numberp)
+             (car args)))))
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+#+end_src
+
+**** Fix fragment color
+
+This code changes the color of the fragment based on the current theme.
+
+#+begin_src emacs-lisp
+(defun vct-update-org-latex-fragment-colors ()
+  (org-latex-preview '(4))
+  (setq org-format-latex-options (plist-put org-format-latex-options :foreground 'auto))
+  (setq org-format-latex-options (plist-put org-format-latex-options :background 'auto))
+  (org-latex-preview '(3)))
+
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'after-load-theme-hook
+		      'vct-update-org-latex-fragment-colors nil 'make-it-local)))
+#+end_src
+
+*** COMMENT Citations
 
 [[https://github.com/jkitchin/org-ref][org-ref]] is a set of org-mode modules for citations, cross-references, bibliographies in org-mode and useful bibtex tools.
 
@@ -1069,7 +1642,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 (use-package org-ref)
 #+end_src
 
-** COMMENT Babel
+** Babel
 :properties:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
@@ -1120,8 +1693,9 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 #+end_src
 
 **** R
+
 #+begin_src emacs-lisp
-(add-to-list 'org-babel-default-header-args:R '(:session . "*org-R*"))
+;; (add-to-list 'org-babel-default-header-args:R '(:session . "*org-R*"))
 #+end_src
 
 **** SageMath
@@ -1129,7 +1703,6 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
 #+begin_src emacs-lisp
 ;; Ob-sagemath supports only evaluating with a session.
 (setq org-babel-default-header-args:sage '((:noweb . "yes")
-					   (:session . "org-sage")
                                            (:results . "output")))
 
 ;; C-c c for asynchronous evaluating (only for SageMath code blocks).
@@ -1145,8 +1718,7 @@ This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_o
                                            (:results . "output")))
 #+end_src
 
-** COMMENT Agenda
-** COMMENT Org agenda configuration
+** Org agenda configuration
 
 #+begin_src emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
@@ -1230,6 +1802,18 @@ $0
 ,#+end_src
 #+end_src
 
+*** Ruby code block
+
+#+begin_src text :tangle "emacs/.yasnippet/org-mode/ruby_src_block"
+# -*- mode: snippet -*-
+# name: ruby
+# key: <rb
+# --
+,#+begin_src ruby
+$0
+,#+end_src
+#+end_src
+
 * COMMENT Org LaTeX classes
 ** Preprint/notes
 
@@ -1306,13 +1890,5 @@ $0
 
 (message "Loading Org LaTeX class preprint")
 (provide 'org-latex-class-preprint)
-#+end_src
-
-* COMMENT Archive
-** COMMENT Diminish minor modes
-
-[[https://github.com/myrjola/diminish.el][diminish]] allows hiding or abbreviate minor mode display on the modeline:
-#+begin_src emacs-lisp
-(use-package diminish)
 #+end_src
 

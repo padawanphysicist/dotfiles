@@ -49,8 +49,8 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 
 #+begin_src haskell
 vctTerminal :: String
--- vctTerminal = "xterm -e 'tmux attach-session -t santos'"
-vctTerminal = "mate-terminal --hide-menubar --command 'tmux attach-session -t santos'"
+vctTerminal = "xterm -e 'tmux attach-session -t santos'"
+-- vctTerminal = "mate-terminal --hide-menubar --command 'tmux attach-session -t santos'"
 #+end_src
 
 ** Screensaver
@@ -114,7 +114,7 @@ The usual behaviour of XMonad for highlight the focused (active) window is to dr
 #+begin_src haskell
 -- Width of windows border
 vctBorderWidth :: Dimension
-vctBorderWidth = 4 -- Change this to a value > 0 to have border
+vctBorderWidth = 0 -- Change this to a value > 0 to have border
 
 -- Border colors for focused/unfocused windows
 vctFocusedBorderColor :: String
@@ -128,7 +128,7 @@ However, there is a neater way to do this: make the unfocused (inactive) windows
 #+begin_src haskell
 vctTransparentInactive :: X()
 vctTransparentInactive = fadeInactiveLogHook fadeAmount
-    where fadeAmount = 0.75
+    where fadeAmount = 0.65
 #+end_src
 
 ** Pretty print to panel
@@ -224,14 +224,14 @@ Config
 --  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
   , sepChar =  "@"   -- delineator between plugin names and straight text
   , alignSep = "}{"  -- separator between left-right alignment
-  , template = "@UnsafeStdinReader@ | <fc=#4f94cd><fn=1></fn></fc> @multicpu@ | @memory@ | @swap@ | <fc=#4f94cd><fn=1></fn></fc> <fc=#caff70>@uptime@</fc> | <fc=#ffff00><fn=1></fn></fc> @backlight@% | <fc=#008b45><fn=1></fn></fc> @battery@ | <fc=#4f94cd><fn=1></fn></fc> @date@ | <action=`systemctl hibernate`><fc=#ee2c2c><fn=1>  </fn></fc></action> }{  | "
+  , template = "@UnsafeStdinReader@ | <fc=#4f94cd><fn=1></fn></fc> @multicpu@ | @memory@ • @swap@ | <fc=#4f94cd><fn=1></fn></fc> <fc=#caff70>@uptime@</fc> | <fc=#ffff00><fn=1></fn></fc> @backlight@% }{ <fc=#008b45><fn=1></fn></fc> @battery@ | <fc=#4f94cd><fn=1></fn></fc> @date@     "
   , commands =
     [
       Run UnsafeStdinReader
     -- , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
     , Run MultiCpu       ["-w", "2" -- Fix width of the field
                          , "-c", "0"-- Padding with zeros
-                         , "--template" , "<total0>% | <total1>% | <total2>% | <total3>%"
+                         , "--template" , "<total0>% • <total1>% • <total2>% • <total3>%"
                          , "--Low"      , "50"         -- units: %
                          , "--High"     , "85"         -- units: %
                          , "--low"      , "green"

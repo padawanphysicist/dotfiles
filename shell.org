@@ -418,7 +418,7 @@ I also like to keep an unlimited history list
 #+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
 export HISTSIZE=
 export HISTFILESIZE=
-export HISTTIMEFORMAT="[%F %T] "
+export HISTTIMEFORMAT=""
 export HISTFILE=~/.bash_eternal_history
 #+end_src
 

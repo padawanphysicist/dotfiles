@@ -61,7 +61,7 @@ Visual line mode actually does several things. From a user's point of view, it:
 
 Enable by default:
 #+begin_src emacs-lisp
-(global-visual-line-mode t)
+;; (global-visual-line-mode t)
 #+end_src
 
 and this code enable a visual hint whether a paragraph is hard or soften wrapped:
@@ -956,6 +956,7 @@ yasnippet-snippets
 sed-mode
 sage-shell-mode
 ob-sagemath
+(darkroom :location (recipe :fetcher github :repo "joaotavora/darkroom"))
 #+end_src
 
 ** Excluded packages
@@ -1003,6 +1004,16 @@ ox-reveal
 (spacemacs/set-leader-keys-for-major-mode 'enh-ruby-mode "msi" 'vct--robe-start)
 #+end_src
 
+*** Configure Darkroom
+
+#+begin_src emacs-lisp
+(spacemacs|add-toggle darkroom-mode
+    :status darkroom-mode
+    :on (darkroom-mode)
+    :off (darkroom-mode -1)
+    :documentation "Turn on darkroom mode."
+    :evil-leader "td")
+#+end_src
 ** Custom Org
 :properties:
 :header-args+: :noweb-ref spacemacs-custom-org

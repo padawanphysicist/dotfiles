@@ -188,7 +188,7 @@ export WORKING="${HOME}/1.working"
 Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export ARCHIVE="${HOME}/2.archive"
+# export ARCHIVE="${HOME}/2.archive"
 #+end_src
 
 *** =3.media=

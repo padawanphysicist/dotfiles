@@ -930,8 +930,8 @@ haskell
 html
 latex
 (ruby :variables
-      ruby-enable-enh-ruby-mode t
-      ruby-version-manager 'rvm)
+      ruby-version-manager 'rbenv
+      ruby-enable-enh-ruby-mode t)
 scheme
 themes-megapack
 colors
@@ -941,6 +941,7 @@ pdf-tools
        shell-default-position 'bottom)
 spell-checking
 syntax-checking
+python
 #+end_src
 
 ** Additional packages
@@ -957,6 +958,7 @@ sed-mode
 sage-shell-mode
 ob-sagemath
 (darkroom :location (recipe :fetcher github :repo "joaotavora/darkroom"))
+inf-ruby
 #+end_src
 
 ** Excluded packages
@@ -1013,6 +1015,11 @@ ox-reveal
     :off (darkroom-mode -1)
     :documentation "Turn on darkroom mode."
     :evil-leader "td")
+#+end_src
+*** Fix flyspell
+
+#+begin_src emacs-lisp
+(spacemacs/set-leader-keys "Sc" 'flyspell-correct-next)
 #+end_src
 ** Custom Org
 :properties:
@@ -1713,7 +1720,8 @@ This code changes the color of the fragment based on the current theme.
 
 #+begin_src emacs-lisp
 ;; Ob-sagemath supports only evaluating with a session.
-(setq org-babel-default-header-args:sage '((:noweb . "yes")
+(setq org-babel-default-header-args:sage '((:session . "session")
+                                           (:noweb . "yes")
                                            (:results . "output")))
 
 ;; C-c c for asynchronous evaluating (only for SageMath code blocks).
@@ -1825,28 +1833,72 @@ $0
 ,#+end_src
 #+end_src
 
-* COMMENT Org LaTeX classes
-** Preprint/notes
+* Org LaTeX classes
 
-#+begin_src emacs-lisp :tangle "emacs/.elisp/org-latex-class-preprint.el"
+#+begin_src emacs-lisp :tangle "emacs/.elisp/org-latex-custom-class.el"
 ;; package --- Summary
-;;; Setup LaTeX class for preprints
+;;; Setup Custom LaTeX classes
 ;;; Commentary:
 ;; Configures org mode parameters
 
 ;;; Code:
-(unless (boundp 'org-latex-classes)
-  (setq org-latex-classes nil))
-
-(setq org-latex-with-hyperref nil)
-
-(setq org-latex-image-default-width ".4\\linewidth")
+;;(unless (boundp 'org-latex-classes)
+;;  (setq org-latex-classes nil))
+;;
+;;(setq org-latex-with-hyperref nil)
+;;
+;;(setq org-latex-image-default-width ".4\\linewidth")
 
 (setq org-latex-listings 'minted
       org-latex-pdf-process
       '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
         "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
+<<abnt-report>>
+<<preprint>>
+
+(message "Loading Org LaTeX custom classes...")
+(provide 'org-latex-custom-class)
+#+end_src
+
+** ABNT report
+:properties:
+:header-args+: :tangle no
+:end:
+
+#+begin_src emacs-lisp :noweb-ref abnt-report
+(add-to-list 'org-latex-classes
+             '("relatorio-abnt"
+               "
+\\documentclass[12pt,a4paper,brazil]{abntex2}
+%%\\usepackage[margin=2cm]{geometry}
+%%\\usepackage[brazil]{babel} % Typographical rules for different languages
+\\usepackage[T1]{fontenc} % Select font encoding
+\\usepackage{kpfonts}
+\\usepackage{ae,aecompl} % To solve fuzzy fonts on arXiv (https://arxiv.org/help/faq/texprobs)
+
+\\usepackage{amsmath,amssymb,amsbsy,amsfonts,amsopn,amstext,amsthm} % AMS mathematical facilities
+
+\\usepackage{graphicx} % Support for graphics
+
+\\usepackage[per-mode=symbol]{siunitx} % For using SI units
+
+[NO-DEFAULT-PACKAGES]
+[NO-PACKAGES]
+[EXTRA]
+"
+  ("\\section{%s}" . "\\section*{%s}")
+  ("\\subsection{%s}" . "\\subsection*{%s}")
+  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+  ("\\paragraph{%s}" . "\\paragraph*{%s}")))
+#+end_src
+
+** Preprint/notes
+:properties:
+:header-args+: :tangle no
+:end:
+
+#+begin_src emacs-lisp :noweb-ref preprint
 (add-to-list 'org-latex-classes
              '("preprint"
                "
@@ -1898,8 +1950,5 @@ $0
   ("\\subsection{%s}" . "\\subsection*{%s}")
   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
   ("\\paragraph{%s}" . "\\paragraph*{%s}")))
-
-(message "Loading Org LaTeX class preprint")
-(provide 'org-latex-class-preprint)
 #+end_src
 

@@ -49,8 +49,7 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "xterm -e 'tmux attach-session -t santos'"
--- vctTerminal = "mate-terminal --hide-menubar --command 'tmux attach-session -t santos'"
+vctTerminal = "tmux has-session -t santos && xterm -e 'tmux attach-session -t santos' || xterm -e 'tmux new -t santos'"
 #+end_src
 
 ** Screensaver
@@ -217,8 +216,8 @@ You would like to install/enable [[https://elpa.gnu.org/packages/rainbow-mode.ht
 Config
   {
   -- appearance
-    font = "xft:Inconsolata for Powerline:size=20:antialias=true"
-  , additionalFonts = ["xft:FontAwesome:size=16"] -- For the icons
+    font = "xft:Inconsolata for Powerline:size=15:antialias=true"
+  , additionalFonts = ["xft:Font Awesome 5 Free Regular:size=16", "xft:Font Awesome 5 Free Solid:size=16", "xft:Font Awesome 5 Brands Regular:size=16"] -- For the icons
   , allDesktops = True
   , position = BottomW L 100
 --  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }

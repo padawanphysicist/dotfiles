@@ -73,7 +73,7 @@ XTerm*visualBell: true
 ** Change fontsize
 
 Since I'm constantly changing the font size, it's interesting to change the font size using the keyboard. I've got a nice solution [[https://blog.rot13.org/2010/03/change-font-size-in-xterm-using-keyboard.html][here]].
-#+begin_src conf :noweb-ref xterm-configuration
+#+begin_src conf
 XTerm.VT100.translations: #override \
       Super <Key> minus: smaller-vt-font() \n\
       Super <Key> plus: larger-vt-font() \n\
@@ -84,7 +84,7 @@ XTerm.VT100.translations: #override \
 ** Copy/Paste
 
 I put some keybindings to copy/paste in the terminal in a way similar to konsole:
-#+begin_src conf :noweb-ref xterm-configuration
+#+begin_src conf
 XTerm*VT100.Translations: #override \
       Shift Ctrl<Key>V: insert-selection(CLIPBOARD) \n\
       Shift Ctrl<Key>V: insert-selection(PRIMARY) \n\
@@ -97,7 +97,7 @@ XTerm*selectToClipboard: true
 * Change colors
 
 The default colors are worth changing too!
-#+begin_src conf :noweb-ref xterm-configuration
+#+begin_src conf
 XTerm*background:#232629
 XTerm*foreground:#cfcfc2
 #+end_src

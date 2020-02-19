@@ -76,6 +76,23 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 #+end_src
 
+** Load custom configuration
+
+ Emacs =custom= facility puts some "cryptic" entries into the =custom-set-variables= and =custom-set-faces= in the end of =init.el= file, which I have under version control. This causes a lot of conflicts when I update configuration across different machines.
+
+ This code offloads the =custom-set-variables= to a separate file. This keeps your =init.el= neater and you have the option to gitignore your =custom.el= if you see fit.
+
+ #+begin_src emacs-lisp
+ (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+ (unless (file-exists-p custom-file)
+   (write-region "" nil custom-file))
+
+ ;; Load custom file. Don't hide errors. Hide success message
+ (if (file-exists-p custom-file)
+   (load custom-file nil t))
+ #+end_src
+
+
 * COMMENT Vanilla Emacs Configuration
 
 This is my own "starter-kit".
@@ -1166,7 +1183,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Monego"
-                               :size 15
+                               :size 15.0
                                :weight normal
                                :width normal
                                :powerline-scale 1.5)

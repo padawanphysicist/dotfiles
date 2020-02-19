@@ -223,7 +223,7 @@ Config
 --  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
   , sepChar =  "@"   -- delineator between plugin names and straight text
   , alignSep = "}{"  -- separator between left-right alignment
-  , template = "@UnsafeStdinReader@ | <fc=#4f94cd><fn=1></fn></fc> @multicpu@ | @memory@ • @swap@ | <fc=#4f94cd><fn=1></fn></fc> <fc=#caff70>@uptime@</fc> | <fc=#ffff00><fn=1></fn></fc> @backlight@% }{ <fc=#008b45><fn=1></fn></fc> @battery@ | <fc=#4f94cd><fn=1></fn></fc> @date@     "
+  , template = "@UnsafeStdinReader@ | <fc=#4f94cd>CPU</fc> @multicpu@ | @memory@ • @swap@ | <fc=#caff70>@uptime@</fc> }{ <fc=#ffff00>[B]</fc> @backlight@% • <fc=#008b45>[BATT]</fc> @battery@ | @date@     "
   , commands =
     [
       Run UnsafeStdinReader

@@ -99,7 +99,8 @@ vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
                     , ((vctModMask, xK_b), sendMessage ToggleStruts)
                     , ((vctModMask .|. shiftMask, xK_Delete), spawn "sudo systemctl hibernate")
                     , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
-                    , ((vctModMask, xK_z), sendMessage (Toggle "Full"))]
+                    , ((vctModMask, xK_z), sendMessage (Toggle "Full"))
+                    ]
 #+end_src
 
 * Log Hooks
@@ -148,6 +149,16 @@ vctLogHook :: Handle -> X()
 vctLogHook h = vctTransparentInactive <+> (vctPP h)
 #+end_src
 
+* Manage Hooks
+
+Send applications to the right workspace
+
+#+begin_src haskell
+vctManageHook :: ManageHook
+vctManageHook = composeAll
+    [ manageDocks --, className =? "Firefox" --> doShift "1:WWW"
+    ]
+#+end_src
 * Layouts
 ** Tall
 The Tall layout has the master pane on the left, taking half of the screen. All other windows share the right half of the screen, and are stacked vertically, top to bottom.
@@ -197,7 +208,7 @@ main = do
     , normalBorderColor  = vctNormalBorderColor
     , focusedBorderColor = vctFocusedBorderColor
     , logHook            = vctLogHook xmproc
-    , manageHook         = manageHook desktopConfig <+> manageDocks
+    , manageHook         = vctManageHook <+> manageHook desktopConfig
     , layoutHook         = avoidStruts $ vctLayoutHook
     , startupHook        = vctStartupHook
     } `additionalKeys` vctAdditionalKeys

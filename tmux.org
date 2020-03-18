@@ -146,8 +146,10 @@ set -g default-terminal screen-256color
 #+end_src
 
 #+begin_src conf
-setw -g pane-border-style fg=black
-setw -g pane-active-border-style fg=brightred
+set -g pane-border-style fg=black
+set -g pane-active-border-style fg=brightred
+set -g window-style 'bg=colour234 fg=colour239'
+set -g window-active-style 'bg=colour235 fg=colour250'
 #+end_src
 
 * Statusbar

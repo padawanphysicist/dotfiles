@@ -431,8 +431,8 @@ I also want to set a few shell options to control how history is stored as well:
 - =histappend= append to history, not overwrite it.
 
 #+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
-shopt -s cmdhist
-shopt -s histreedit
+shopt -s cmdhist # Save multiline commands in the same history entry
+shopt -s histreedit # Enable to re-edit a failed history substitution
 shopt -s histappend
 shopt -s histverify # History command is not executed immediately
 #+end_src
@@ -458,6 +458,11 @@ shopt -s extglob
 We want to check the size of the terminal window after each command and, if necessary, update the values of =$LINES= and =$COLUMNS=. If any command uses the size of the terminal window to intelligently format output (think =ls= selecting the number of columns to output filenames in), this will give it up-to-date information on the terminal size. The shell option =checkwinsize= does this for us.
 #+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
 shopt -s checkwinsize
+#+end_src
+
+If a command name that is the name of a directory is executed as if it were the argument to the =cd= command. This option is only used by interactive shells. 
+#+begin_src bash :noweb-ref shell-interactive
+shopt -s autocd
 #+end_src
 
 ** Pager

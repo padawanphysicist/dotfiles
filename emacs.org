@@ -92,7 +92,6 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
    (load custom-file nil t))
  #+end_src
 
-
 * COMMENT Vanilla Emacs Configuration
 
 This is my own "starter-kit".
@@ -956,7 +955,7 @@ pdf-tools
 (shell :variables
        shell-default-height 30
        shell-default-position 'bottom)
-spell-checking
+(spell-checking :variables ispell-program-name "aspell")
 syntax-checking
 python
 #+end_src
@@ -1172,7 +1171,7 @@ values."
    ;; True if the home buffer should respond to resize events.
    dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
-   dotspacemacs-scratch-mode 'text-mode
+   dotspacemacs-scratch-mode 'org-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
@@ -1183,7 +1182,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Monego"
-                               :size 15.0
+                               :size 13.0
                                :weight normal
                                :width normal
                                :powerline-scale 1.5)
@@ -1447,6 +1446,20 @@ The default position of tags is quite sensitive to the font size.
 #+begin_src emacs-lisp
 (setq org-tags-column 0)
 #+end_src
+
+*** Change tag color
+
+Tag regex taken from here: https://stackoverflow.com/a/60635933
+#+begin_src emacs-lisp
+(font-lock-add-keywords 'org-mode
+  '(("^\\*+ "
+     ":" nil nil
+     (0 (put-text-property (match-beginning 0) (match-end 0) 'display " ")))))
+
+(custom-set-faces '(org-tag ((t (:inherit 'spacemacs-normal-face :background "#68228b" :foreground "#ffffff" :box t)))))
+#+end_src
+
+#+RESULTS:
 
 *** Update timestamps
 

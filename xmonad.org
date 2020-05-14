@@ -324,23 +324,24 @@ function run {
   fi
 }
 
-[[ -f ~/.Xresources_custom ]] && xrdb -merge ~/.Xresources_custom
+[[ -f ~/.xresources_custom ]] && xrdb -merge ~/.xresources_custom
 xsetroot -cursor_name left_ptr &
 setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 
-~/.fehbg &
+[[ -f ~/.fehbg ]] && ~/.fehbg
 
-run dunst
-run stalonetray
-run redshift
-run xscreensaver 'xscreensaver -no-splash'
-run compton 'compton'
-run odrive '/opt/OpenDrive/odrive'
-run dropbox '/home/santos/.local/bin/dropbox start'
-run xmobar 'xmobar'
+# run dunst
+# run stalonetray
+# run redshift
+# run xscreensaver 'xscreensaver -no-splash'
+# run compton 'compton'
+# run odrive '/opt/OpenDrive/odrive'
+# run dropbox '/home/santos/.local/bin/dropbox start'
+# run xmobar 'xmobar'
 notify-send 'Restarted!'
-
-systemctl is-active --quiet --user tmux --quiet || systemctl --user restart tmux
+# 
+# systemctl is-active --quiet --user tmux --quiet || systemctl --user restart tmux
+pgrep emacs > /dev/null && true || emacs --daemon &
 # systemctl is-active --quiet --user emacs --quiet || systemctl --user restart emacs
 
 #+end_src

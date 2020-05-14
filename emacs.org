@@ -32,23 +32,115 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-** Configure Wiki
+** Configure slipbox
 
-My personal notes are structured as a kind of a wiki, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
+My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book 
+- [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
+
+The aim is to have notes created using org capture facilities, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
+
+*** Set main folder (root directory) 
+
+Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
+#+begin_src emacs-lisp
+(setq wiki-directory (expand-file-name "~/2.archive/Dropbox/slipbox/"))
+(setq org-directory wiki-directory)
+(setq slipbox-directory wiki-directory)
+#+end_src
+
+*** Set fleeting notes location
+
+Fleeting notes are the entry point for taking notes in a smart way. As the name says, they are supposed to be ephemeral, for dumping whatever it is in your head.
 
 #+begin_src emacs-lisp
-(setq deft-directory "~/.wiki")
+(setq fleeting-notes-directory (expand-file-name (concat slipbox-directory "/fleeting")))
+(setq braindump-directory (expand-file-name (concat slipbox-directory "fleeting/")))
+
+(setq org-agenda-files `(,fleeting-notes-directory))
+(setq org-default-notes-file (expand-file-name (concat fleeting-notes-directory "/notes.org")))
+(setq org-archive-location (expand-file-name (concat fleeting-notes-directory "/archive.org::")))
+#+end_src
+
+*** Set permanent notes location
+
+#+begin_src emacs-lisp
+(setq permanent-notes-directory (expand-file-name (concat slipbox-directory "/permanent")))
+(setq org-roam-directory permanent-notes-directory)
+(setq org-download-image-dir (expand-file-name (concat org-directory "img/")))
+(setq org-download-screenshot-method "spectacle --background --region --output %s")
+#+end_src
+
+*** Set journal
+
+#+begin_src emacs-lisp
+(setq org-journal-dir (expand-file-name (concat slipbox-directory "journal/")))
+(setq org-journal-date-prefix "#+title: ")
+(setq org-journal-file-format "%Y-%m-%d")
+(setq org-journal-date-format "%A, %d %B %Y")
+#+end_src
+
+*** Set templates for notes
+
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+             '("t" "Tarefa"  entry
+               (file org-default-notes-file)
+               "* TODO %?\n%U" :empty-lines 1))
+(add-to-list 'org-capture-templates
+             '("n" "Nota"  entry
+               (file org-default-notes-file)
+               "* NOTE %?\n%U" :empty-lines 1))
+(add-to-list 'org-capture-templates
+             '("s" "Agendado" entry (file+headline org-default-notes-file "Agenda")
+               "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1))
+(add-to-list 'org-capture-templates
+             '("d" "Prazo" entry (file+headline org-default-notes-file "Agenda")
+               "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1))
+(add-to-list 'org-capture-templates
+             '("j" "Diário" entry (file+datetree journal-file)
+               "* %? %^G\nEntered on %U\n"))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq org-roam-capture-templates
+ '(
+  ("d" "default" plain (function org-roam--capture-get-point)
+       "%?"
+       :file-name "%<%Y%m%d%H%M%S>-${slug}"
+       :head "#+title: ${title}\n#+date: %(org-insert-time-stamp (current-time))\n#+modified: \n#+options: \n\n"
+       :unnarrowed t)))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq deft-directory wiki-directory)
 (setq deft-default-extension "org")
-(setq deft-extensions '("org"))
+(setq deft-extensions '("org" "gpg"))
 (setq deft-recursive t)
 (setq deft-use-filename-as-title nil)
-(setq deft-use-filter-string-for-filename nil)
+(setq deft-use-filter-string-for-filename t)
 (setq deft-file-naming-rules '((noslash . "-")
 			 (nospace . "-")
 			 (case-fn . downcase)))
 (setq deft-text-mode 'org-mode)
 (setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
 (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
+#+end_src
+
+#+begin_src emacs-lisp
+(setq org-journal-date-prefix "#+title: ")
+(setq org-journal-file-format "%Y-%m-%d.org")
+(setq org-journal-dir (expand-file-name (concat wiki-directory "journal/")))
+(setq org-journal-date-format "%A, %d %B %Y")
+#+end_src
+
+*** Set encryption
+
+*** 
+#+begin_src emacs-lisp
+(setq org-roam-encrypt-files t)
+(setq org-journal-encrypt-journal t)
+(setenv "GPG_AGENT_INFO" nil)
+(setq epa-pinentry-mode 'loopback)
 #+end_src
 
 ** Setup visual lines
@@ -62,6 +154,7 @@ Visual line mode actually does several things. From a user's point of view, it:
 Enable by default:
 #+begin_src emacs-lisp
 ;; (global-visual-line-mode t)
+;; (add-hook 'text-mode-hook #'visual-line-mode)
 #+end_src
 
 and this code enable a visual hint whether a paragraph is hard or soften wrapped:
@@ -91,6 +184,24 @@ and this code enable a visual hint whether a paragraph is hard or soften wrapped
  (if (file-exists-p custom-file)
    (load custom-file nil t))
  #+end_src
+
+** Custom functions
+*** Delete all buffers
+
+#+begin_src emacs-lisp
+(defun vct/spacemacs-reset-buffers ()
+  (interactive)
+  (let* ((buffers-to-keep '("*spacemacs*" "*scratch*" "*Messages*"))
+         (to-be-deleted (-filter 
+                         (lambda (b)
+                           (not (member (buffer-name b) buffers-to-keep)))
+                         (buffer-list))))
+    (progn
+      (switch-to-buffer "*spacemacs*")
+      (beginning-of-buffer)
+      (mapc 'kill-buffer to-be-deleted))))
+(spacemacs/set-leader-keys "oR" 'vct/spacemacs-reset-buffers)
+#+end_src
 
 * COMMENT Vanilla Emacs Configuration
 
@@ -937,8 +1048,10 @@ helm
 better-defaults
 emacs-lisp
 git
+; (wiki :variables wiki-directory "~/.yasnippet/")
+slipbox
 deft
-org
+(org :variables org-enable-org-journal-support t)
 common-lisp
 bibtex
 ess
@@ -949,13 +1062,13 @@ latex
       ruby-version-manager 'rbenv
       ruby-enable-enh-ruby-mode t)
 scheme
-themes-megapack
+;; themes-megapack
 colors
 pdf-tools
 (shell :variables
        shell-default-height 30
        shell-default-position 'bottom)
-(spell-checking :variables ispell-program-name "aspell")
+(spell-checking :variables ispell-program-name "aspell" spell-checking-enable-by-default nil)
 syntax-checking
 python
 #+end_src
@@ -975,6 +1088,7 @@ sage-shell-mode
 ob-sagemath
 (darkroom :location (recipe :fetcher github :repo "joaotavora/darkroom"))
 inf-ruby
+auctex-latexmk
 #+end_src
 
 ** Excluded packages
@@ -1362,6 +1476,8 @@ you should place your code here."
 
   <<common-settings>>
   <<spacemacs-user-config>>
+  (auctex-latexmk-setup)
+  (remove-hook 'text-mode-hook #'turn-on-auto-fill)
   
   ;; Load Org configuration
   (with-eval-after-load 'org
@@ -1451,10 +1567,10 @@ The default position of tags is quite sensitive to the font size.
 
 Tag regex taken from here: https://stackoverflow.com/a/60635933
 #+begin_src emacs-lisp
-(font-lock-add-keywords 'org-mode
-  '(("^\\*+ "
-     ":" nil nil
-     (0 (put-text-property (match-beginning 0) (match-end 0) 'display " ")))))
+;;(font-lock-add-keywords 'org-mode
+;;  '(("^\\*+ "
+;;     ":" nil nil
+;;     (0 (put-text-property (match-beginning 0) (match-end 0) 'display " ")))))
 
 (custom-set-faces '(org-tag ((t (:inherit 'spacemacs-normal-face :background "#68228b" :foreground "#ffffff" :box t)))))
 #+end_src
@@ -1506,6 +1622,12 @@ Tag regex taken from here: https://stackoverflow.com/a/60635933
 
 *** Previewing fragments
 **** Automatic LaTeX fragment previewing toggle
+
+#+begin_src emacs-lisp
+(load-file "/home/santos/1.working/org-fragtog/org-fragtog.el")
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+#+end_src
+**** COMMENT Automatic LaTeX fragment previewing toggle
 
 This solution (found [[https://ivanaf.com/Automatic_Latex_Fragment_Toggling_in_org-mode.html][here]]) enables org-mode LaTeX preview images when the cursor is over the equation.
 #+begin_src emacs-lisp
@@ -1672,8 +1794,8 @@ This code changes the color of the fragment based on the current theme.
 #+begin_src emacs-lisp
 (defun vct-update-org-latex-fragment-colors ()
   (org-latex-preview '(4))
-  (setq org-format-latex-options (plist-put org-format-latex-options :foreground 'auto))
-  (setq org-format-latex-options (plist-put org-format-latex-options :background 'auto))
+  (setq org-format-latex-options (plist-put org-format-latex-options :foreground (face-attribute 'default :foreground)))
+  (setq org-format-latex-options (plist-put org-format-latex-options :background (face-attribute 'default :background)))
   (org-latex-preview '(3)))
 
 (add-hook 'org-mode-hook
@@ -1771,7 +1893,6 @@ This code changes the color of the fragment based on the current theme.
 
 #+begin_src emacs-lisp
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
-(setq org-agenda-files '("~/.wiki/capture/"))
 
 (defun air-org-skip-subtree-if-priority (priority)
   "Skip an agenda subtree if it has a priority of PRIORITY.
@@ -1812,7 +1933,6 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
                     (org-agenda-overriding-header "ALL normal priority tasks:"))))
          ((org-agenda-compact-blocks t)))))
 
-(setq org-archive-location "~/.wiki/capture/archive.org::")
 
 ;; TODO: Used to indicate tasks and projects which need to be done
 ;; STARTED: Used to indicate that a task or project is already started

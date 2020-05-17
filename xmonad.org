@@ -47,9 +47,11 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 
 ** Terminal
 
+The long line here is to interchange foreground and background colors depending on the time of the day: light color during the day, dark color during the night.
+
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "tmux has-session -t santos && xterm -e 'tmux attach-session -t santos' || xterm -e 'tmux new -t santos'"
+vctTerminal = "if [ $(date +'(%H-18)*3600 + (%M-00)*60' | bc) -le 0 ] && [ $(date +'(%H-06)*3600 + (%M-00)*60' | bc) -ge 0 ]; then xterm -rv -e 'tmux attach-session -t santos || tmux new-session -t santos'; else xterm -e 'tmux attach-session -t santos || tmux new-session -t santos'; fi"
 #+end_src
 
 ** Screensaver
@@ -324,7 +326,7 @@ function run {
   fi
 }
 
-[[ -f ~/.xresources_custom ]] && xrdb -merge ~/.xresources_custom
+# [[ -f ~/.xresources_custom ]] && xrdb -merge ~/.xresources_custom
 xsetroot -cursor_name left_ptr &
 setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 

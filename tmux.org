@@ -150,7 +150,7 @@ bind Tab last-window
 * Set default terminal
 
 #+begin_src conf
-set -g default-terminal screen-256color
+set -g default-terminal xterm-256color
 #+end_src
 
 * Styling

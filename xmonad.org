@@ -332,7 +332,7 @@ setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 
 [[ -f ~/.fehbg ]] && ~/.fehbg
 
-# run dunst
+run dunst
 # run stalonetray
 # run redshift
 # run xscreensaver 'xscreensaver -no-splash'

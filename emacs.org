@@ -32,7 +32,7 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-** Configure slipbox
+** COMMENT Configure slipbox
 
 My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book 
 - [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
@@ -131,16 +131,6 @@ Fleeting notes are the entry point for taking notes in a smart way. As the name 
 (setq org-journal-file-format "%Y-%m-%d.org")
 (setq org-journal-dir (expand-file-name (concat wiki-directory "journal/")))
 (setq org-journal-date-format "%A, %d %B %Y")
-#+end_src
-
-*** Set encryption
-
-*** 
-#+begin_src emacs-lisp
-(setq org-roam-encrypt-files t)
-(setq org-journal-encrypt-journal t)
-(setenv "GPG_AGENT_INFO" nil)
-(setq epa-pinentry-mode 'loopback)
 #+end_src
 
 ** Setup visual lines
@@ -1048,10 +1038,8 @@ helm
 better-defaults
 emacs-lisp
 git
-; (wiki :variables wiki-directory "~/.yasnippet/")
-slipbox
 deft
-(org :variables org-enable-org-journal-support t)
+org
 common-lisp
 bibtex
 ess
@@ -1062,7 +1050,6 @@ latex
       ruby-version-manager 'rbenv
       ruby-enable-enh-ruby-mode t)
 scheme
-;; themes-megapack
 colors
 pdf-tools
 (shell :variables

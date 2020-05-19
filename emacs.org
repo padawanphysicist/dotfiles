@@ -32,20 +32,71 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-** COMMENT Configure slipbox
+** COMMENT Configure zettelkasten
+
+#+begin_src emacs-lisp
+(setq zettelkasten-directory (expand-file-name "~/2.archive/Dropbox/notes/"))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq deft-directory zettelkasten-directory)
+(setq deft-default-extension "org")
+(setq deft-extensions '("org" "gpg" "md" "txt"))
+(setq deft-recursive nil)
+(setq deft-use-filename-as-title nil)
+(setq deft-use-filter-string-for-filename t)
+(setq deft-file-naming-rules '((noslash . "-")
+			 (nospace . "-")
+			 (case-fn . downcase)))
+(setq deft-text-mode 'org-mode)
+;; (setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
+;; (setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
+#+end_src
+
+** Configure zettelkasten
 
 My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book 
 - [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
 
 The aim is to have notes created using org capture facilities, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
 
-*** Set main folder (root directory) 
+*** Setup deft
 
-Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
+[[https://jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by Notational Velocity. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
+
 #+begin_src emacs-lisp
-(setq wiki-directory (expand-file-name "~/2.archive/Dropbox/slipbox/"))
-(setq org-directory wiki-directory)
-(setq slipbox-directory wiki-directory)
+(setq zettelkasten-directory (expand-file-name "~/2.archive/Dropbox/org/notes/"))
+(setq deft-directory zettelkasten-directory)
+(setq deft-recursive nil)
+(setq deft-default-extension "org")
+(setq deft-extensions '("org" "gpg" "md" "txt"))
+(setq deft-use-filename-as-title nil)
+(setq deft-use-filter-string-for-filename t)
+(setq deft-file-naming-rules '((noslash . "-")
+			 (nospace . "-")
+			 (case-fn . downcase)))
+(setq deft-text-mode 'org-mode)
+#+end_src
+
+*** Setup org-download
+
+[[https://github.com/abo-abo/org-download][Org-download]] lets you screenshot and yank images from the web into your notes:
+
+#+begin_src emacs-lisp
+(setq org-download-image-dir (expand-file-name (concat org-directory "img/")))
+(setq org-download-screenshot-method "spectacle --background --region --output %s")
+#+end_src
+
+*** Configure templates
+
+#+begin_src emacs-lisp
+(setq org-roam-capture-templates
+ '(
+  ("d" "default" plain (function org-roam--capture-get-point)
+       "%?"
+       :file-name "%<%Y%m%d-%H%M%S>"
+       :head "#+title: ${title}\n#+date: %(org-insert-time-stamp (current-time) t)\n#+modified: \n#+filetags: :tag1:tag2:\n#+options: \n\n"
+       :unnarrowed t)))
 #+end_src
 
 *** Set fleeting notes location
@@ -53,27 +104,16 @@ Here I set all the main folders I use. All paths defined later should be relativ
 Fleeting notes are the entry point for taking notes in a smart way. As the name says, they are supposed to be ephemeral, for dumping whatever it is in your head.
 
 #+begin_src emacs-lisp
-(setq fleeting-notes-directory (expand-file-name (concat slipbox-directory "/fleeting")))
-(setq braindump-directory (expand-file-name (concat slipbox-directory "fleeting/")))
-
-(setq org-agenda-files `(,fleeting-notes-directory))
-(setq org-default-notes-file (expand-file-name (concat fleeting-notes-directory "/notes.org")))
-(setq org-archive-location (expand-file-name (concat fleeting-notes-directory "/archive.org::")))
-#+end_src
-
-*** Set permanent notes location
-
-#+begin_src emacs-lisp
-(setq permanent-notes-directory (expand-file-name (concat slipbox-directory "/permanent")))
-(setq org-roam-directory permanent-notes-directory)
-(setq org-download-image-dir (expand-file-name (concat org-directory "img/")))
-(setq org-download-screenshot-method "spectacle --background --region --output %s")
+(setq vct/org-capture-notes-directory (expand-file-name (concat org-directory "/capture")))
+(setq org-agenda-files `(,vct/org-capture-notes-directory))
+(setq org-default-notes-file (expand-file-name (concat vct/org-capture-notes-directory "/notes.org")))
+(setq org-archive-location (expand-file-name (concat vct/org-capture-notes-directory "/archive.org::")))
 #+end_src
 
 *** Set journal
 
 #+begin_src emacs-lisp
-(setq org-journal-dir (expand-file-name (concat slipbox-directory "journal/")))
+(setq org-journal-dir (expand-file-name (concat org-directory "journal/")))
 (setq org-journal-date-prefix "#+title: ")
 (setq org-journal-file-format "%Y-%m-%d")
 (setq org-journal-date-format "%A, %d %B %Y")
@@ -99,38 +139,6 @@ Fleeting notes are the entry point for taking notes in a smart way. As the name 
 (add-to-list 'org-capture-templates
              '("j" "Diário" entry (file+datetree journal-file)
                "* %? %^G\nEntered on %U\n"))
-#+end_src
-
-#+begin_src emacs-lisp
-(setq org-roam-capture-templates
- '(
-  ("d" "default" plain (function org-roam--capture-get-point)
-       "%?"
-       :file-name "%<%Y%m%d%H%M%S>-${slug}"
-       :head "#+title: ${title}\n#+date: %(org-insert-time-stamp (current-time))\n#+modified: \n#+options: \n\n"
-       :unnarrowed t)))
-#+end_src
-
-#+begin_src emacs-lisp
-(setq deft-directory wiki-directory)
-(setq deft-default-extension "org")
-(setq deft-extensions '("org" "gpg"))
-(setq deft-recursive t)
-(setq deft-use-filename-as-title nil)
-(setq deft-use-filter-string-for-filename t)
-(setq deft-file-naming-rules '((noslash . "-")
-			 (nospace . "-")
-			 (case-fn . downcase)))
-(setq deft-text-mode 'org-mode)
-(setq deft-ignore-file-regexp "\\(?:index.org\\|sitemap.org\\)$")
-(setq deft-recursive-ignore-dir-regexp "\\(?:\\.\\|\\.\\.\\|capture\\|include\\)$")
-#+end_src
-
-#+begin_src emacs-lisp
-(setq org-journal-date-prefix "#+title: ")
-(setq org-journal-file-format "%Y-%m-%d.org")
-(setq org-journal-dir (expand-file-name (concat wiki-directory "journal/")))
-(setq org-journal-date-format "%A, %d %B %Y")
 #+end_src
 
 ** Setup visual lines
@@ -1038,7 +1046,7 @@ helm
 better-defaults
 emacs-lisp
 git
-deft
+(deft :variables deft-zetteldeft nil)
 org
 common-lisp
 bibtex
@@ -1051,13 +1059,14 @@ latex
       ruby-enable-enh-ruby-mode t)
 scheme
 colors
-pdf-tools
+pdf
 (shell :variables
        shell-default-height 30
        shell-default-position 'bottom)
 (spell-checking :variables ispell-program-name "aspell" spell-checking-enable-by-default nil)
 syntax-checking
 python
+(org-roam :variables org-roam-directory nil)
 #+end_src
 
 ** Additional packages
@@ -1260,7 +1269,7 @@ values."
    ;; directory. A string value must be a path to an image format supported
    ;; by your Emacs build.
    ;; If the value is nil then no banner is displayed. (default 'official)
-   dotspacemacs-startup-banner 'official
+   dotspacemacs-startup-banner "~/.images/blackhole-lines.svg"
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
    ;; Possible values for list-type are:
@@ -1391,7 +1400,7 @@ values."
    ;; If non nil show the color guide hint for transient state keys. (default t)
    dotspacemacs-show-transient-state-color-guide t
    ;; If non nil unicode symbols are displayed in the mode line. (default t)
-   dotspacemacs-mode-line-unicode-symbols t
+   dotspacemacs-mode-line-unicode-symbols nil
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
    ;; when it reaches the top or bottom of the screen. (default t)
@@ -1426,7 +1435,9 @@ values."
    dotspacemacs-highlight-delimiters 'all
    ;; If non nil, advise quit functions to keep server open when quitting.
    ;; (default nil)
-   dotspacemacs-persistent-server nil
+   dotspacemacs-enable-server t
+   dotspacemacs-persistent-server t
+   
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `ag', `pt', `ack' and `grep'.
    ;; (default '("ag" "pt" "ack" "grep"))
@@ -1441,7 +1452,7 @@ values."
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
-   dotspacemacs-mode-line-theme '(all-the-icons :separator wave)
+   dotspacemacs-mode-line-theme '(spacemacs :separator wave)
    ))
 
 (defun dotspacemacs/user-init ()
@@ -1504,6 +1515,14 @@ Org is so awesome it deserves a package itself:
 :header-args+: :noweb-ref org-conf
 :header-args+: :tangle no
 :end:
+
+*** Set main folder (root directory) 
+
+Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
+#+begin_src emacs-lisp
+(setq org-directory (expand-file-name "~/2.archive/Dropbox/org/"))
+(setq org-roam-directory (concat org-directory "notes/"))
+#+end_src
 
 *** Clean view
 Org’s default outline with stars and no indents can become too cluttered for short documents. For book-like long documents, the effect is not as noticeable. Org provides an alternate stars and indentation scheme, as shown on the right in the following table. It uses only one star and indents text to line with the heading: 

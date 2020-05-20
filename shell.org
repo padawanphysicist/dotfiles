@@ -1,6 +1,8 @@
 #+title:  Shell configuration
 #+property: header-args  :mkdirp yes
 #+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
+#+property: header-args+ :padline no
 
 This shell configuration is similar to that described in the article [[https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789#.a9jfn51ix][Getting Started With Dotfiles]].
 
@@ -229,20 +231,7 @@ fi
 The default =ls= does not automatically print its results in color when the terminal supports it, and it gives rather unhelpful values for file sizes. For usability, we change the default in interactive shells to use color whenever the output terminal supports it and to display file sizes in human-readable format (e.g., =1K=, =234M=, =2G=). Once we've done that, we can also add the common and useful =ll= alias, which displays a long listing format, sorted with directories first.
 
 #+begin_src bash :noweb-ref shell-alias :noweb-sep "\n\n"
-# ls usability aliases
 alias ls="ls -h --color=auto"
-alias ll="ls -lv --group-directories-first"
-alias la="ls -lha --group-directories-first"
-#+end_src
-
-** Archive Extracter
-
-Linux provides various tools for archiving and compressing files such as [[https://en.wikipedia.org/wiki/Zip_(file_format)][zip]], [[https://en.wikipedia.org/wiki/Bzip2][bzip]], [[https://en.wikipedia.org/wiki/Gzip][gzip]], [[https://en.wikipedia.org/wiki/Tar_(computing)][tar]], [[https://en.wikipedia.org/wiki/RAR_(file_format)][rar]], /etc/. There are more tools that are not native to Linux, but provide good archiving and compressing abilities. With such a large number of tools at hand, sometimes it becomes difficult to remember all the commands. '[[http://www.nongnu.org/atool/][atool]]' allows you to manage these different file archives with a single command.
-
-=ae= is a mnemonic for Archive Extracter.
-
-#+begin_src bash :noweb-ref shell-alias :noweb-sep "\n" :exports none
-alias ae='aunpack' 
 #+end_src
 
 ** Human readable disk usage
@@ -263,15 +252,7 @@ alias du="du -h"
 
 ** Emacs
 
-Now, so we can easily connect to the Emacs server from an interactive terminal, we define some shorthand shell aliases.  I can never remember the command-line arguments to =emacsclient=, and =emacsclient= itself is a pretty hefty command name, so these aliases find a lot of use.  =emx= opens its argument in a graphical frame, =emc= opens its argument in the current terminal.
-
-#+begin_src bash :noweb-ref shell-alias :noweb-sep "\n\n"
-# Emacsclient aliases
-alias emc="emacc"
-alias emx="emacx"
-#+end_src
-
-Finally, we set Emacs as our default editor for the session.  We want the behavior to be "open a new buffer for the existing Emacs session.  If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it. Setting =$VISUAL= and =$EDITOR= to =emacsclient= accomplishes the first part, and setting =$ALTERNATIVE_EDITOR= to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
+Set Emacs as our default editor for the session. We want the behavior to be "open a new buffer for the existing Emacs session. If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it. Setting =$VISUAL= and =$EDITOR= to =emacsclient= accomplishes the first part, and setting =$ALTERNATIVE_EDITOR= to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n\n"
 if [ -z "$SSH_CONNECTION" ]; then
@@ -330,12 +311,10 @@ The =path_append()= and =path_prepend()= functions are rather self-explanatory, 
 
 * Bash Prompt
 
-In order to configure our Bash prompt I use a new file, =$HOME/.config/bash/prompt=. This file's job is simply to set the prompt as we want when it sourced.
+In order to configure the Bash prompt I use a new file, =$HOME/.config/bash/prompt=. This file's job is simply to set the prompt as we want when it sourced.
 
 Bash prompt configuration is contained within the =$PS1= environment variable, which is extremely terse and hard to work with. The following is my =$PS1= configuration:
-
-#+caption: Source listing for =.config/bash/prompt=.
-#+BEGIN_src bash :tangle "shell/.config/bash/prompt" :noweb yes :shebang "#!/bin/bash\n"
+#+begin_src bash :tangle "shell/.config/bash/prompt" :noweb yes :shebang "#!/bin/bash"
 source "/usr/share/git/git-prompt.sh" # Default when installing Git
 
 # Configure `__git_ps1` to tell us as much as possible
@@ -346,13 +325,12 @@ export GIT_PS1_HIDE_IF_PWD_IGNORED=1
 # Colorful prompt for Bash!
 export PS1='\w\[\e[0;33m\]$(__git_ps1 " (%s)")\[\e[0m\]>> '
  
-# Unrelated but useful: avoid auto-édit on successful merges, starting with Git 2.0
+# Unrelated but useful: avoid auto-edit on successful merges, starting with Git 2.0
 export GIT_MERGE_AUTOEDIT=no
 #+end_src
 
 Now that we've set the prompt, let's make sure to source this configuration from =.bashrc=:
-
-#+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-bashrc
 if [ -r "${HOME}/.config/bash/prompt" ]; then
     source "${HOME}/.config/bash/prompt"
 fi
@@ -363,8 +341,10 @@ fi
 Finally, we're left with some interactive shell customizations that don't fit under any other heading. These are either set in or conditionally sourced from =$HOME/.config/bash/interactive=, which is listed below:
 
 #+caption: Source listing for =.config/bash/interactive=.
-#+begin_src bash :tangle "shell/.config/bash/interactive" :noweb yes :shebang "#!/bin/bash\n"
-<<shell-interactive>>
+#+begin_src bash :tangle "shell/.config/bash/interactive" :noweb yes :shebang "#!/bin/bash"
+<<bash-history>>
+<<bash-completion>>
+<<misc-interactive-customization>>
 #+end_src
 
 As these are interactive, Bash-specific customizations, we want to source it from our =.bashrc= by adding the following line to that file:
@@ -376,11 +356,13 @@ fi
 #+end_src
 
 ** Bash Completion
+:properties:
+:header-args:bash: :noweb-ref bash-completion
+:end:
 
 To enable completion in Bash, you must install the appropriate package for your distribution (in Arch, =pacman -S bash-completion=) and one of the two files:
 
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
-# Enable interactive Bash completion
+#+begin_src bash
 if [ -r "/usr/share/bash-completion/bash_completion" ]; then
     source "/usr/share/bash-completion/bash_completion"
 elif [ -r "/etc/bash_completion" ]; then
@@ -391,78 +373,87 @@ fi
 This configuration is taken from the default =.bashrc= shipped with Debian; the former path is the path that the =bash-completion= package installs to. This can actually be modified [[https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html][programmatically]] by packages.
 
 ** Bash History
+:properties:
+:header-args:bash: :noweb-ref bash-history
+:end:
+
+*** Set history options
+
+Set a shell options to control how history is stored:
+
+- =cmdhist= :: saves all lines in a multi-line command in the history file, which makes it easy to modify multi-line commands that we've run.
+- =histreedit= :: allows a user to re-edit a failed history substitution instead of clearing the prompt.
+- =histappend= :: append to history, not overwrite it.
+- =histverify= :: results of history are not immediately passed to the shell parser. The resulting line is loaded into the Readline editing buffer, allowing modifications. 
+
+#+begin_src bash
+shopt -s cmdhist    
+shopt -s histreedit 
+shopt -s histappend 
+shopt -s histverify
+#+end_src
+
+*** Set history file
 
 Bash has command history support that allows you to recall previously run commands and run them again at a later session. Command history is stored both in memory and in a special file written to disk, =$HOME/.bash_history=.
 
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n" :exports none
-# History configuration
-#+end_src
-
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
+#+begin_src bash
 export HISTFILE="${HOME}/.bash_history"
 #+end_src
 
-When saving command history in memory, I want to prevent two things from being added: lines beginning with whitespace (in case we have a reason to run a command and not remember it) and duplicate lines (which are just a nuisance to scroll through). This can be done by setting the =$HISTCONTROL= environment variable to =ignoreboth=. We don't want this environment variable to leak into subshells (especially noninteractive subshells), so we don't =export= it.
+*** Save only a subset of history
 
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
-HISTCONTROL=ignoreboth:erasedups
+When saving command history in memory, I want to prevent two things from being added: 
+- =ignorespace= :: lines beginning with whitespace (in case we have a reason to run a command and not remember it);
+- =ignoredups= :: duplicate lines (which are just a nuisance to scroll through). 
+- =erasedups= :: causes all previous lines matching the current line to be removed from the history list before that line is saved. 
+
+We don't want this environment variable to leak into subshells (especially noninteractive subshells), so we don't =export= it.
+
+#+begin_src bash
+HISTCONTROL=ignorespace:ignoredups:erasedups
 #+end_src
 
-I also ignore too short commands, like =ls=.
+*** Commands to ignore in history
 
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
+I also ignore too short commands, like =ls= and =pwd=. This is only junk in the history, as it is simple and fast to type.
+
+#+begin_src bash
 export HISTIGNORE="?:??:???:$HISTIGNORE"
 #+end_src
 
+*** Unlimited history
+
 I also like to keep an unlimited history list
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
-export HISTSIZE=
-export HISTFILESIZE=
-export HISTTIMEFORMAT=""
-export HISTFILE=~/.bash_eternal_history
+#+begin_src bash
+export HISTSIZE=-1
+export HISTFILESIZE=-1
 #+end_src
 
-I also want to set a few shell options to control how history is stored as well:
+*** Preserve history across tmux sessions
 
-- =cmdhist= saves all lines in a multi-line command in the history file,
-  which makes it easy to modify multi-line commands that we've run.
-- =histreedit= allows a user to re-edit a failed history substitution
-  instead of clearing the prompt.
-- =histappend= append to history, not overwrite it.
-
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
-shopt -s cmdhist # Save multiline commands in the same history entry
-shopt -s histreedit # Enable to re-edit a failed history substitution
-shopt -s histappend
-shopt -s histverify # History command is not executed immediately
-#+end_src
-
-I use this to preserve the history across tmux sessions
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
+#+begin_src bash
 export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -n; history -c; history -r"
 #+end_src
 
-*** Miscellaneous Configuration
+** Miscellaneous Configuration
+:properties:
+:header-args:bash: :noweb-ref misc-interactive-customization
+:end:
 
 Finally, we have the following configuration options that don't fit anywhere else.
 
-#+BEGIN_src bash :noweb-ref shell-interactive :noweb-sep "\n" :exports none
-# Miscellaneous configuration items
-#+END_SRC
+*** Extended pattern matching
 
-I tend to use the extended pattern matching
-#+BEGIN_src bash :noweb-ref shell-interactive :noweb-sep "\n" :exports none
+#+begin_src bash 
 shopt -s extglob
-#+END_SRC
-
-We want to check the size of the terminal window after each command and, if necessary, update the values of =$LINES= and =$COLUMNS=. If any command uses the size of the terminal window to intelligently format output (think =ls= selecting the number of columns to output filenames in), this will give it up-to-date information on the terminal size. The shell option =checkwinsize= does this for us.
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n\n"
-shopt -s checkwinsize
 #+end_src
 
-If a command name that is the name of a directory is executed as if it were the argument to the =cd= command. This option is only used by interactive shells. 
-#+begin_src bash :noweb-ref shell-interactive
-shopt -s autocd
+*** Checks the window size after each external (non-builtin) command
+
+We want to check the size of the terminal window after each command and, if necessary, update the values of =$LINES= and =$COLUMNS=. If any command uses the size of the terminal window to intelligently format output (think =ls= selecting the number of columns to output filenames in), this will give it up-to-date information on the terminal size. The shell option =checkwinsize= does this for us.
+#+begin_src bash
+shopt -s checkwinsize
 #+end_src
 
 ** Pager

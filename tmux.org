@@ -5,6 +5,12 @@
 
 [[https://tmux.github.io/][tmux]] gives you terminal some superpowers. Enough said.
 
+* Create session
+
+#+begin_src conf
+new-session -d -s vct
+#+end_src
+
 * Changing prefix
 
 The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. I was using =C-a= instead but note that this might interfere with bash’s "go to beginning of line" command1. So I've decide to follow emacs prefix, and changed the default prefix to =M-x=.

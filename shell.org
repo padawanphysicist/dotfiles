@@ -560,20 +560,20 @@ $endif
 Output commands to set the LS_COLORS environment variable. 
 
 #+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
-if [[ -n "${TMUX}" ]]; then
-  if [ $(date +'(%H-18)*3600 + (%M-00)*60' | bc) -le 0 ] && [ $(date +'(%H-06)*3600 + (%M-00)*60' | bc) -ge 0 ]; then 
-    # xterm -rv -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
-    eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
-  else 
-    # xterm -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
-    eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
-  fi
-fi
+# if [[ -n "${TMUX}" ]]; then
+#   if [ $(date +'(%H-18)*3600 + (%M-00)*60' | bc) -le 0 ] && [ $(date +'(%H-06)*3600 + (%M-00)*60' | bc) -ge 0 ]; then 
+#     # xterm -rv -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
+#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#   else 
+#     # xterm -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
+#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#   fi
+# fi
 #+end_src
 
 Took the themes from https://github.com/seebi/dircolors-solarized
 
-** 256-dark
+** COMMENT 256-dark
 
 #+begin_src bash :tangle "shell/.config/shell/dir_colors_256_dark" :noweb yes
 
@@ -882,7 +882,7 @@ EXEC 00;38;5;64
 .ogx 00;38;5;166
 #+end_src
 
-** ansi-dark
+** COMMENT ansi-dark
 
 #+begin_src bash :tangle "shell/.config/shell/dir_colors_ansi_dark" :noweb yes
 # Exact Solarized Dark color theme for the color GNU ls utility.
@@ -1370,7 +1370,7 @@ EXEC 01;31  # Unix
 .sqlite 34
 #+end_src
 
-** ansi-light
+** COMMENT ansi-light
 
 #+begin_src bash :tangle "shell/.config/shell/dir_colors_ansi_light" :noweb yes
 # Exact Solarized Light color theme for the color GNU ls utility.

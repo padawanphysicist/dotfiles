@@ -424,6 +424,7 @@ Most of the time I want the which-key popup only when I need it. This will preve
 
 #+begin_src emacs-lisp
 (use-package hydra)
+(use-package use-package-hydra)
 #+end_src
 
 ** Make Emacs sexy
@@ -459,7 +460,17 @@ Most of the time I want the which-key popup only when I need it. This will preve
 Useful no matter what theme you have installed!
 
 #+begin_src emacs-lisp
-;;(use-package theme-looper
-;;  :config
-;;  ())
+(use-package theme-looper
+  :after hydra
+  :bind ("C-c h t" . hydra-theme-loop/body)
+  :hydra
+  (hydra-theme-loop (:color amaranth)
+    "Theme looper"
+    ("n" theme-looper-enable-next-theme "Next")
+    ("p" theme-looper-enable-previous-theme "Previous")
+    ("e" (lambda ()
+           (interactive)
+           (theme-looper-enable-theme (car custom-enable-themes)))
+     "Enable" :color blue)
+    ("q" nil "Quit" :color blue)))
 #+end_src

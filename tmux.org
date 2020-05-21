@@ -1,25 +1,29 @@
 #+title: Tmux configuration
 #+property: header-args+ :tangle "tmux/.tmux.conf"
 #+property: header-args+ :mkdirp yes
+#+property: header-args+ :padline no
 
 [[https://tmux.github.io/][tmux]] gives you terminal some superpowers. Enough said.
 
+* Create session
+
+#+begin_src conf
+new-session -d -s vct
+#+end_src
+
 * Changing prefix
 
-The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. Following [[https://www.gnu.org/software/screen/][GNU Screen]] prefix, I change the default prefix to C-a.
+The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. I was using =C-a= instead but note that this might interfere with bash’s "go to beginning of line" command1. So I've decide to follow emacs prefix, and changed the default prefix to =M-x=.
 
 We first release the default prefix,
-
 #+begin_src conf
 unbind C-b
 #+end_src
 
-and then define a new prefix
+and then define a new prefix:
 #+begin_src conf
 set -g prefix M-x
 bind-key M-x send-prefix
-#set -g prefix IC
-#bind-key IC send-prefix
 #+end_src
 
 * Quickly reload tmux configuration
@@ -30,17 +34,63 @@ When you are playing around with your tmux config you often need to repeatedly o
 bind-key r source-file ~/.tmux.conf \; display-message "~/.tmux.conf reloaded!"
 #+end_src
 
-* Vi mode
+* Sane splits
+
+I find quite difficult to remember the default pane splitting commands. Who's supposed to memorize ="= to split vertically and =%= to split horizontally? I find it helpful to have the characters as a more visual representation of the split, so I chose =|= and =-= for splitting panes vertically and horizontally respectively.
+
+** Horizontal splits with =-=
 
 #+begin_src conf
-set-window-option -g mode-keys vi
-bind-key -T copy-mode-vi 'v' send -X begin-selection
-bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
+unbind s
+unbind ^S
+unbind '"'
+unbind -
+bind - split-window -v -c "#{pane_current_path}"
+#+end_src
+
+** Vertical split with =\= or =/=
+
+#+begin_src conf
+unbind v
+unbind ^V
+unbind %
+unbind '\'
+unbind /
+bind '\' split-window -h -c "#{pane_current_path}"
+bind / split-window -h -c "#{pane_current_path}"
+#+end_src
+
+* Pane switching
+
+Switching between panes is a frequent task when using tmux. Therefore it should be as easy as possible. I’ don't like triggering the prefix key all the time. I want to be able to simply say =M-<direction>= to go where I want to go (remember: M is for Meta, which is usually your Alt key). With this modification I can simply press =Alt-left= to go to the left pane (and other directions respectively):
+
+#+begin_src conf
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+#+end_src
+
+* Mouse mode off by default
+
+This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
+
+#+begin_src conf
+set -g mouse off
+#+end_src
+
+* Stop renaming windows automatically
+
+I like to give my tmux windows custom names using the =,= key. This helps me naming my windows according to the context they’re focusing on. By default tmux will update the window title automatically depending on the last executed command within that window. In order to prevent tmux from overriding my wisely chosen window names I want to suppress this behavior:
+
+#+begin_src conf
+set-option -g allow-rename off
 #+end_src
 
 * Start window numbering at 1
 
 Start window indexing at one instead of zero. Then it will be more like the keyboard layout.
+
 #+begin_src conf
 set -g base-index 1
 set -g pane-base-index 1
@@ -54,8 +104,10 @@ set -g renumber-windows on
 
 * Slightly longer pane indicators display time
 
+Time given in milliseconds
+
 #+begin_src conf
-set -g display-panes-time 5000
+set -g display-panes-time 2000
 #+end_src
 
 * Slightly longer status messages display time
@@ -71,14 +123,6 @@ Set the maximum number of lines held in window history. This setting applies onl
 set -g history-limit 20000
 #+end_src
 
-* Mouse mode off by default
-
-This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
-
-#+begin_src conf
-setw -g mouse off
-#+end_src
-
 * Pass keys through to its terminals
 
 If this option is set, tmux will generate xterm-style function key sequences; these have a number included to indicate modifiers such as Shift, Alt or Ctrl.
@@ -87,93 +131,45 @@ If this option is set, tmux will generate xterm-style function key sequences; th
 set-window-option -g xterm-keys on
 #+end_src
 
-* Fix delayed Esc with VIM
-
-#+begin_src conf
-set -sg escape-time 0
-#+end_src
-
-* Horizontal splits with =-=
-
-#+begin_src conf
-unbind s
-unbind ^S
-unbind '"'
-unbind -
-bind - split-window -v -c "#{pane_current_path}"
-#+end_src
-
-* Vertical split with =\= or =/=
-
-#+begin_src conf
-unbind v
-unbind ^V
-unbind %
-unbind '\'
-unbind /
-bind '\' split-window -h -c "#{pane_current_path}"
-bind / split-window -h -c "#{pane_current_path}"
-#+end_src
-
-* Pane switching
-
-For pane switching it will be used the combination =Alt+<arrow key>=
-
-#+begin_src conf
-bind -n M-Left select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up select-pane -U
-bind -n M-Down select-pane -D
-#+end_src
-
 * Move to last active window
 
 #+begin_src conf
 bind Tab last-window
 #+end_src
 
-* Stop renaming windows automatically
+* Set default terminal
 
-I like to give my tmux windows custom names using the =,= key. This helps me naming my windows according to the context they’re focusing on. By default tmux will update the window title automatically depending on the last executed command within that window. In order to prevent tmux from overriding my wisely chosen window names I want to suppress this behavior:
 #+begin_src conf
-set-option -g allow-rename off
+set -g default-terminal xterm-256color
 #+end_src
 
-* Colors
+* Styling
+** Modes
 
 #+begin_src conf
-set -g default-terminal screen-256color
+setw -g clock-mode-colour colour5
 #+end_src
 
+** Colors
+
 #+begin_src conf
-# set -g pane-border-style fg=black
+set -g pane-border-style 'fg=black'
 set -g pane-active-border-style 'fg=colour32'
-# set -g window-style 'bg=colour234 fg=colour239'
-# set -g window-style 'none'
-# set -g window-active-style 'fg=colour235' # fg=colour235'
-
-# Cores padrão da janela ativa
-# set -w window-active-style 'bg=default' 
-# Cores padrão da janela (não-ativa)
-# set -w window-style 'bg=colour249' 
 #+end_src
 
-* Statusbar
+** Statusbar
 
 #+begin_src conf
 set -g status-position bottom
 set -g status-justify left
 set -g status-style 'bg=colour234'
 set -g status-left ''
-set -g status-right '#[fg=colour233,bg=colour243] %d/%m #[fg=colour233,bg=colour248] %H:%M '
+set -g status-right '#[fg=colour233,bg=colour243] %d/%m '
 set -g status-right-length 50
 set -g status-left-length 20
-
 setw -g window-status-current-style 'bg=colour244'
 setw -g window-status-current-format ' #[fg=colour87]#I#[fg=colour234]:#[fg=colour234]#W#[fg=colour1 bold]#F '
-
 setw -g window-status-style 'bg=colour236'
 setw -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#[fg=colour244]#F '
-
 setw -g window-status-bell-style 'fg=colour255 bg=colour1 bold'
 #+end_src

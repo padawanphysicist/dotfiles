@@ -1,8 +1,10 @@
-#+title: vct's dotfiles
+#+title: vct's literate dotfiles
+#+author: Victor Santos (vct)
+#+keywords: dotfiles orgmode config
 
 This is my dotfiles repo. I hope you find something useful here!
 
-The files should contain all my (public) personal system configuration, structured within the [[http://www.literateprogramming.com/][Literate Programming]] methodology introduced by [[https://cs.stanford.edu/~knuth/][Donald Knuth]]. This setup allows me to migrate the configuration across different machines easily and, at the same time, understand why my settings are the way they are.
+The files inside this repo should (ideally) contain all my public personal system configuration, structured within the [[http://www.literateprogramming.com/][Literate Programming]] methodology introduced by [[https://cs.stanford.edu/~knuth/][Donald Knuth]]. This setup allows me to migrate the configuration across different machines easily and, at the same time, understand why my settings are the way they are.
 
 * Dependencies
 
@@ -22,14 +24,14 @@ then enter the directory,
 cd ~/.dotfiles
 #+end_src
 
-tangle the files
+tangle the files (here I tangle all of them, but you can pick a single one if you like)
 #+begin_src sh
-for file in *.org ; do emacs --batch --eval "(progn (require 'org) (org-babel-tangle-file \"$file\"))"; done
+for file in *.org ; do ./tangle -f ${file} ; done
 #+end_src
 
 and create the symlinks to your =$HOME= directory:
 #+begin_src sh
-for directory in */ ; do stow $directory ; done
+for directory in */ ; do stow ${directory} ; done
 #+end_src
 
 * Configuration files
@@ -37,21 +39,21 @@ for directory in */ ; do stow $directory ; done
 The configuration files written in literate style are:
 
 #+begin_src sh :results raw :exports results
-for i in *.org; do if [[ $i != "README.org" ]]; then echo '-' [[$i]]; fi ; done
+for file in *.org; do if [[ $file != "README.org" ]]; then echo '-' [[file:$file][$file]]; fi ; done
 #+end_src
 
 #+RESULTS:
-- [[conky.org]]
-- [[dunst.org]]
-- [[emacs.org]]
-- [[git.org]]
-- [[openbox.org]]
-- [[pry.org]]
-- [[ranger.org]]
-- [[redshift.org]]
-- [[rofi.org]]
-- [[shell.org]]
-- [[tmux.org]]
-- [[X.org]]
+- [[file:dunst.org][dunst.org]]
+- [[file:emacs.org][emacs.org]]
+- [[file:git.org][git.org]]
+- [[file:pry.org][pry.org]]
+- [[file:ranger.org][ranger.org]]
+- [[file:redshift.org][redshift.org]]
+- [[file:rofi.org][rofi.org]]
+- [[file:shell.org][shell.org]]
+- [[file:tmux.org][tmux.org]]
+- [[file:xmonad.org][xmonad.org]]
+- [[file:X.org][X.org]]
+- [[file:xterm.org][xterm.org]]
 
 Also, there is the folder [[file:misc][misc]], which contains dotfiles which are too small to worth write in Org, or I'm just too lazy to do it.

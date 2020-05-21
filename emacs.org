@@ -167,7 +167,7 @@ This hook runs after loading init files and handling the command line.
 <<package-management>>
 <<enable-hydra>>
 <<enable-which-key>>
-<<theme>>
+<<sexy-emacs>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -429,7 +429,7 @@ Most of the time I want the which-key popup only when I need it. This will preve
 
 ** Make Emacs sexy
 :properties:
-:header-args+: :noweb-ref theme
+:header-args+: :noweb-ref sexy-emacs
 :end:
 
 *** Doom themes
@@ -473,4 +473,30 @@ Useful no matter what theme you have installed!
            (theme-looper-enable-theme (car custom-enable-themes)))
      "Enable" :color blue)
     ("q" nil "Quit" :color blue)))
+#+end_src
+
+*** Dashboard
+**** Some buffers should never be deleted:
+#+begin_src emacs-lisp
+(defun vct--immortal-buffers ()
+  (if (or (eq (current-buffer) (get-buffer "*scratch*"))
+          (eq (current-buffer) (get-buffer "*Messages*"))
+          (eq (current-buffer) (get-buffer "*dashboard*")))
+      (progn (bury-buffer)
+             nil)
+    t))
+
+(add-hook 'kill-buffer-query-functions 'vct--immortal-buffers)
+#+end_src
+
+**** Configure Dashboard
+
+#+begin_src emacs-lisp
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-center-content t)
+  ;; Set the banner
+  (setq dashboard-startup-banner "~/.images/blackhole-lines.svg")
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src

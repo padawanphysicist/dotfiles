@@ -1,5 +1,8 @@
 #+title:  Shell configuration
-#+property: header-args :tangle-mode (identity #o444)
+#+property: header-args  :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
+#+property: header-args+ :padline no
 
 This shell configuration is similar to that described in the article [[https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789#.a9jfn51ix][Getting Started With Dotfiles]].
 
@@ -24,19 +27,19 @@ The above descriptions lead to the following plan: Use =.profile= for one-time c
 So, let's take a look at these three configuration files:
 
 #+caption: Source listing for =.profile=.
-#+begin_src sh :tangle "shell/.profile" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
+#+begin_src bash :tangle "shell/.profile" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
 # Configuration for interactive login shell
 <<shell-profile>>
 #+end_src
 
 #+caption: Source listing for =.bashrc=.
-#+begin_src sh :tangle "shell/.bashrc" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
+#+begin_src bash :tangle "shell/.bashrc" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
 # Source installed interactive shell configurations:
 <<shell-bashrc>>
 #+end_src
 
 #+caption: Source listing for =.bash_profile=.
-#+begin_src sh :tangle "shell/.bash_profile" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
+#+begin_src bash :tangle "shell/.bash_profile" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
 # Configuration for interactive non-login shell
 
 # Load =.profile= if it exists
@@ -54,18 +57,24 @@ fi
 
 The XDG Base Directory variables define where configuration, cache, and data files for the user should be stored. While this has the nice effect of cleaning up the home directory, moving dotfiles into subdirectories, it has an even more important benefit: because it separates configuration files, cache files, and important data files into separate folders, it greatly simplifies backup and recovery of these files. Migrating to a new laptop, for instance, should be as simple as installing the software and copying over the configuration and data. With the typical dotfiles approach, there's nothing that prevents cached data (data that isn't essential and could potentially contain system-specific data that would not transfer well) from being written straight to the home directory. In essence, this mirrors quite closely how UNIX systems break the file system into directories that store configuration (=/etc=), cached data (=/var=), shared data (=/usr/share=), and so forth.
 
-Let's create a file =$HOME/.config/shell/xdg= that, when sourced, sets these variables correctly. The full listing of this file is shown below:
+#+begin_src bash :tangle "shell/.config/user-dirs.conf"
+# When set to False, xdg-user-dirs-update won't change the folders
+# configuration. 
+enabled=False
+#+end_src
 
-#+caption: Source listing for =.config/shell/xdg=.
-#+begin_src sh :tangle "shell/.config/shell/xdg" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
+Let's create a file =$HOME/.config/bash/xdg= that, when sourced, sets these variables correctly. The full listing of this file is shown below:
+
+#+caption: Source listing for =.config/bash/xdg=.
+#+begin_src bash :tangle "shell/.config/bash/xdg" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
 <<shell-xdg>>
 #+end_src
 
 We also want this to be sourced by our =.profile=, so we add the following line there:
 
-#+begin_src sh :noweb-ref shell-profile :noweb-sep "\n"
-if [ -s "${HOME}/.config/shell/xdg" ]; then
-    source "${HOME}/.config/shell/xdg"
+#+begin_src bash :noweb-ref shell-profile :noweb-sep "\n"
+if [ -s "${HOME}/.config/bash/xdg" ]; then
+    source "${HOME}/.config/bash/xdg"
 fi
 #+end_src
 
@@ -88,7 +97,7 @@ The variables =$XDG_BIN_DIRS=, =$XDG_LIB_DIRS=, =$XDG_DATA_DIRS=, and =$XDG_CONF
 
 The remaining variables (namely, =$XDG_DATA_HOME=, =$XDG_CONFIG_HOME=, =$XDG_BIN_HOME=, =$XDG_LIB_HOME=, and =$XDG_CACHE_HOME=), though, should be set in our shell configuration. I use the following, which happen to be the defaults anyway:
 
-#+begin_src sh :noweb-ref shell-xdg :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n"
 # XDG Basedir variables
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -109,7 +118,7 @@ The semantics of these environment variables naturally lead us to a backup and r
 While just configuring this should be enough, it's not. There is an annoying amount of software that does not use these directories properly, or at all. We do our best here to configure the problematic software to use them, but we can't get all of it.
 
 We also add a few more directories, handled by [[https://www.freedesktop.org/wiki/Software/xdg-user-dirs/][xdg-user-dirs]]
-#+begin_src sh :noweb-ref shell-xdg :noweb-sep "\n\n" :exports none
+#+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n\n" :exports none
 # XDG User directories
 export XDG_DESKTOP_DIR="$HOME/0.inbox"
 export XDG_DOWNLOAD_DIR="$HOME/0.inbox"
@@ -124,31 +133,31 @@ export XDG_VIDEOS_DIR="$HOME/3.media/videos"
 TeX stores its cache right under the home directory by default, so we set the
 following environment variable to move it to the cache directory:
 
-#+begin_src sh :noweb-ref shell-xdg :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n"
 # Per-software configuration to use XDG basedirs
 export TEXMFVAR="$XDG_CACHE_HOME/texmf-var"
 #+end_src
 
 * Miscellaneous Environment Variables
 
-The remaining environment variables are either set in or conditionally sourced from =$HOME/.config/shell/env=. A full listing of this file is shown below:
+The remaining environment variables are either set in or conditionally sourced from =$HOME/.config/bash/env=. A full listing of this file is shown below:
 
-#+caption: Source listing for =.config/shell/env=.
-#+begin_src sh :tangle "shell/.config/shell/env" :noweb yes :shebang "#!/bin/sh\n"
+#+caption: Source listing for =.config/bash/env=.
+#+begin_src bash :tangle "shell/.config/bash/env" :noweb yes :shebang "#!/bin/sh\n"
 <<shell-env>>
 #+end_src
 
 We want these environment variables to be available in all sessions, so we want to source it from our =.profile=, as well. We add the following line there to do that:
 
-#+begin_src sh :noweb-ref shell-profile :noweb-sep "\n"
-if [ -r "${HOME}/.config/shell/env" ]; then
-    source "${HOME}/.config/shell/env"
+#+begin_src bash :noweb-ref shell-profile :noweb-sep "\n"
+if [ -r "${HOME}/.config/bash/env" ]; then
+    source "${HOME}/.config/bash/env"
 fi
 #+end_src
 
 I also set another file for environment variables, containing any variables specific to the machine, and that do not need to be backed up:
 
-#+begin_src sh :noweb-ref shell-profile :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-profile :noweb-sep "\n"
 if [ -s "${HOME}/.env" ]; then
     source "${HOME}/.env"
 fi
@@ -156,7 +165,7 @@ fi
 
 ** Special folders
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
 # Special Folders
 #+end_src
 
@@ -164,7 +173,7 @@ fi
 
 Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =0.sandbox= to =1.docs=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
 export INBOX="${HOME}/0.inbox"
 #+end_src
 
@@ -172,7 +181,7 @@ export INBOX="${HOME}/0.inbox"
 
 Is the big kahuna [fn:: Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.] of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but (to keep you sanity) don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
 export WORKING="${HOME}/1.working"
 #+end_src
 
@@ -180,15 +189,15 @@ export WORKING="${HOME}/1.working"
 
 Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
-export ARCHIVE="${HOME}/2.archive"
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
+# export ARCHIVE="${HOME}/2.archive"
 #+end_src
 
 *** =3.media=
 
 Multimedia files (games, pictures and movies). This is a file that usually I don't mind to keep a backup.
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
 export MEDIA="${HOME}/3.media"
 #+end_src
 
@@ -196,24 +205,24 @@ export MEDIA="${HOME}/3.media"
 
 Third-party software, not present among the official packages.
 
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
 export OPT="${HOME}/4.opt"
 #+end_src
 
 * Aliases
 
-I store aliases in the =$HOME/.config/shell/alias= file. These aliases apply only to interactive shells, not to scripts, so all these aliases are only to help me in interactive shells. Here is a full listing of that file:
+I store aliases in the =$HOME/.config/bash/alias= file. These aliases apply only to interactive shells, not to scripts, so all these aliases are only to help me in interactive shells. Here is a full listing of that file:
 
-#+caption: Source listing for =.config/shell/alias=.
-#+begin_src sh :tangle "shell/.config/shell/alias" :noweb yes :shebang "#!/bin/sh\n"
+#+caption: Source listing for =.config/bash/alias=.
+#+begin_src bash :tangle "shell/.config/bash/alias" :noweb yes :shebang "#!/bin/sh\n"
 <<shell-alias>>
 #+end_src
 
 We also want to make sure to source this file from =.bashrc=:
 
-#+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"
-if [ -r "${HOME}/.config/shell/alias" ]; then
-    source "${HOME}/.config/shell/alias"
+#+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
+if [ -r "${HOME}/.config/bash/alias" ]; then
+    source "${HOME}/.config/bash/alias"
 fi
 #+end_src
 
@@ -221,28 +230,15 @@ fi
 
 The default =ls= does not automatically print its results in color when the terminal supports it, and it gives rather unhelpful values for file sizes. For usability, we change the default in interactive shells to use color whenever the output terminal supports it and to display file sizes in human-readable format (e.g., =1K=, =234M=, =2G=). Once we've done that, we can also add the common and useful =ll= alias, which displays a long listing format, sorted with directories first.
 
-#+begin_src sh :noweb-ref shell-alias :noweb-sep "\n\n"
-# ls usability aliases
+#+begin_src bash :noweb-ref shell-alias :noweb-sep "\n\n"
 alias ls="ls -h --color=auto"
-alias ll="ls -lv --group-directories-first"
-alias la="ls -lha --group-directories-first"
-#+end_src
-
-** Archive Extracter
-
-Linux provides various tools for archiving and compressing files such as [[https://en.wikipedia.org/wiki/Zip_(file_format)][zip]], [[https://en.wikipedia.org/wiki/Bzip2][bzip]], [[https://en.wikipedia.org/wiki/Gzip][gzip]], [[https://en.wikipedia.org/wiki/Tar_(computing)][tar]], [[https://en.wikipedia.org/wiki/RAR_(file_format)][rar]], /etc/. There are more tools that are not native to Linux, but provide good archiving and compressing abilities. With such a large number of tools at hand, sometimes it becomes difficult to remember all the commands. '[[http://www.nongnu.org/atool/][atool]]' allows you to manage these different file archives with a single command.
-
-=ae= is a mnemonic for Archive Extracter.
-
-#+begin_src sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
-alias ae='aunpack' 
 #+end_src
 
 ** Human readable disk usage
 
 The =df= command displays the amount of disk space available on the file system. However, the default setting is to show the usage in KB, which is quite hard to eye-read.
 
-#+begin_src sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-alias :noweb-sep "\n" :exports none
 alias df="df -H"
 #+end_src
 
@@ -250,23 +246,15 @@ alias df="df -H"
 
 The =du= command displays the estimate file space usage. Like =df=, the default setting is to show the usage in KB.
 
-#+begin_src sh :noweb-ref shell-alias :noweb-sep "\n" :exports none
+#+begin_src bash :noweb-ref shell-alias :noweb-sep "\n" :exports none
 alias du="du -h"
 #+end_src
 
 ** Emacs
 
-Now, so we can easily connect to the Emacs server from an interactive terminal, we define some shorthand shell aliases.  I can never remember the command-line arguments to =emacsclient=, and =emacsclient= itself is a pretty hefty command name, so these aliases find a lot of use.  =emx= opens its argument in a graphical frame, =emc= opens its argument in the current terminal.
+Set Emacs as our default editor for the session. We want the behavior to be "open a new buffer for the existing Emacs session. If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it. Setting =$VISUAL= and =$EDITOR= to =emacsclient= accomplishes the first part, and setting =$ALTERNATIVE_EDITOR= to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
 
-#+begin_src sh :noweb-ref shell-alias :noweb-sep "\n\n"
-# Emacsclient aliases
-alias emc="emacc"
-alias emx="emacx"
-#+end_src
-
-Finally, we set Emacs as our default editor for the session.  We want the behavior to be "open a new buffer for the existing Emacs session.  If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it. Setting =$VISUAL= and =$EDITOR= to =emacsclient= accomplishes the first part, and setting =$ALTERNATIVE_EDITOR= to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
-
-#+begin_src sh :noweb-ref shell-env :noweb-sep "\n\n"
+#+begin_src bash :noweb-ref shell-env :noweb-sep "\n\n"
 if [ -z "$SSH_CONNECTION" ]; then
     export EDITOR="emacsclient -c"
     export ALTERNATE_EDITOR=""
@@ -278,24 +266,24 @@ export VISUAL=$EDITOR
 
 * Functions
 
-In addition to aliases, I use some shell functions for functionality that is more complicated than what aliases can provide but not complicated enough to warrant a separate shell script. These functions are stored in =$HOME/.config/shell/function=, reproduced below:
+In addition to aliases, I use some shell functions for functionality that is more complicated than what aliases can provide but not complicated enough to warrant a separate shell script. These functions are stored in =$HOME/.config/bash/function=, reproduced below:
 
-#+caption: Source listing for =.config/shell/function=.
-#+begin_src sh :tangle "shell/.config/shell/function" :noweb yes :shebang "#!/bin/sh\n"
+#+caption: Source listing for =.config/bash/function=.
+#+begin_src bash :tangle "shell/.config/bash/function" :noweb yes :shebang "#!/bin/sh\n"
 <<shell-function>>
 #+end_src
 
 Again, we source it from =.bashrc=:
 
-#+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"
-if [ -r "${HOME}/.config/shell/function" ]; then
-    source "${HOME}/.config/shell/function"
+#+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
+if [ -r "${HOME}/.config/bash/function" ]; then
+    source "${HOME}/.config/bash/function"
 fi
 #+end_src
 
 The functions I use most commonly manage my =$PATH= variable, the environment variable that contains a colon-separated list of directories in which to look for a command to be executed. Modifying it manually (especially removing directories from it) is tedious and error-prone; these functions, which I found on [[https://stackoverflow.com/questions/370047/][a StackOverflow question]], have served we well:
 
-#+begin_src sh :noweb-ref shell-function :noweb yes :noweb-sep "\n\n"
+#+begin_src bash :noweb-ref shell-function :noweb yes :noweb-sep "\n\n"
 # $PATH management functions
 path_append()  { path_remove $1; export PATH="$PATH:$1";   }
 path_prepend() { path_remove $1; export PATH="$1:$PATH";   }
@@ -305,11 +293,11 @@ path_remove()  { export PATH=`<<shell-function-pathremove>>`; }
 The =path_append()= and =path_prepend()= functions are rather self-explanatory, but the =path_remove()= function may not be.  In fact, it's slightly modified from the version in the StackOverflow question linked above. Let's break it down. Our goal is to export the =$PATH= variable to a new value, so let's look inside the backtick-quoted string to see what is run:
 
 1. First, we print out the current =$PATH=, which we will use as input. The =$PATH= variable should not end in a newline, which gives us two options: =echo -n=, which is not completely portable, or =printf=. In the name of portability, we will choose the later.
-   #+begin_src sh :noweb-ref shell-function-pathremove :noweb-sep " | "
+   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
    printf '%s' "$PATH"
    #+end_src
 2. We want to parse this output into a series of records separated by colons. To this, we turn to awk. The awk [[http://www.grymoire.com/Unix/Awk.html#uh-19][=RS= variable]] stores the line/record separator used in parsing, and the [[http://www.grymoire.com/Unix/Awk.html#uh-20][=ORS= variable]] stores the line/record separator used in printing. We can use these two variables to piggyback on awk's parsing capabilities, setting both of them to colons. Awk can then loop over these parsed directory names to determine whether any of them are the directory we are trying to remove. If they are, we ignore them.
-   #+begin_src sh :noweb-ref shell-function-pathremove :noweb-sep " | "
+   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
    awk -v RS=: -v ORS=: '$0 != "'$1'"'
    #+end_src
    The expression here used to filter is a little opaque, but works as follows:
@@ -317,18 +305,16 @@ The =path_append()= and =path_prepend()= functions are rather self-explanatory, 
    - Then, we have a _shell_ variable that interpolates to the first argument to our function.
    - Finally, we have a third string that closes the opening quote from the first string.
 3. Unfortunately, awk outputs the value of =ORS= at the end of the string, too, so we need to chop it off. The following sed invocation does that:
-   #+begin_src sh :noweb-ref shell-function-pathremove :noweb-sep " | "
+   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
    sed 's/:$//'
    #+end_src
 
 * Bash Prompt
 
-In order to configure our Bash prompt I use a new file, =$HOME/.config/shell/prompt=. This file's job is simply to set the prompt as we want when it sourced.
+In order to configure the Bash prompt I use a new file, =$HOME/.config/bash/prompt=. This file's job is simply to set the prompt as we want when it sourced.
 
 Bash prompt configuration is contained within the =$PS1= environment variable, which is extremely terse and hard to work with. The following is my =$PS1= configuration:
-
-#+caption: Source listing for =.config/shell/prompt=.
-#+BEGIN_SRC sh :tangle "shell/.config/shell/prompt" :noweb yes :shebang "#!/bin/bash\n"
+#+begin_src bash :tangle "shell/.config/bash/prompt" :noweb yes :shebang "#!/bin/bash"
 source "/usr/share/git/git-prompt.sh" # Default when installing Git
 
 # Configure `__git_ps1` to tell us as much as possible
@@ -339,41 +325,44 @@ export GIT_PS1_HIDE_IF_PWD_IGNORED=1
 # Colorful prompt for Bash!
 export PS1='\w\[\e[0;33m\]$(__git_ps1 " (%s)")\[\e[0m\]>> '
  
-# Unrelated but useful: avoid auto-édit on successful merges, starting with Git 2.0
+# Unrelated but useful: avoid auto-edit on successful merges, starting with Git 2.0
 export GIT_MERGE_AUTOEDIT=no
 #+end_src
 
 Now that we've set the prompt, let's make sure to source this configuration from =.bashrc=:
-
-#+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"
-if [ -r "${HOME}/.config/shell/prompt" ]; then
-    source "${HOME}/.config/shell/prompt"
+#+begin_src bash :noweb-ref shell-bashrc
+if [ -r "${HOME}/.config/bash/prompt" ]; then
+    source "${HOME}/.config/bash/prompt"
 fi
 #+end_src
 
 * Miscellaneous Interactive Shell Customizations
 
-Finally, we're left with some interactive shell customizations that don't fit under any other heading. These are either set in or conditionally sourced from =$HOME/.config/shell/interactive=, which is listed below:
+Finally, we're left with some interactive shell customizations that don't fit under any other heading. These are either set in or conditionally sourced from =$HOME/.config/bash/interactive=, which is listed below:
 
-#+caption: Source listing for =.config/shell/interactive=.
-#+begin_src sh :tangle "shell/.config/shell/interactive" :noweb yes :shebang "#!/bin/bash\n"
-<<shell-interactive>>
+#+caption: Source listing for =.config/bash/interactive=.
+#+begin_src bash :tangle "shell/.config/bash/interactive" :noweb yes :shebang "#!/bin/bash"
+<<bash-history>>
+<<bash-completion>>
+<<misc-interactive-customization>>
 #+end_src
 
 As these are interactive, Bash-specific customizations, we want to source it from our =.bashrc= by adding the following line to that file:
 
-#+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"
-if [ -r "${HOME}/.config/shell/interactive" ]; then
-    source "${HOME}/.config/shell/interactive"
+#+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
+if [ -r "${HOME}/.config/bash/interactive" ]; then
+    source "${HOME}/.config/bash/interactive"
 fi
 #+end_src
 
 ** Bash Completion
+:properties:
+:header-args:bash: :noweb-ref bash-completion
+:end:
 
 To enable completion in Bash, you must install the appropriate package for your distribution (in Arch, =pacman -S bash-completion=) and one of the two files:
 
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n\n"
-# Enable interactive Bash completion
+#+begin_src bash
 if [ -r "/usr/share/bash-completion/bash_completion" ]; then
     source "/usr/share/bash-completion/bash_completion"
 elif [ -r "/etc/bash_completion" ]; then
@@ -384,70 +373,86 @@ fi
 This configuration is taken from the default =.bashrc= shipped with Debian; the former path is the path that the =bash-completion= package installs to. This can actually be modified [[https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html][programmatically]] by packages.
 
 ** Bash History
+:properties:
+:header-args:bash: :noweb-ref bash-history
+:end:
+
+*** Set history options
+
+Set a shell options to control how history is stored:
+
+- =cmdhist= :: saves all lines in a multi-line command in the history file, which makes it easy to modify multi-line commands that we've run.
+- =histreedit= :: allows a user to re-edit a failed history substitution instead of clearing the prompt.
+- =histappend= :: append to history, not overwrite it.
+- =histverify= :: results of history are not immediately passed to the shell parser. The resulting line is loaded into the Readline editing buffer, allowing modifications. 
+
+#+begin_src bash
+shopt -s cmdhist    
+shopt -s histreedit 
+shopt -s histappend 
+shopt -s histverify
+#+end_src
+
+*** Set history file
 
 Bash has command history support that allows you to recall previously run commands and run them again at a later session. Command history is stored both in memory and in a special file written to disk, =$HOME/.bash_history=.
 
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
-# History configuration
-#+end_src
-
-#+begin_srC sh :noweb-ref shell-interactive :noweb-sep "\n"
+#+begin_src bash
 export HISTFILE="${HOME}/.bash_history"
 #+end_src
 
-When saving command history in memory, I want to prevent two things from being added: lines beginning with whitespace (in case we have a reason to run a command and not remember it) and duplicate lines (which are just a nuisance to scroll through). This can be done by setting the =$HISTCONTROL= environment variable to =ignoreboth=. We don't want this environment variable to leak into subshells (especially noninteractive subshells), so we don't =export= it.
+*** Save only a subset of history
 
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n"
-HISTCONTROL=ignoreboth:erasedups
+When saving command history in memory, I want to prevent two things from being added: 
+- =ignorespace= :: lines beginning with whitespace (in case we have a reason to run a command and not remember it);
+- =ignoredups= :: duplicate lines (which are just a nuisance to scroll through). 
+- =erasedups= :: causes all previous lines matching the current line to be removed from the history list before that line is saved. 
+
+We don't want this environment variable to leak into subshells (especially noninteractive subshells), so we don't =export= it.
+
+#+begin_src bash
+HISTCONTROL=ignorespace:ignoredups:erasedups
 #+end_src
 
-I also ignore too short commands, like =ls=.
+*** Commands to ignore in history
 
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n\n"
+I also ignore too short commands, like =ls= and =pwd=. This is only junk in the history, as it is simple and fast to type.
+
+#+begin_src bash
 export HISTIGNORE="?:??:???:$HISTIGNORE"
 #+end_src
 
+*** Unlimited history
+
 I also like to keep an unlimited history list
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n\n"
-export HISTSIZE=
-export HISTFILESIZE=
+#+begin_src bash
+export HISTSIZE=-1
+export HISTFILESIZE=-1
 #+end_src
 
-I also want to set a few shell options to control how history is stored as well:
+*** Preserve history across tmux sessions
 
-- =cmdhist= saves all lines in a multi-line command in the history file,
-  which makes it easy to modify multi-line commands that we've run.
-- =histreedit= allows a user to re-edit a failed history substitution
-  instead of clearing the prompt.
-- =histappend= append to history, not overwrite it.
-
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n"
-shopt -s cmdhist
-shopt -s histreedit
-shopt -s histappend
-shopt -s histverify # History command is not executed immediately
-#+end_src
-
-I use this to preserve the history across tmux sessions
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n\n"
+#+begin_src bash
 export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -n; history -c; history -r"
 #+end_src
 
-*** Miscellaneous Configuration
+** Miscellaneous Configuration
+:properties:
+:header-args:bash: :noweb-ref misc-interactive-customization
+:end:
 
 Finally, we have the following configuration options that don't fit anywhere else.
 
-#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
-# Miscellaneous configuration items
-#+END_SRC
+*** Extended pattern matching
 
-I tend to use the extended pattern matching
-#+BEGIN_SRC sh :noweb-ref shell-interactive :noweb-sep "\n" :exports none
+#+begin_src bash 
 shopt -s extglob
-#+END_SRC
+#+end_src
+
+*** Checks the window size after each external (non-builtin) command
 
 We want to check the size of the terminal window after each command and, if necessary, update the values of =$LINES= and =$COLUMNS=. If any command uses the size of the terminal window to intelligently format output (think =ls= selecting the number of columns to output filenames in), this will give it up-to-date information on the terminal size. The shell option =checkwinsize= does this for us.
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n\n"
+#+begin_src bash
 shopt -s checkwinsize
 #+end_src
 
@@ -463,7 +468,7 @@ These options will make =less= more friendly:
 - =-R= :: =less= will display ANSI "color" escape sequences like =ESC [ ... m=, preserving then =ls= colors for example.
 - =-S= :: =less= will chop long lines instead of truncate them 
 
-#+begin_src sh :noweb-ref shell-interactive :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
 export PAGER="less"
 export LESS="-i -F -g -z-4 -R -S"
 #+end_src
@@ -478,7 +483,7 @@ The configuration options in =.inputrc= are particularly useful for customising 
 
 Let's start off by moving the configuration to the correct XDG Basedir by adding this to the =xdg= script we detail in the [[*XDG Base Directories][XDG Basedirs section]].
 
-#+begin_src sh :noweb-ref shell-xdg :noweb-sep "\n"
+#+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n"
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
 #+end_src
 
@@ -531,13 +536,1329 @@ set visible-stats On
 set menu-complete-display-prefix On
 #+end_src
 
-* Dircolors
+** Bindings for specific applications
+*** Bash
 
-#+begin_src sh :noweb-ref shell-bashrc :noweb-sep "\n"
-eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
+$if bash
+  "\C-o": "> ttt.txt"
+$endif
 #+end_src
 
-#+begin_src sh :tangle "shell/.config/shell/dir_colors" :noweb yes
+*** R
+
+#+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
+$if R
+  "<<": "<- "
+  "\C-j": "\C-a(\C-e)"
+  "\C-xd": "q('no')\n"
+$endif
+#+end_src
+
+* Color setup for =ls=
+
+Output commands to set the LS_COLORS environment variable. 
+
+#+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
+# if [[ -n "${TMUX}" ]]; then
+#   if [ $(date +'(%H-18)*3600 + (%M-00)*60' | bc) -le 0 ] && [ $(date +'(%H-06)*3600 + (%M-00)*60' | bc) -ge 0 ]; then 
+#     # xterm -rv -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
+#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#   else 
+#     # xterm -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
+#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
+#   fi
+# fi
+#+end_src
+
+Took the themes from https://github.com/seebi/dircolors-solarized
+
+** COMMENT 256-dark
+
+#+begin_src bash :tangle "shell/.config/shell/dir_colors_256_dark" :noweb yes
+
+# Dark 256 color solarized theme for the color GNU ls utility.
+# Used and tested with dircolors (GNU coreutils) 8.5
+#
+# @author  {@link http://sebastian.tramp.name Sebastian Tramp}
+# @license http://sam.zoy.org/wtfpl/  Do What The Fuck You Want To Public License (WTFPL)
+#
+# More Information at
+# https://github.com/seebi/dircolors-solarized
+
+# Term Section
+TERM Eterm
+TERM alacritty
+TERM ansi
+TERM color-xterm
+TERM con132x25
+TERM con132x30
+TERM con132x43
+TERM con132x60
+TERM con80x25
+TERM con80x28
+TERM con80x30
+TERM con80x43
+TERM con80x50
+TERM con80x60
+TERM cons25
+TERM console
+TERM cygwin
+TERM dtterm
+TERM dvtm
+TERM dvtm-256color
+TERM eterm-color
+TERM fbterm
+TERM gnome
+TERM gnome-256color
+TERM jfbterm
+TERM konsole
+TERM konsole-256color
+TERM kterm
+TERM linux
+TERM linux-c
+TERM mach-color
+TERM mlterm
+TERM putty
+TERM putty-256color
+TERM rxvt
+TERM rxvt-256color
+TERM rxvt-cygwin
+TERM rxvt-cygwin-native
+TERM rxvt-unicode
+TERM rxvt-unicode256
+TERM rxvt-unicode-256color
+TERM screen
+TERM screen-16color
+TERM screen-16color-bce
+TERM screen-16color-s
+TERM screen-16color-bce-s
+TERM screen-256color
+TERM screen-256color-bce
+TERM screen-256color-s
+TERM screen-256color-bce-s
+TERM screen-256color-italic
+TERM screen-bce
+TERM screen-w
+TERM screen.linux
+TERM screen.xterm-256color
+TERM st
+TERM st-meta
+TERM st-256color
+TERM st-meta-256color
+TERM tmux
+TERM tmux-256color
+TERM vt100
+TERM xterm
+TERM xterm-16color
+TERM xterm-256color
+TERM xterm-256color-italic
+TERM xterm-88color
+TERM xterm-color
+TERM xterm-debian
+TERM xterm-termite
+
+## Documentation
+#
+# standard colors
+#
+# Below are the color init strings for the basic file types. A color init
+# string consists of one or more of the following numeric codes:
+# Attribute codes:
+# 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+# Text color codes:
+# 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+# Background color codes:
+# 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+#
+#
+# 256 color support
+# see here: http://www.mail-archive.com/bug-coreutils@gnu.org/msg11030.html)
+#
+# Text 256 color coding:
+# 38;5;COLOR_NUMBER
+# Background 256 color coding:
+# 48;5;COLOR_NUMBER
+
+## Special files
+
+NORMAL 00;38;5;244 # no color code at all
+#FILE 00 # regular file: use no color at all
+RESET 0 # reset to "normal" color
+DIR 00;38;5;33 # directory 01;34
+LINK 00;38;5;37 # symbolic link. (If you set this to 'target' instead of a
+ # numerical value, the color is as for the file pointed to.)
+MULTIHARDLINK 00 # regular file with more than one link
+FIFO 48;5;230;38;5;136;01 # pipe
+SOCK 48;5;230;38;5;136;01 # socket
+DOOR 48;5;230;38;5;136;01 # door
+BLK 48;5;230;38;5;244;01 # block device driver
+CHR 48;5;230;38;5;244;01 # character device driver
+ORPHAN 48;5;235;38;5;160 # symlink to nonexistent file, or non-stat'able file
+SETUID 48;5;160;38;5;230 # file that is setuid (u+s)
+SETGID 48;5;136;38;5;230 # file that is setgid (g+s)
+CAPABILITY 30;41 # file with capability
+STICKY_OTHER_WRITABLE 48;5;64;38;5;230 # dir that is sticky and other-writable (+t,o+w)
+OTHER_WRITABLE 48;5;235;38;5;33 # dir that is other-writable (o+w) and not sticky
+STICKY 48;5;33;38;5;230 # dir with the sticky bit set (+t) and not other-writable
+# This is for files with execute permission:
+EXEC 00;38;5;64
+
+## Archives or compressed (violet + bold for compression)
+.tar    00;38;5;61
+.tgz    00;38;5;61
+.arj    00;38;5;61
+.taz    00;38;5;61
+.lzh    00;38;5;61
+.lzma   00;38;5;61
+.tlz    00;38;5;61
+.txz    00;38;5;61
+.zip    00;38;5;61
+.z      00;38;5;61
+.Z      00;38;5;61
+.dz     00;38;5;61
+.gz     00;38;5;61
+.lz     00;38;5;61
+.xz     00;38;5;61
+.bz2    00;38;5;61
+.bz     00;38;5;61
+.tbz    00;38;5;61
+.tbz2   00;38;5;61
+.tz     00;38;5;61
+.deb    00;38;5;61
+.rpm    00;38;5;61
+.jar    00;38;5;61
+.rar    00;38;5;61
+.ace    00;38;5;61
+.zoo    00;38;5;61
+.cpio   00;38;5;61
+.7z     00;38;5;61
+.rz     00;38;5;61
+.apk    00;38;5;61
+.gem    00;38;5;61
+
+# Image formats (yellow)
+.jpg    00;38;5;136
+.JPG    00;38;5;136 #stupid but needed
+.jpeg   00;38;5;136
+.gif    00;38;5;136
+.bmp    00;38;5;136
+.pbm    00;38;5;136
+.pgm    00;38;5;136
+.ppm    00;38;5;136
+.tga    00;38;5;136
+.xbm    00;38;5;136
+.xpm    00;38;5;136
+.tif    00;38;5;136
+.tiff   00;38;5;136
+.png    00;38;5;136
+.PNG    00;38;5;136
+.svg    00;38;5;136
+.svgz   00;38;5;136
+.mng    00;38;5;136
+.pcx    00;38;5;136
+.dl     00;38;5;136
+.xcf    00;38;5;136
+.xwd    00;38;5;136
+.yuv    00;38;5;136
+.cgm    00;38;5;136
+.emf    00;38;5;136
+.eps    00;38;5;136
+.CR2    00;38;5;136
+.ico    00;38;5;136
+.nef    00;38;5;136 # Nikon RAW format
+.NEF    00;38;5;136
+
+# Files of special interest (base1)
+.tex             00;38;5;245
+.rdf             00;38;5;245
+.owl             00;38;5;245
+.n3              00;38;5;245
+.ttl             00;38;5;245
+.nt              00;38;5;245
+.torrent         00;38;5;245
+.xml             00;38;5;245
+*Makefile        00;38;5;245
+*Rakefile        00;38;5;245
+*Dockerfile      00;38;5;245
+*build.xml       00;38;5;245
+*rc              00;38;5;245
+*1               00;38;5;245
+.nfo             00;38;5;245
+*README          00;38;5;245
+*README.txt      00;38;5;245
+*readme.txt      00;38;5;245
+.md              00;38;5;245
+*README.markdown 00;38;5;245
+.ini             00;38;5;245
+.yml             00;38;5;245
+.cfg             00;38;5;245
+.conf            00;38;5;245
+.h               00;38;5;245
+.hpp             00;38;5;245
+.c               00;38;5;245
+.cpp             00;38;5;245
+.cxx             00;38;5;245
+.cc              00;38;5;245
+.objc            00;38;5;245
+.sqlite          00;38;5;245
+.go              00;38;5;245
+.sql             00;38;5;245
+.csv             00;38;5;245
+
+# "unimportant" files as logs and backups (base01)
+.log        00;38;5;240
+.bak        00;38;5;240
+.aux        00;38;5;240
+.lof        00;38;5;240
+.lol        00;38;5;240
+.lot        00;38;5;240
+.out        00;38;5;240
+.toc        00;38;5;240
+.bbl        00;38;5;240
+.blg        00;38;5;240
+*~          00;38;5;240
+*#          00;38;5;240
+.part       00;38;5;240
+.incomplete 00;38;5;240
+.swp        00;38;5;240
+.tmp        00;38;5;240
+.temp       00;38;5;240
+.o          00;38;5;240
+.pyc        00;38;5;240
+.class      00;38;5;240
+.cache      00;38;5;240
+
+# Audio formats (orange)
+.aac    00;38;5;166
+.au     00;38;5;166
+.flac   00;38;5;166
+.mid    00;38;5;166
+.midi   00;38;5;166
+.mka    00;38;5;166
+.mp3    00;38;5;166
+.mpc    00;38;5;166
+.ogg    00;38;5;166
+.opus   00;38;5;166
+.ra     00;38;5;166
+.wav    00;38;5;166
+.m4a    00;38;5;166
+# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+.axa    00;38;5;166
+.oga    00;38;5;166
+.spx    00;38;5;166
+.xspf   00;38;5;166
+
+# Video formats (as audio + bold)
+.mov    00;38;5;166
+.MOV    00;38;5;166
+.mpg    00;38;5;166
+.mpeg   00;38;5;166
+.m2v    00;38;5;166
+.mkv    00;38;5;166
+.ogm    00;38;5;166
+.mp4    00;38;5;166
+.m4v    00;38;5;166
+.mp4v   00;38;5;166
+.vob    00;38;5;166
+.qt     00;38;5;166
+.nuv    00;38;5;166
+.wmv    00;38;5;166
+.asf    00;38;5;166
+.rm     00;38;5;166
+.rmvb   00;38;5;166
+.flc    00;38;5;166
+.avi    00;38;5;166
+.fli    00;38;5;166
+.flv    00;38;5;166
+.gl     00;38;5;166
+.m2ts   00;38;5;166
+.divx   00;38;5;166
+.webm   00;38;5;166
+# http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
+.axv 00;38;5;166
+.anx 00;38;5;166
+.ogv 00;38;5;166
+.ogx 00;38;5;166
+#+end_src
+
+** COMMENT ansi-dark
+
+#+begin_src bash :tangle "shell/.config/shell/dir_colors_ansi_dark" :noweb yes
+# Exact Solarized Dark color theme for the color GNU ls utility.
+# Designed for dircolors (GNU coreutils) 5.97
+#
+# This simple theme was simultaneously designed for these terminal color schemes:
+# - Solarized dark  (best)
+# - Solarized light
+# - default dark
+# - default light
+# with a slight optimization for Solarized Dark.
+#
+# How the colors were selected:
+# - Terminal emulators often have an option typically enabled by default that makes
+#   bold a different color.  It is important to leave this option enabled so that
+#   you can access the entire 16-color Solarized palette, and not just 8 colors.
+# - We favor universality over a greater number of colors.  So we limit the number
+#   of colors so that this theme will work out of the box in all terminals,
+#   Solarized or not, dark or light.
+# - We choose to have the following category of files:
+#   NORMAL & FILE, DIR, LINK, EXEC and
+#   editable text including source, unimportant text, binary docs & multimedia source
+#   files, viewable multimedia, archived/compressed, and unimportant non-text
+# - For uniqueness, we stay away from the Solarized foreground colors are -- either
+#   base00 (brightyellow) or base0 (brightblue).  However, they can be used if
+#   you know what the bg/fg colors of your terminal are, in order to optimize the display.
+# - 3 different options are provided: universal, solarized dark, and solarized light.
+#   The only difference between the universal scheme and one that's optimized for
+#   dark/light is the color of "unimportant" files, which should blend more with the
+#   background
+# - We note that blue is the hardest color to see on dark bg and yellow is the hardest
+#   color to see on light bg (with blue being particularly bad).  So we choose yellow
+#   for multimedia files which are usually accessed in a GUI folder browser anyway.
+#   And blue is kept for custom use of this scheme's user.
+# - See table below to see the assignments.
+
+
+# Installation instructions:
+# This file goes in the /etc directory, and must be world readable.
+# You can copy this file to .dir_colors in your $HOME directory to override
+# the system defaults.
+
+# COLOR needs one of these arguments: 'tty' colorizes output to ttys, but not
+# pipes. 'all' adds color characters to all output. 'none' shuts colorization
+# off.
+COLOR tty
+
+# Below, there should be one TERM entry for each termtype that is colorizable
+TERM alacritty
+TERM ansi
+TERM color_xterm
+TERM color-xterm
+TERM con132x25
+TERM con132x30
+TERM con132x43
+TERM con132x60
+TERM con80x25
+TERM con80x28
+TERM con80x30
+TERM con80x43
+TERM con80x50
+TERM con80x60
+TERM cons25
+TERM console
+TERM cygwin
+TERM dtterm
+TERM dvtm
+TERM dvtm-256color
+TERM Eterm
+TERM eterm-color
+TERM fbterm
+TERM gnome
+TERM gnome-256color
+TERM jfbterm
+TERM konsole
+TERM konsole-256color
+TERM kterm
+TERM linux
+TERM linux-c
+TERM mach-color
+TERM mlterm
+TERM nxterm
+TERM putty
+TERM putty-256color
+TERM rxvt
+TERM rxvt-256color
+TERM rxvt-cygwin
+TERM rxvt-cygwin-native
+TERM rxvt-unicode
+TERM rxvt-unicode256
+TERM rxvt-unicode-256color
+TERM screen
+TERM screen-16color
+TERM screen-16color-bce
+TERM screen-16color-s
+TERM screen-16color-bce-s
+TERM screen-256color
+TERM screen-256color-bce
+TERM screen-256color-s
+TERM screen-256color-bce-s
+TERM screen-256color-italic
+TERM screen-bce
+TERM screen-w
+TERM screen.linux
+TERM screen.xterm-256color
+TERM screen.xterm-new
+TERM st
+TERM st-meta
+TERM st-256color
+TERM st-meta-256color
+TERM tmux
+TERM tmux-256color
+TERM vt100
+TERM xterm
+TERM xterm-new
+TERM xterm-16color
+TERM xterm-256color
+TERM xterm-256color-italic
+TERM xterm-88color
+TERM xterm-color
+TERM xterm-debian
+TERM xterm-termite
+
+# EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
+EIGHTBIT 1
+
+#############################################################################
+# Below are the color init strings for the basic file types. A color init
+# string consists of one or more of the following numeric codes:
+#
+# Attribute codes:
+#   00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+# Text color codes:
+#   30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+# Background color codes:
+#   40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+#
+# NOTES:
+# - See http://www.oreilly.com/catalog/wdnut/excerpt/color_names.html
+# - Color combinations
+#   ANSI Color code       Solarized  Notes                Universal             SolDark              SolLight
+#   ~~~~~~~~~~~~~~~       ~~~~~~~~~  ~~~~~                ~~~~~~~~~             ~~~~~~~              ~~~~~~~~
+#   00    none                                            NORMAL, FILE          <SAME>               <SAME>
+#   30    black           base02
+#   01;30 bright black    base03     bg of SolDark
+#   31    red             red                             docs & mm src         <SAME>               <SAME>
+#   01;31 bright red      orange                          EXEC                  <SAME>               <SAME>
+#   32    green           green                           editable text         <SAME>               <SAME>
+#   01;32 bright green    base01                          unimportant text      <SAME>
+#   33    yellow          yellow     unclear in light bg  multimedia            <SAME>               <SAME>
+#   01;33 bright yellow   base00     fg of SolLight                             unimportant non-text
+#   34    blue            blue       unclear in dark bg   user customized       <SAME>               <SAME>
+#   01;34 bright blue     base0      fg in SolDark                                                   unimportant text
+#   35    magenta         magenta                         LINK                  <SAME>               <SAME>
+#   01;35 bright magenta  violet                          archive/compressed    <SAME>               <SAME>
+#   36    cyan            cyan                            DIR                   <SAME>               <SAME>
+#   01;36 bright cyan     base1                           unimportant non-text                       <SAME>
+#   37    white           base2
+#   01;37 bright white    base3      bg in SolLight
+#   05;37;41                         unclear in Putty dark
+
+
+### By file type
+
+# global default
+NORMAL 00
+# normal file
+FILE 00
+# directory
+DIR 34
+# 777 directory
+OTHER_WRITABLE 34;40
+# symbolic link
+LINK 35
+
+# pipe, socket, block device, character device (blue bg)
+FIFO 30;44
+SOCK 35;44
+DOOR 35;44 # Solaris 2.5 and later
+BLK  33;44
+CHR  37;44
+
+
+#############################################################################
+### By file attributes
+
+# Orphaned symlinks (blinking white on red)
+# Blink may or may not work (works on iTerm dark or light, and Putty dark)
+ORPHAN  05;37;41
+# ... and the files that orphaned symlinks point to (blinking white on red)
+MISSING 05;37;41
+
+# files with execute permission
+EXEC 01;31  # Unix
+.cmd 01;31  # Win
+.exe 01;31  # Win
+.com 01;31  # Win
+.bat 01;31  # Win
+.reg 01;31  # Win
+.app 01;31  # OSX
+
+#############################################################################
+### By extension
+
+# List any file extensions like '.gz' or '.tar' that you would like ls
+# to colorize below. Put the extension, a space, and the color init string.
+# (and any comments you want to add after a '#')
+
+### Text formats
+
+# Text that we can edit with a regular editor
+.txt 32
+.org 32
+.md 32
+.mkd 32
+
+# Source text
+.h 32
+.hpp 32
+.c 32
+.C 32
+.cc 32
+.cpp 32
+.cxx 32
+.objc 32
+.cl 32
+.sh 32
+.bash 32
+.csh 32
+.zsh 32
+.el 32
+.vim 32
+.java 32
+.pl 32
+.pm 32
+.py 32
+.rb 32
+.hs 32
+.php 32
+.htm 32
+.html 32
+.shtml 32
+.erb 32
+.haml 32
+.xml 32
+.rdf 32
+.css 32
+.sass 32
+.scss 32
+.less 32
+.js 32
+.coffee 32
+.man 32
+.0 32
+.1 32
+.2 32
+.3 32
+.4 32
+.5 32
+.6 32
+.7 32
+.8 32
+.9 32
+.l 32
+.n 32
+.p 32
+.pod 32
+.tex 32
+.go 32
+.sql 32
+.csv 32
+.sv 32
+.svh 32
+.v 32
+.vh 32
+.vhd 32
+
+### Multimedia formats
+
+# Image
+.bmp 33
+.cgm 33
+.dl 33
+.dvi 33
+.emf 33
+.eps 33
+.gif 33
+.jpeg 33
+.jpg 33
+.JPG 33
+.mng 33
+.pbm 33
+.pcx 33
+.pdf 33
+.pgm 33
+.png 33
+.PNG 33
+.ppm 33
+.pps 33
+.ppsx 33
+.ps 33
+.svg 33
+.svgz 33
+.tga 33
+.tif 33
+.tiff 33
+.xbm 33
+.xcf 33
+.xpm 33
+.xwd 33
+.xwd 33
+.yuv 33
+.nef 33 # Nikon RAW format
+.NEF 33
+
+# Audio
+.aac 33
+.au  33
+.flac 33
+.m4a 33
+.mid 33
+.midi 33
+.mka 33
+.mp3 33
+.mpa 33
+.mpeg 33
+.mpg 33
+.ogg  33
+.opus 33
+.ra 33
+.wav 33
+
+# Video
+.anx 33
+.asf 33
+.avi 33
+.axv 33
+.flc 33
+.fli 33
+.flv 33
+.gl 33
+.m2v 33
+.m4v 33
+.mkv 33
+.mov 33
+.MOV 33
+.mp4 33
+.mp4v 33
+.mpeg 33
+.mpg 33
+.nuv 33
+.ogm 33
+.ogv 33
+.ogx 33
+.qt 33
+.rm 33
+.rmvb 33
+.swf 33
+.vob 33
+.webm 33
+.wmv 33
+
+### Misc
+
+# Binary document formats and multimedia source
+.doc 31
+.docx 31
+.rtf 31
+.odt 31
+.dot 31
+.dotx 31
+.ott 31
+.xls 31
+.xlsx 31
+.ods 31
+.ots 31
+.ppt 31
+.pptx 31
+.odp 31
+.otp 31
+.fla 31
+.psd 31
+
+# Archives, compressed
+.7z   1;35
+.apk  1;35
+.arj  1;35
+.bin  1;35
+.bz   1;35
+.bz2  1;35
+.cab  1;35  # Win
+.deb  1;35
+.dmg  1;35  # OSX
+.gem  1;35
+.gz   1;35
+.iso  1;35
+.jar  1;35
+.msi  1;35  # Win
+.rar  1;35
+.rpm  1;35
+.tar  1;35
+.tbz  1;35
+.tbz2 1;35
+.tgz  1;35
+.tx   1;35
+.war  1;35
+.xpi  1;35
+.xz   1;35
+.z    1;35
+.Z    1;35
+.zip  1;35
+
+# For testing
+.ANSI-30-black 30
+.ANSI-01;30-brblack 01;30
+.ANSI-31-red 31
+.ANSI-01;31-brred 01;31
+.ANSI-32-green 32
+.ANSI-01;32-brgreen 01;32
+.ANSI-33-yellow 33
+.ANSI-01;33-bryellow 01;33
+.ANSI-34-blue 34
+.ANSI-01;34-brblue 01;34
+.ANSI-35-magenta 35
+.ANSI-01;35-brmagenta 01;35
+.ANSI-36-cyan 36
+.ANSI-01;36-brcyan 01;36
+.ANSI-37-white 37
+.ANSI-01;37-brwhite 01;37
+
+#############################################################################
+# Your customizations
+
+# Unimportant text files
+# For universal scheme, use brightgreen 01;32
+# For optimal on light bg (but too prominent on dark bg), use white 01;34
+.log 01;32
+*~ 01;32
+*# 01;32
+#.log 01;34
+#*~ 01;34
+#*# 01;34
+
+# Unimportant non-text files
+# For universal scheme, use brightcyan 01;36
+# For optimal on dark bg (but too prominent on light bg), change to 01;33
+#.bak 01;36
+#.BAK 01;36
+#.old 01;36
+#.OLD 01;36
+#.org_archive 01;36
+#.off 01;36
+#.OFF 01;36
+#.dist 01;36
+#.DIST 01;36
+#.orig 01;36
+#.ORIG 01;36
+#.swp 01;36
+#.swo 01;36
+#*,v 01;36
+.bak 01;33
+.BAK 01;33
+.old 01;33
+.OLD 01;33
+.org_archive 01;33
+.off 01;33
+.OFF 01;33
+.dist 01;33
+.DIST 01;33
+.orig 01;33
+.ORIG 01;33
+.swp 01;33
+.swo 01;33
+*,v 01;33
+
+# The brightmagenta (Solarized: purple) color is free for you to use for your
+# custom file type
+.gpg 34
+.gpg 34
+.pgp 34
+.asc 34
+.3des 34
+.aes 34
+.enc 34
+.sqlite 34
+#+end_src
+
+** COMMENT ansi-light
+
+#+begin_src bash :tangle "shell/.config/shell/dir_colors_ansi_light" :noweb yes
+# Exact Solarized Light color theme for the color GNU ls utility.
+# Designed for dircolors (GNU coreutils) 5.97
+#
+# This simple theme was simultaneously designed for these terminal color schemes:
+# - Solarized dark
+# - Solarized light (best)
+# - default dark
+# - default light
+# with a slight optimization for Solarized Light.
+#
+# How the colors were selected:
+# - Terminal emulators often have an option typically enabled by default that makes
+#   bold a different color.  It is important to leave this option enabled so that
+#   you can access the entire 16-color Solarized palette, and not just 8 colors.
+# - We favor universality over a greater number of colors.  So we limit the number
+#   of colors so that this theme will work out of the box in all terminals,
+#   Solarized or not, dark or light.
+# - We choose to have the following category of files:
+#   NORMAL & FILE, DIR, LINK, EXEC and
+#   editable text including source, unimportant text, binary docs & multimedia source
+#   files, viewable multimedia, archived/compressed, and unimportant non-text
+# - For uniqueness, we stay away from the Solarized foreground colors are -- either
+#   base00 (brightyellow) or base0 (brightblue).  However, they can be used if
+#   you know what the bg/fg colors of your terminal are, in order to optimize the display.
+# - 3 different options are provided: universal, solarized dark, and solarized light.
+#   The only difference between the universal scheme and one that's optimized for
+#   dark/light is the color of "unimportant" files, which should blend more with the
+#   background
+# - We note that blue is the hardest color to see on dark bg and yellow is the hardest
+#   color to see on light bg (with blue being particularly bad).  So we choose yellow
+#   for multimedia files which are usually accessed in a GUI folder browser anyway.
+#   And blue is kept for custom use of this scheme's user.
+# - See table below to see the assignments.
+
+
+# Installation instructions:
+# This file goes in the /etc directory, and must be world readable.
+# You can copy this file to .dir_colors in your $HOME directory to override
+# the system defaults.
+
+# COLOR needs one of these arguments: 'tty' colorizes output to ttys, but not
+# pipes. 'all' adds color characters to all output. 'none' shuts colorization
+# off.
+COLOR tty
+
+# Below, there should be one TERM entry for each termtype that is colorizable
+TERM alacritty
+TERM ansi
+TERM color_xterm
+TERM color-xterm
+TERM con132x25
+TERM con132x30
+TERM con132x43
+TERM con132x60
+TERM con80x25
+TERM con80x28
+TERM con80x30
+TERM con80x43
+TERM con80x50
+TERM con80x60
+TERM cons25
+TERM console
+TERM cygwin
+TERM dtterm
+TERM dvtm
+TERM dvtm-256color
+TERM Eterm
+TERM eterm-color
+TERM fbterm
+TERM gnome
+TERM gnome-256color
+TERM jfbterm
+TERM konsole
+TERM konsole-256color
+TERM kterm
+TERM linux
+TERM linux-c
+TERM mach-color
+TERM mlterm
+TERM nxterm
+TERM putty
+TERM putty-256color
+TERM rxvt
+TERM rxvt-256color
+TERM rxvt-cygwin
+TERM rxvt-cygwin-native
+TERM rxvt-unicode
+TERM rxvt-unicode256
+TERM rxvt-unicode-256color
+TERM screen
+TERM screen-16color
+TERM screen-16color-bce
+TERM screen-16color-s
+TERM screen-16color-bce-s
+TERM screen-256color
+TERM screen-256color-bce
+TERM screen-256color-s
+TERM screen-256color-bce-s
+TERM screen-256color-italic
+TERM screen-bce
+TERM screen-w
+TERM screen.linux
+TERM screen.xterm-256color
+TERM screen.xterm-new
+TERM st
+TERM st-meta
+TERM st-256color
+TERM st-meta-256color
+TERM tmux
+TERM tmux-256color
+TERM vt100
+TERM xterm
+TERM xterm-new
+TERM xterm-16color
+TERM xterm-256color
+TERM xterm-256color-italic
+TERM xterm-88color
+TERM xterm-color
+TERM xterm-debian
+TERM xterm-termite
+
+# EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
+EIGHTBIT 1
+
+#############################################################################
+# Below are the color init strings for the basic file types. A color init
+# string consists of one or more of the following numeric codes:
+#
+# Attribute codes:
+#   00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
+# Text color codes:
+#   30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
+# Background color codes:
+#   40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
+#
+# NOTES:
+# - See http://www.oreilly.com/catalog/wdnut/excerpt/color_names.html
+# - Color combinations
+#   ANSI Color code       Solarized  Notes                Universal             SolDark              SolLight
+#   ~~~~~~~~~~~~~~~       ~~~~~~~~~  ~~~~~                ~~~~~~~~~             ~~~~~~~              ~~~~~~~~
+#   00    none                                            NORMAL, FILE          <SAME>               <SAME>
+#   30    black           base02
+#   01;30 bright black    base03     bg of SolDark
+#   31    red             red                             docs & mm src         <SAME>               <SAME>
+#   01;31 bright red      orange                          EXEC                  <SAME>               <SAME>
+#   32    green           green                           editable text         <SAME>               <SAME>
+#   01;32 bright green    base01                          unimportant text      <SAME>
+#   33    yellow          yellow     unclear in light bg  multimedia            <SAME>               <SAME>
+#   01;33 bright yellow   base00     fg of SolLight                             unimportant non-text
+#   34    blue            blue       unclear in dark bg   user customized       <SAME>               <SAME>
+#   01;34 bright blue     base0      fg in SolDark                                                   unimportant text
+#   35    magenta         magenta                         LINK                  <SAME>               <SAME>
+#   01;35 bright magenta  violet                          archive/compressed    <SAME>               <SAME>
+#   36    cyan            cyan                            DIR                   <SAME>               <SAME>
+#   01;36 bright cyan     base1                           unimportant non-text                       <SAME>
+#   37    white           base2
+#   01;37 bright white    base3      bg in SolLight
+#   05;37;41                         unclear in Putty dark
+
+
+### By file type
+
+# global default
+NORMAL 00
+# normal file
+FILE 00
+# directory
+DIR 36
+# XX2, XX3, XX6, and XX7 directories
+OTHER_WRITABLE 34;47
+# symbolic link
+LINK 35
+
+# pipe, socket, block device, character device (blue bg)
+FIFO 30;44
+SOCK 35;44
+DOOR 35;44 # Solaris 2.5 and later
+BLK  33;44
+CHR  37;44
+
+
+#############################################################################
+### By file attributes
+
+# Orphaned symlinks (blinking white on red)
+# Blink may or may not work (works on iTerm dark or light, and Putty dark)
+ORPHAN  05;37;41
+# ... and the files that orphaned symlinks point to (blinking white on red)
+MISSING 05;37;41
+
+# files with execute permission
+EXEC 01;31  # Unix
+.cmd 01;31  # Win
+.exe 01;31  # Win
+.com 01;31  # Win
+.bat 01;31  # Win
+.reg 01;31  # Win
+.app 01;31  # OSX
+
+#############################################################################
+### By extension
+
+# List any file extensions like '.gz' or '.tar' that you would like ls
+# to colorize below. Put the extension, a space, and the color init string.
+# (and any comments you want to add after a '#')
+
+### Text formats
+
+# Text that we can edit with a regular editor
+.txt 32
+.org 32
+.md 32
+.mkd 32
+
+# Source text
+.h 32
+.hpp 32
+.c 32
+.C 32
+.cc 32
+.cpp 32
+.cxx 32
+.objc 32
+.cl 32
+.sh 32
+.bash 32
+.csh 32
+.zsh 32
+.el 32
+.vim 32
+.java 32
+.pl 32
+.pm 32
+.py 32
+.rb 32
+.hs 32
+.php 32
+.htm 32
+.html 32
+.shtml 32
+.erb 32
+.haml 32
+.xml 32
+.rdf 32
+.css 32
+.sass 32
+.scss 32
+.less 32
+.js 32
+.coffee 32
+.man 32
+.0 32
+.1 32
+.2 32
+.3 32
+.4 32
+.5 32
+.6 32
+.7 32
+.8 32
+.9 32
+.l 32
+.n 32
+.p 32
+.pod 32
+.tex 32
+.go 32
+.sql 32
+.csv 32
+.sv 32
+.svh 32
+.v 32
+.vh 32
+.vhd 32
+
+### Multimedia formats
+
+# Image
+.bmp 33
+.cgm 33
+.dl 33
+.dvi 33
+.emf 33
+.eps 33
+.gif 33
+.jpeg 33
+.jpg 33
+.JPG 33
+.mng 33
+.pbm 33
+.pcx 33
+.pdf 33
+.pgm 33
+.png 33
+.PNG 33
+.ppm 33
+.pps 33
+.ppsx 33
+.ps 33
+.svg 33
+.svgz 33
+.tga 33
+.tif 33
+.tiff 33
+.xbm 33
+.xcf 33
+.xpm 33
+.xwd 33
+.xwd 33
+.yuv 33
+.nef 33 # Nikon RAW format
+.NEF 33
+
+# Audio
+.aac 33
+.au  33
+.flac 33
+.m4a 33
+.mid 33
+.midi 33
+.mka 33
+.mp3 33
+.mpa 33
+.mpeg 33
+.mpg 33
+.ogg  33
+.opus 33
+.ra 33
+.wav 33
+
+# Video
+.anx 33
+.asf 33
+.avi 33
+.axv 33
+.flc 33
+.fli 33
+.flv 33
+.gl 33
+.m2v 33
+.m4v 33
+.mkv 33
+.mov 33
+.MOV 33
+.mp4 33
+.mp4v 33
+.mpeg 33
+.mpg 33
+.nuv 33
+.ogm 33
+.ogv 33
+.ogx 33
+.qt 33
+.rm 33
+.rmvb 33
+.swf 33
+.vob 33
+.webm 33
+.wmv 33
+
+### Misc
+
+# Binary document formats and multimedia source
+.doc 31
+.docx 31
+.rtf 31
+.odt 31
+.dot 31
+.dotx 31
+.ott 31
+.xls 31
+.xlsx 31
+.ods 31
+.ots 31
+.ppt 31
+.pptx 31
+.odp 31
+.otp 31
+.fla 31
+.psd 31
+
+# Archives, compressed
+.7z   1;35
+.apk  1;35
+.arj  1;35
+.bin  1;35
+.bz   1;35
+.bz2  1;35
+.cab  1;35  # Win
+.deb  1;35
+.dmg  1;35  # OSX
+.gem  1;35
+.gz   1;35
+.iso  1;35
+.jar  1;35
+.msi  1;35  # Win
+.rar  1;35
+.rpm  1;35
+.tar  1;35
+.tbz  1;35
+.tbz2 1;35
+.tgz  1;35
+.tx   1;35
+.war  1;35
+.xpi  1;35
+.xz   1;35
+.z    1;35
+.Z    1;35
+.zip  1;35
+
+# For testing
+.ANSI-30-black 30
+.ANSI-01;30-brblack 01;30
+.ANSI-31-red 31
+.ANSI-01;31-brred 01;31
+.ANSI-32-green 32
+.ANSI-01;32-brgreen 01;32
+.ANSI-33-yellow 33
+.ANSI-01;33-bryellow 01;33
+.ANSI-34-blue 34
+.ANSI-01;34-brblue 01;34
+.ANSI-35-magenta 35
+.ANSI-01;35-brmagenta 01;35
+.ANSI-36-cyan 36
+.ANSI-01;36-brcyan 01;36
+.ANSI-37-white 37
+.ANSI-01;37-brwhite 01;37
+
+#############################################################################
+# Your customizations
+
+# Unimportant text files
+# For universal scheme, use brightgreen 01;32
+# For optimal on light bg (but too prominent on dark bg), use white 01;34
+#.log 01;32
+#*~ 01;32
+#*# 01;32
+.log 01;34
+*~ 01;34
+*# 01;34
+
+# Unimportant non-text files
+# For universal scheme, use brightcyan 01;36
+# For optimal on dark bg (but too prominent on light bg), change to 01;33
+.bak 01;36
+.BAK 01;36
+.old 01;36
+.OLD 01;36
+.org_archive 01;36
+.off 01;36
+.OFF 01;36
+.dist 01;36
+.DIST 01;36
+.orig 01;36
+.ORIG 01;36
+.swp 01;36
+.swo 01;36
+*,v 01;36
+#.bak 01;33
+#.BAK 01;33
+#.old 01;33
+#.OLD 01;33
+#.org_archive 01;33
+#.off 01;33
+#.OFF 01;33
+#.dist 01;33
+#.DIST 01;33
+#.orig 01;33
+#.ORIG 01;33
+#.swp 01;33
+#.swo 01;33
+#*,v 01;33
+
+# The brightmagenta (Solarized: purple) color is free for you to use for your
+# custom file type
+.gpg 34
+.gpg 34
+.pgp 34
+.asc 34
+.3des 34
+.aes 34
+.enc 34
+.sqlite 34
+#+end_src
+
+#+begin_src bash :tangle "shell/.config/shell/dir_colors" :noweb yes
 # Dark 256 color solarized theme for the color GNU ls utility.
 # Used and tested with dircolors (GNU coreutils) 8.5
 #

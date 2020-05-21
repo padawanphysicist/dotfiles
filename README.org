@@ -38,7 +38,7 @@ for directory in */ ; do stow ${directory} ; done
 
 The configuration files written in literate style are:
 
-#+begin_src sh :results raw :exports results
+#+begin_src bash :results raw :exports results
 for file in *.org; do if [[ $file != "README.org" ]]; then echo '-' [[file:$file][$file]]; fi ; done
 #+end_src
 
@@ -46,14 +46,10 @@ for file in *.org; do if [[ $file != "README.org" ]]; then echo '-' [[file:$file
 - [[file:dunst.org][dunst.org]]
 - [[file:emacs.org][emacs.org]]
 - [[file:git.org][git.org]]
-- [[file:pry.org][pry.org]]
-- [[file:ranger.org][ranger.org]]
-- [[file:redshift.org][redshift.org]]
 - [[file:rofi.org][rofi.org]]
 - [[file:shell.org][shell.org]]
 - [[file:tmux.org][tmux.org]]
 - [[file:xmonad.org][xmonad.org]]
-- [[file:X.org][X.org]]
-- [[file:xterm.org][xterm.org]]
+- [[file:xresources.org][xresources.org]]
 
-Also, there is the folder [[file:misc][misc]], which contains dotfiles which are too small to worth write in Org, or I'm just too lazy to do it.
+Also, there is the folder =misc=, which contains dotfiles which are too small to worth write in Org, or I'm just too lazy to do it (not versioned yet, but it does not influence the configuration here).

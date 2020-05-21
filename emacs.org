@@ -500,3 +500,13 @@ Useful no matter what theme you have installed!
   (setq dashboard-startup-banner "~/.images/blackhole-lines.svg")
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src
+
+**** Modeline
+
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :config
+  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-icon t)
+  (doom-modeline-mode 1))
+#+end_src

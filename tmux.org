@@ -28,16 +28,6 @@ When you are playing around with your tmux config you often need to repeatedly o
 bind-key r source-file ~/.tmux.conf \; display-message "~/.tmux.conf reloaded!"
 #+end_src
 
-* Vi mode
-
-tmux offers a set of vi-like bindings for navigating a buffer in a window. These allow you to not only navigate through the buffer beyond what your screen is currently showing, but also to search all the output generated thus far, and to select and copy text that can be pasted in any other window in the tmux session.
-
-#+begin_src conf
-set-window-option -g mode-keys vi
-bind-key -T copy-mode-vi 'v' send -X begin-selection
-bind-key -T copy-mode-vi 'y' send -X copy-selection-and-cancel
-#+end_src
-
 * Sane splits
 
 I find quite difficult to remember the default pane splitting commands. Who's supposed to memorize ="= to split vertically and =%= to split horizontally? I find it helpful to have the characters as a more visual representation of the split, so I chose =|= and =-= for splitting panes vertically and horizontally respectively.
@@ -80,7 +70,7 @@ bind -n M-Down select-pane -D
 This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
 
 #+begin_src conf
-set -g mouse on
+set -g mouse off
 #+end_src
 
 * Stop renaming windows automatically
@@ -135,12 +125,6 @@ If this option is set, tmux will generate xterm-style function key sequences; th
 set-window-option -g xterm-keys on
 #+end_src
 
-* Fix delayed Esc with VIM
-
-#+begin_src conf
-set -sg escape-time 0
-#+end_src
-
 * Move to last active window
 
 #+begin_src conf
@@ -174,7 +158,6 @@ set -g status-position bottom
 set -g status-justify left
 set -g status-style 'bg=colour234'
 set -g status-left ''
-# set -g status-right '#[fg=colour233,bg=colour243] %d/%m #[fg=colour233,bg=colour248] %H:%M '
 set -g status-right '#[fg=colour233,bg=colour243] %d/%m '
 set -g status-right-length 50
 set -g status-left-length 20

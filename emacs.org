@@ -165,6 +165,8 @@ This hook runs after loading init files and handling the command line.
 #+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
 <<sane-ui-defaults>>
 <<package-management>>
+<<theme>>
+<<enable-which-key>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -385,4 +387,29 @@ We can integrate it with =use-package=:
 #+begin_src emacs-lisp
 (setq straight-use-package-by-default t)
 (straight-use-package 'use-package)
+#+end_src
+
+** Make Emacs discoverable
+:properties:
+:header-args+: :noweb-ref enable-which-key
+:end:
+
+Emacs by default is built around this idea of discoverability. It is a self-documented editor. To see this, check =C-h ?=.
+
+However, after enabling a whole plethora of available packages you can get lost by the messiness of the enabled shortcuts.
+
+[[https://github.com/justbur/emacs-which-key][which-key]] is a minor mode for Emacs that displays the key bindings following your currently entered incomplete command (a prefix) in a popup. This provides a way to discover shortcuts globally.
+
+Most of the time I want the which-key popup only when I need it. This will prevent which-key from showing automatically, and allow you to use =C-h= in the middle of a key sequence to show the which-key buffer and keep it open for the remainder of the key sequence.
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :config
+  ;; Allow C-h to trigger which-key before it is done automatically
+  (setq which-key-show-early-on-C-h t)
+  ;; make sure which-key doesn't show normally but refreshes quickly after it is
+  ;; triggered.
+  (setq which-key-idle-delay 10000)
+  (setq which-key-idle-secondary-delay 0.05)
+  (which-key-mode))
 #+end_src

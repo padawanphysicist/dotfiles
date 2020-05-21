@@ -168,6 +168,7 @@ This hook runs after loading init files and handling the command line.
 <<enable-hydra>>
 <<enable-which-key>>
 <<sexy-emacs>>
+<<enable-helm>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -509,4 +510,36 @@ Useful no matter what theme you have installed!
   (setq doom-modeline-minor-modes t)
   (setq doom-modeline-icon t)
   (doom-modeline-mode 1))
+#+end_src
+** Completion framework
+:properties:
+:header-args+: :noweb-ref enable-helm
+:end:
+
+Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
+
+#+begin_src emacs-lisp
+(use-package helm
+  :defer t
+  :bind
+  ("M-x" . helm-M-x)
+  ("C-x r b" . helm-filtered-bookmarks)
+  ("C-x C-f" . helm-find-files)
+  ("C-x C-r" . helm-recentf)
+  ("C-x C-b" . helm-mini)
+  ("C-h a" . helm-apropos)
+  ("M-y" . helm-show-kill-ring)
+  :config
+  (require 'helm-config)
+  (setq helm-candidate-number-limit nil)
+
+  ;; From https://gist.github.com/antifuchs/9238468
+  (setq helm-idle-delay 0.0 ; update fast sources immediately (doesn't).
+        helm-input-idle-delay 0.01  ; this actually updates things
+                                    ; reeeelatively quickly.
+        helm-yas-display-key-on-candidate t
+        helm-quick-update t
+        helm-M-x-requires-pattern nil
+        helm-ff-skip-boring-files t)
+  (helm-mode 1))
 #+end_src

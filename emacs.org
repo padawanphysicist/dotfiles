@@ -11,13 +11,12 @@ Why lexical scope? https://nullprogram.com/blog/2016/12/22/
 This section contains the configuration to be used for pure Emacs (no starter kits).
 
 * Early init file
-  :properties:
-  :header-args+: :tangle "emacs/.emacs.d/early-init.el"
-  :header-args+: :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
-  :end:
+:properties:
+:header-args+: :tangle "emacs/.emacs.d/early-init.el"
+:header-args+: :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
+:end:
 
 Emacs 27+ introduces =early-init.el=, which is run before =init.el=, before package and UI initialization happens. Therefore we can customize in it variables that affect frame appearance as well as the package initialization process.
-
 
 ** Improve garbage collection
 
@@ -161,5 +160,229 @@ This hook runs after loading init files and handling the command line.
               (add-hook 'after-focus-change-function 'garbage-collect))))
 #+end_src
 
+* Init file
 
+#+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
+<<sane-ui-defaults>>
+<<package-management>>
+#+end_src
 
+When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
+
+** Sane defaults
+:properties:
+:header-args+: :noweb-ref sane-ui-defaults
+:end:
+
+*** Smooth Scrolling
+**** Scroll one line at a time
+
+  This is less "jumpy" than the default behaviour.
+
+  #+begin_src emacs-lisp
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+  #+end_src
+
+**** Don't accelerate scrolling
+
+  The original behaviour is to scroll as fast as the user moves the wheel.
+
+  #+begin_src emacs-lisp
+  (setq mouse-wheel-progressive-speed nil)
+  #+end_src
+
+**** Scroll window under mouse
+
+  Ensure that the mouse wheel scroll the window the mouse is over.
+
+  #+begin_src emacs-lisp
+  (setq mouse-wheel-follow-mouse 't)
+  #+end_src
+
+**** Keyboard scroll one line at a time
+
+  #+begin_src emacs-lisp
+  (setq scroll-step 1)
+  #+end_src
+
+**** Scroll window up/down by one line
+
+  Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here]]:
+  #+begin_src emacs-lisp
+  (global-set-key (kbd "M-n") (kbd "C-u 1 C-v"))
+  (global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
+  #+end_src
+
+**** Pixel scrolling                                       :testing:document:
+
+  #+begin_src emacs-lisp
+  (setq pixel-scroll-mode t)
+  #+end_src
+
+*** Change "yes or no" to "y or n"
+
+  Lazy people like me never want to type "yes" when "y" will suffice.
+
+  #+begin_src emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+  #+end_src
+
+*** Show matching brackets
+
+  [[https://www.emacswiki.org/emacs/ShowParenMode][show-paren-mode]] allows one to see matching pairs of parentheses and other characters. 
+  #+begin_src emacs-lisp
+  (show-paren-mode 1)
+  #+end_src
+
+  By default, there’s a small delay before showing a matching parenthesis. It can be deactivated with the following:
+  #+begin_src emacs-lisp
+  (setq show-paren-delay 0)
+  #+end_src
+
+*** Disable bell sound
+
+  #+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+  #+end_src
+
+*** Change backup behaviour
+
+  This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
+
+  #+begin_src emacs-lisp
+  ;; Don't litter my filesystem tree
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
+  #+end_src
+
+  Since disk space is cheap, I prefer to save a lot!
+  #+begin_src emacs-lisp
+  (setq backup-by-copying t) ;; don't clobber symlinks
+  (setq delete-old-versions t)
+  (setq kept-new-versions 8)
+  (setq kept-old-versions 4)
+  (setq version-control t)
+  #+end_src
+
+*** Save minibuffer history
+
+  #+begin_src emacs-lisp
+  (savehist-mode 1)
+  #+end_src
+
+*** Add my elisp directory and other files
+
+  Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
+
+  #+begin_src emacs-lisp :noweb-ref add-elisp-folder
+  (add-to-list 'load-path "~/.elisp")
+  #+end_src
+
+*** Line numbering
+
+  Line numbering is really helpful for simple file movement.
+
+**** Number of columns reserved for line number display
+
+  #+begin_src emacs-lisp
+  (setq-default display-line-numbers-width 4)
+  #+end_src
+
+**** Do not shrink line number width
+
+  #+begin_src emacs-lisp
+  (setq display-line-numbers-grow-only t)
+  #+end_src
+
+**** Relative line numbers taking into account screen lines
+
+  #+begin_src emacs-lisp
+  (setq-default display-line-numbers-type 'visual)
+  #+end_src
+
+**** Display the absolute number of the current line
+
+  #+begin_src emacs-lisp
+  (setq-default display-line-numbers-current-absolute t)
+  #+end_src
+
+**** Disregard narrowing when showing line numbers
+
+  #+begin_src emacs-lisp
+  (setq-default display-line-numbers-widen t)
+  #+end_src
+
+**** Keybinding for toggling
+
+  The default is no line numbers. One can then toggle with =<f9>=.
+
+  #+begin_src emacs-lisp
+  (global-display-line-numbers-mode)
+  (global-set-key (kbd "<f9>") 'display-line-numbers-mode)
+  #+end_src
+
+**** Show cursor position within line
+
+  #+begin_src emacs-lisp
+  (column-number-mode 1)
+  #+end_src
+
+*** Setup visual lines
+
+  Visual line mode actually does several things. From a user's point of view, it:
+  - Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
+  - Makes up/down arrow keys move by a visual line. (controlled by the var line-move-visual.)
+  - Makes the kill-line command delete by a visual line, as opposed to a logical line.
+  - Turns off the display of little return arrow at the edge of window. (controlled by the var fringe-indicator-alist.)
+
+  Enable by default:
+  #+begin_src emacs-lisp
+  (global-visual-line-mode t)
+  #+end_src
+
+  and this code enable a visual hint whether a paragraph is hard or soften wrapped:
+  #+begin_src emacs-lisp
+  (defface my-custom-curly-face
+    '((t (:foreground "orange")))
+    "Face for fringe curly bitmaps."
+    :group 'basic-faces)
+  (setq-default left-fringe-width 10)
+  (set-fringe-bitmap-face 'left-curly-arrow 'my-custom-curly-face)
+  (set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
+  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+  #+end_src
+
+** Package management
+:properties:
+:header-args+: :noweb-ref package-management
+:end:
+
+Nowadays almost nobody uses Emacs without a pile of plugins/addons. Manage those addons is a pain in the ass. Fortunately Emacs 24 introduced a new tool, =package.el= to make this management a little easier.
+
+By using the [[https://github.com/jwiegley/use-package][use-package]] macro one can isolate package configuration in your initialization files in a way that is both performance-oriented and tidy. It is a tool that streamlines the configuration of packages. handles everything from assigning key bindings, setting the value of customisation options, writing hooks, declaring a package as a dependency for another, and so on. 
+
+Though it might not be readily apparent, a "package" in Emacs parlance is any elisp file that is evaluated by Emacs.  This includes libraries that are shipped with the upstream distribution as well as code that comes from other sources.
+
+As such =use-package= is *NOT* a package manager, in the sense of installing, removing, listing packages.  It only configures things using a declarative syntax.  The package manager of Emacs is =package.el= while there are other tools available from third parties, such as =straight.el=.
+
+I’ve been using [[https://github.com/raxod502/straight.el][straight.el]] for package management for a while and I really like it.
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+We can integrate it with =use-package=:
+#+begin_src emacs-lisp
+(setq straight-use-package-by-default t)
+(straight-use-package 'use-package)
+#+end_src

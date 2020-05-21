@@ -24,15 +24,6 @@ The first thing you should do when you install Git is to set your user name and 
   name = Victor Santos (vct)
 #+end_src
 
-* Editor
-
-Now that your identity is set up, you can configure the default text editor that will be used when Git needs you to type in a message. If not configured, Git uses your system’s default editor.
-
-#+begin_src conf
-[core]
-  editor = vim
-#+end_src
-
 * Enable Colors in color-supporting terminals
 
 #+begin_src conf

@@ -165,8 +165,9 @@ This hook runs after loading init files and handling the command line.
 #+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
 <<sane-ui-defaults>>
 <<package-management>>
-<<theme>>
+<<enable-hydra>>
 <<enable-which-key>>
+<<sexy-emacs>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -412,4 +413,90 @@ Most of the time I want the which-key popup only when I need it. This will preve
   (setq which-key-idle-delay 10000)
   (setq which-key-idle-secondary-delay 0.05)
   (which-key-mode))
+#+end_src
+
+** Make bindings that stick around
+:properties:
+:header-args+: :noweb-ref enable-hydra
+:end:
+
+[[https://github.com/abo-abo/hydra][Hydra]] is a package that can be used to group related commands into a family of short bindings with a common prefix - a Hydra.
+
+#+begin_src emacs-lisp
+(use-package hydra)
+(use-package use-package-hydra)
+#+end_src
+
+** Make Emacs sexy
+:properties:
+:header-args+: :noweb-ref sexy-emacs
+:end:
+
+*** Doom themes
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-one t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+#+end_src
+
+*** Theme looper
+
+Useful no matter what theme you have installed!
+
+#+begin_src emacs-lisp
+(use-package theme-looper
+  :after hydra
+  :bind ("C-c h t" . hydra-theme-loop/body)
+  :hydra
+  (hydra-theme-loop (:color amaranth)
+    "Theme looper"
+    ("n" theme-looper-enable-next-theme "Next")
+    ("p" theme-looper-enable-previous-theme "Previous")
+    ("e" (lambda ()
+           (interactive)
+           (theme-looper-enable-theme (car custom-enable-themes)))
+     "Enable" :color blue)
+    ("q" nil "Quit" :color blue)))
+#+end_src
+
+*** Dashboard
+**** Some buffers should never be deleted:
+#+begin_src emacs-lisp
+(defun vct--immortal-buffers ()
+  (if (or (eq (current-buffer) (get-buffer "*scratch*"))
+          (eq (current-buffer) (get-buffer "*Messages*"))
+          (eq (current-buffer) (get-buffer "*dashboard*")))
+      (progn (bury-buffer)
+             nil)
+    t))
+
+(add-hook 'kill-buffer-query-functions 'vct--immortal-buffers)
+#+end_src
+
+**** Configure Dashboard
+
+#+begin_src emacs-lisp
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-center-content t)
+  ;; Set the banner
+  (setq dashboard-startup-banner "~/.images/blackhole-lines.svg")
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
 #+end_src

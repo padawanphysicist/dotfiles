@@ -169,6 +169,7 @@ This hook runs after loading init files and handling the command line.
 <<enable-which-key>>
 <<sexy-emacs>>
 <<enable-helm>>
+<<load-extra-configuration>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -542,4 +543,21 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
         helm-M-x-requires-pattern nil
         helm-ff-skip-boring-files t)
   (helm-mode 1))
+#+end_src
+
+** Load additional configuration
+:properties:
+:header-args+: :noweb-ref load-extra-configuration
+:end:
+
+To avoid constantly modifying this dotfile, you can keep any extra/testing configuration in a non-versioned file (defaults to =~/.custom-emacs.el=). You can keep your personal settings there and use some configuration for some time until you decide to move the code to this file.
+#+begin_src emacs-lisp
+(setq vct/custom-configuration-file (expand-file-name "~/.custom-emacs.el"))
+#+end_src
+
+The file is loaded only if it exists:
+#+begin_src emacs-lisp
+(let ((personal-settings vct/custom-configuration-file))
+ (when (file-exists-p personal-settings)
+   (load-file personal-settings)))
 #+end_src

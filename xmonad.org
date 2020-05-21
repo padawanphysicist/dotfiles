@@ -51,7 +51,7 @@ The long line here is to interchange foreground and background colors depending 
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "xterm"
+vctTerminal = "xterm -e 'tmux attach -t vct'"
 #+end_src
 
 ** Screensaver
@@ -193,7 +193,7 @@ Perform an arbitrary action each time xmonad starts or is restarted with =mod-q=
 #+begin_src haskell
 vctStartupHook :: X()
 vctStartupHook = do
-  spawn "~/.autostart"
+  spawn "~/.xmonad/autostart"
 #+end_src
 
 * Run XMonad
@@ -299,7 +299,7 @@ skip_taskbar true
 
 * Autostart :optional:
 :properties:
-:header-args+: :tangle "xmonad/.autostart"
+:header-args+: :tangle "xmonad/.xmonad/autostart"
 :header-args+: :tangle-mode (identity #o755)
 :end:
 
@@ -318,15 +318,19 @@ skip_taskbar true
 
 function run {
   PROGRAM_NAME=$1
-  COMMAND=${PROGRAM_NAME}
+  COMMAND=$2
+  MSG_IF_NOT_RUNNING=$3
+  MSG_IF_RUNNING=$4  
 
   # Check if PROGRAM_NAME exists
   command -v "${PROGRAM_NAME}" 2>&1 > /dev/null
   if [[ "$?" == 0 ]]; then # PROGRAM_NAME exists
-    if [ ! -z "$2" ]; then COMMAND=$2; fi
-    pgrep --full "${PROGRAM_NAME}" 2>&1 > /dev/null
+    pgrep --full "${PROGRAM_NAME}" 2>&1 > /dev/null # Check if PROGRAM_NAME is running
     if [[ "$?" == 1 ]]; then # $PROGRAM_NAME not running
       ${COMMAND} &
+      if [ ! -z "$MSG_IF_NOT_RUNNING" ]; then notify-send "$MSG_IF_NOT_RUNNING"; fi
+    else # show MSG if command is already running
+      if [ ! -z "$MSG_IF_RUNNING" ]; then notify-send "$MSG_IF_RUNNING"; fi
     fi
   fi
 }
@@ -341,22 +345,14 @@ setxkbmap -layout br -option -option altwin:meta_alt -option ctrl:nocaps &
 # Set wallpaper
 [[ -f ~/.fehbg ]] && ~/.fehbg
 
-run dunst
-run stalonetray
-run xscreensaver 'xscreensaver -no-splash'
-run picom 'picom'
-run dropbox '/home/santos/.local/bin/dropbox start'
-notify-send 'Restarted!'
-
-# Start emacs
-pgrep -full emacs > /dev/null 
-if [ "$?" -eq 1 ]; then 
-  emacs --daemon &
-fi
-
-# Start tmux
-tmux has-session -t santos 2>/dev/null
-if [ "$?" -eq 1 ]; then 
-  tmux new-session -t santos
-fi
+# Syntax for 'run'
+# run <program_name> <command> <msg_if_not_running> <msg_if_running>
+#
+run dunst 'dunst' '' 'Dunst is already running'
+run stalonetray 'stalonetray' 'Started systemtray' 'Systemtray already started'
+run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
+run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
+run tmux 'tmux start-server' 'Starting tmux server' 'Tmux server already started'
+run picom 'picom' 'Starting compositing manager' 'Picom already started'
+run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
 #+end_src

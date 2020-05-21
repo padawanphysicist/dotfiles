@@ -24,4 +24,4 @@ force:
 	touch *.org
 clean: 
 	stow --delete $(CONFIG)
-	
+	for i in $(CONFIG); do if [[ $$i != "misc" ]]; then rm -rf $$i; fi; done

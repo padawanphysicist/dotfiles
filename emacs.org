@@ -165,8 +165,9 @@ This hook runs after loading init files and handling the command line.
 #+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
 <<sane-ui-defaults>>
 <<package-management>>
-<<theme>>
+<<enable-hydra>>
 <<enable-which-key>>
+<<theme>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -414,6 +415,17 @@ Most of the time I want the which-key popup only when I need it. This will preve
   (which-key-mode))
 #+end_src
 
+** Make bindings that stick around
+:properties:
+:header-args+: :noweb-ref enable-hydra
+:end:
+
+[[https://github.com/abo-abo/hydra][Hydra]] is a package that can be used to group related commands into a family of short bindings with a common prefix - a Hydra.
+
+#+begin_src emacs-lisp
+(use-package hydra)
+#+end_src
+
 ** Make Emacs sexy
 :properties:
 :header-args+: :noweb-ref theme
@@ -440,4 +452,14 @@ Most of the time I want the which-key popup only when I need it. This will preve
 
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
+#+end_src
+
+*** Theme looper
+
+Useful no matter what theme you have installed!
+
+#+begin_src emacs-lisp
+;;(use-package theme-looper
+;;  :config
+;;  ())
 #+end_src

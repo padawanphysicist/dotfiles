@@ -104,6 +104,7 @@ possible values are:
 #+begin_src conf :tangle no :noweb-ref global
 separator_color = frame
 #+end_src
+
 *** Sort messages by priority
 
 #+begin_src conf :tangle no :noweb-ref global

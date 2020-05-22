@@ -550,14 +550,10 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 :header-args+: :noweb-ref load-extra-configuration
 :end:
 
-To avoid constantly modifying this dotfile, you can keep any extra/testing configuration in a non-versioned file (defaults to =~/.custom-emacs.el=). You can keep your personal settings there and use some configuration for some time until you decide to move the code to this file.
+To avoid constantly modifying this dotfile, you can keep any extra/testing configuration in a non-versioned file (defaults to =~/.custom.emacs.org=). You can keep your personal settings there and use some configuration for some time until you decide to move the code to this file. The file is loaded only if it exists:
 #+begin_src emacs-lisp
-(setq vct/custom-configuration-file (expand-file-name "~/.custom-emacs.el"))
-#+end_src
-
-The file is loaded only if it exists:
-#+begin_src emacs-lisp
-(let ((personal-settings vct/custom-configuration-file))
+(let ((personal-settings (expand-file-name "~/.custom.emacs.org")))
  (when (file-exists-p personal-settings)
-   (load-file personal-settings)))
+   (org-babel-load-file personal-settings)
+   ))
 #+end_src

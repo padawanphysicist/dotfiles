@@ -169,8 +169,10 @@ This hook runs after loading init files and handling the command line.
 <<enable-which-key>>
 <<sexy-emacs>>
 <<enable-helm>>
+<<programming-language-support>>
 <<add-elisp-folder>>
 <<load-extra-configuration>>
+<<org-configuration>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
@@ -547,6 +549,9 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
 #+end_src
 
 ** Programming/markup languages support
+:properties:
+:header-args+: :noweb-ref programming-language-support
+:end:
 
 In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
 
@@ -709,6 +714,9 @@ To avoid constantly modifying this dotfile, you can keep any extra/testing confi
    ))
 #+end_src
 ** Org configuration
+:properties:
+:header-args+: :noweb-ref org-configuration
+:end:
 
 Org mode configuration is defered to a separate package:
 

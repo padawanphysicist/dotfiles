@@ -545,6 +545,156 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (helm-mode 1))
 #+end_src
 
+** Programming/markup languages support
+
+In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
+
+The first thing to enable is [[https://github.com/flycheck/flycheck][flycheck]]:
+#+begin_src emacs-lisp
+(use-package flycheck
+  :config
+  (add-hook 'prog-mode-hook 'flycheck-mode))
+#+end_src
+
+*** Save cursor position
+
+#+begin_src emacs-lisp
+(use-package saveplace
+  :init
+  (setq save-place-file "~/.emacs.d/saveplace")
+  :config
+  (save-place-mode 1))
+#+end_src
+
+*** Version control with Git
+
+[[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
+
+#+begin_src emacs-lisp
+(use-package magit
+  :bind
+  ("C-x g" . magit-status))
+#+end_src
+
+*** Ruby
+**** Enable enhanced ruby mode
+
+ Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
+
+ #+begin_src emacs-lisp
+ (use-package enh-ruby-mode
+   :config
+   (add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode)))
+ #+end_src
+
+**** Enable inferior Ruby
+
+ #+begin_src emacs-lisp
+ (use-package inf-ruby
+   :config
+   (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
+   (setq inf-ruby-default-implementation "pry"))
+ #+end_src
+
+**** Enable Rubocop
+
+ Ruby static code analyzer and formatter, based on the community Ruby style guide. https://docs.rubocop.org
+
+ #+begin_src emacs-lisp
+ (use-package rubocop
+   :config
+   (add-hook 'enh-ruby-mode-hook 'rubocop-mode))
+ #+end_src
+
+**** Enable Robe
+
+ #+begin_src emacs-lisp
+ (use-package robe
+   :config
+   (add-hook 'enh-ruby-mode-hook 'robe-mode))
+ #+end_src
+
+*** R
+
+#+begin_src emacs-lisp
+(use-package ess)
+#+end_src
+
+*** LaTeX
+**** Pdf viewer
+
+Use [[https://github.com/politza/pdf-tools][pdf-tools]] instead of DocView:
+#+begin_src emacs-lisp
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-width))
+#+end_src
+
+**** Setup AucTeX
+
+#+begin_src emacs-lisp
+(use-package tex-site
+  :straight auctex
+  :defer t
+  :mode ("\\.tex\\'" . latex-mode)
+  :config
+  (setq TeX-source-correlate-mode t)
+  (setq TeX-source-correlate-method 'synctex)
+  (setq TeX-auto-save t)
+
+  (setq TeX-parse-self t)
+  (setq TeX-save-query nil)
+  (setq TeX-PDF-mode t) ;; pdf mode by default
+  (setq reftex-plug-into-auctex t)
+  (pdf-tools-install)
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+	TeX-source-correlate-start-server t)
+  ;; Update PDF buffers after successful LaTeX runs
+  (add-hook 'TeX-after-compilation-finished-functions
+	    #'TeX-revert-document-buffer)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex))
+(use-package cdlatex)
+(use-package helm-bibtex)
+#+end_src
+
+*** Bash
+
+#+begin_src emacs-lisp
+(setq sh-basic-offset 2)
+#+end_src
+
+*** SageMath
+
+[[https://github.com/sagemath/sage-shell-mode][This package]] enable to run [[http://www.sagemath.org/][SageMath]] within Emacs.
+
+#+begin_src emacs-lisp
+(use-package sage-shell-mode
+  :config
+  ;; Run SageMath by M-x run-sage instead of M-x sage-shell:run-sage
+  (sage-shell:define-alias)
+
+  ;; Turn on eldoc-mode in Sage terminal and in Sage source files
+  (add-hook 'sage-shell-mode-hook #'eldoc-mode)
+  (add-hook 'sage-shell:sage-mode-hook #'eldoc-mode))
+#+end_src
+
+For integration with Babel, install [[https://github.com/stakemori/ob-sagemath][ob-sagemath]]:
+#+begin_src emacs-lisp
+(use-package ob-sagemath)
+#+end_src
+
+I also set integration with Org:
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  ;; Ob-sagemath supports only evaluating with a session.
+  (setq org-babel-default-header-args:sage '((:session . "session")
+                                             (:noweb . "yes")
+                                             (:results . "output")))
+  ;; C-c c for asynchronous evaluating (only for SageMath code blocks).
+  (define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async))
+#+end_src
+
 ** Load additional configuration
 :properties:
 :header-args+: :noweb-ref load-extra-configuration

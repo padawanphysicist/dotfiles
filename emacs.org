@@ -169,6 +169,7 @@ This hook runs after loading init files and handling the command line.
 <<enable-which-key>>
 <<sexy-emacs>>
 <<enable-helm>>
+<<add-elisp-folder>>
 <<load-extra-configuration>>
 #+end_src
 

@@ -503,7 +503,13 @@ Useful no matter what theme you have installed!
   (setq dashboard-center-content t)
   ;; Set the banner
   (setq dashboard-startup-banner "~/.images/blackhole-lines.svg")
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*"))))
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq dashboard-items '((recents  . 5)
+                        (bookmarks . 5)
+                        (projects . 5)
+                        (agenda . 5)
+                        (registers . 5)))
+  )
 #+end_src
 
 **** Modeline
@@ -698,7 +704,8 @@ I also set integration with Org:
                                              (:noweb . "yes")
                                              (:results . "output")))
   ;; C-c c for asynchronous evaluating (only for SageMath code blocks).
-  (define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async))
+  ;;(define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async)
+)
 #+end_src
 
 ** Load additional configuration
@@ -799,7 +806,6 @@ Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_
 *** LaTeX behaviour
 :properties:
 :header-args+: :noweb-ref fix-latex-behaviour
-:header-args+: :tangle no
 :end:
 
 **** Startup with LaTeX previews
@@ -1017,7 +1023,6 @@ This code changes the color of the fragment based on the current theme.
 *** Babel configuration
 :properties:
 :header-args+: :noweb-ref babel-configuration
-:header-args+: :tangle no
 :end:
 
 **** Preserve leading whitespace on export
@@ -1037,13 +1042,13 @@ This code changes the color of the fragment based on the current theme.
   Nice solution from John Kitchin. Taken from [[https://emacs.stackexchange.com/a/20618/11909][here]].
 
   #+begin_src emacs-lisp
-  (defadvice org-babel-execute-src-block (around load-language nil activate)
-    "Load language if needed"
-    (let ((language (org-element-property :language (org-element-at-point))))
-      (unless (cdr (assoc (intern language) org-babel-load-languages))
-	(add-to-list 'org-babel-load-languages (cons (intern language) t))
-	(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
-      ad-do-it))
+  ;; (defadvice org-babel-execute-src-block (around load-language nil activate)
+  ;;   "Load language if needed"
+  ;;   (let ((language (org-element-property :language (org-element-at-point))))
+  ;;     (unless (cdr (assoc (intern language) org-babel-load-languages))
+  ;; 	(add-to-list 'org-babel-load-languages (cons (intern language) t))
+  ;; 	(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+  ;;     ad-do-it))
   #+end_src
 
 **** Do not ask for confirmation when executing code block
@@ -1055,7 +1060,6 @@ This code changes the color of the fragment based on the current theme.
 *** Org agenda configuration
 :properties:
 :header-args+: :noweb-ref agenda-configuration
-:header-args+: :tangle no
 :end:
 
 #+begin_src emacs-lisp
@@ -1122,7 +1126,6 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 *** Zettelkasten
 :properties:
 :header-args+: :noweb-ref zettelkasten
-:header-args+: :tangle no
 :end:
 
 My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book
@@ -1203,6 +1206,12 @@ Fleeting notes are the entry point for taking notes in a smart way. As the name 
 (setq org-archive-location (concat org-default-notes-directory "/archive.org::"))
 #+end_src
 
+Apparentrly, =org-capture= does not have any keybinding in the last Org version; therefore, I set to the old keybinding =C-c c=:
+#+begin_src emacs-lisp
+;; (define-key org-mode-map (kbd "C-c c") 'org-capture) ;; For org mode only
+(global-set-key (kbd "C-c c") 'org-capture)
+#+end_src
+
 **** Set journal
 
 #+begin_src emacs-lisp
@@ -1212,7 +1221,7 @@ Fleeting notes are the entry point for taking notes in a smart way. As the name 
 (setq org-journal-date-format "%A, %d %B %Y")
 #+end_src
 
-**** COMMENT Set templates for notes
+**** Set templates for notes
 
 #+begin_src emacs-lisp
 (add-to-list 'org-capture-templates

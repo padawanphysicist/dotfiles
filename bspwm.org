@@ -670,7 +670,7 @@ margin-bottom = 2
 ;;                         (differences* ...)))))
 ;;    ((_ common-binding common-command ()) #t)))
 
-
+;;(define Win Mod4)
 ;; Examples of commands:
 ;; Show keybindings
 (xbindkey '(control shift q) "xbindkeys_show")
@@ -710,8 +710,10 @@ margin-bottom = 2
 (xbindkey '(Mod4 Shift "3") "bspc node -d '^3'")
 (xbindkey '(Mod4 Shift "4") "bspc node -d '^4'")
 
+;; Quit menu
+(xbindkey '(Control Alt Delete) "rofi -show powermenu -modi powermenu:~/.local/bin/rofi-power-menu")
 (xbindkey '(Mod4 Mod1 r) "bspc wm -r")
-(xbindkey '(Mod4 Mod1 q) "bspc quit")
+(xbindkey '(Mod4 Shift q) "bspc quit")
 (xbindkey '(Mod4 g) "bspc node -s biggest")
 
 (xbindkey '(Mod4 t) "bspc node -t tiled")

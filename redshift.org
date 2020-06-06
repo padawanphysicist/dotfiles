@@ -1,0 +1,106 @@
+#+title: Redshift configuration
+#+property: header-args  :tangle "redshift/.config/redshift/redshift.conf"
+#+property: header-args+ :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+
+Redshift adjusts the color temperature of your screen according to your surroundings. This may help your eyes hurt less if you are working in front of the screen at night. This program is inspired by [[https://justgetflux.com/][f.lux]].
+
+* Set the day and night screen temperatures
+
+#+begin_src conf
+[redshift]
+temp-day=5500
+temp-night=3000
+#+end_src
+
+* Enable the smooth fade between temperatures when Redshift start/stop
+
+- 0 will cause an immediate change between screen temperatures.
+- 1 will gradually apply the new screen temperature over a couple of seconds.
+
+#+begin_src conf
+fade=1
+#+end_src
+
+* Solar elevation thresholds.
+
+By default, Redshift will use the current elevation of the sun to determine whether it is daytime, night or in transition (dawn/dusk). When the sun is above the degrees specified with =elevation-high= it is considered daytime and below =elevation-low= it is considered night.
+
+#+begin_src conf
+;elevation-high=3
+;elevation-low=-6
+#+end_src
+
+* Custom dawn/dusk intervals.
+
+Instead of using the solar elevation, the time intervals of dawn and dusk can be specified manually. The times must be specified as HH:MM in 24-hour format.
+
+#+begin_src conf
+;dawn-time=6:00-7:45
+;dusk-time=18:35-20:15
+#+end_src
+
+* Set screen brightness
+
+Default (maximum) is 1.0.
+
+It is also possible to use different settings for day and night.
+
+#+begin_src conf
+;brightness=0.9
+brightness-day=0.85
+brightness-night=0.75
+#+end_src
+
+* Set screen gamma
+
+You can set for all colors, or each color channel individually. This can also be set individually for day and night.
+#+begin_src conf
+; gamma=0.8
+; gamma=0.8:0.7:0.8
+gamma-day=0.8:0.7:0.8
+gamma-night=0.75
+#+end_src
+
+* Set location provider
+
+Type =redshift -l list= to see possible values.
+
+#+begin_src conf
+location-provider=manual
+#+end_src
+
+* Set adjustment method
+
+Type =redshift -m list= to see all possible values.
+
+#+begin_src conf
+adjustment-method=randr
+#+end_src
+
+* Configure location provider
+
+Type =redshift -l PROVIDER:help= to see the settings. For example:
+#+begin_example
+redshift -l manual:help
+#+end_example
+
+Keep in mind that longitudes west of Greenwich (e.g. the Americas) are negative numbers.
+
+#+begin_src conf
+[manual]
+lat=-3.77
+lon=-38.6
+#+end_src
+
+* Configure adjustment method
+
+Type =redshift -m METHOD:help= to see the settings. For example:
+#+begin_example
+redshift -m randr:help
+#+end_example
+
+#+begin_src conf
+[randr]
+screen=0
+#+end_src

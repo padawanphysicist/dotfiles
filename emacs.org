@@ -1050,19 +1050,16 @@ This code changes the color of the fragment based on the current theme.
 (setq org-src-tab-acts-natively t)
 #+end_src
 
-**** Load language on demand                                         :org:
+**** Load languages
 
-  Nice solution from John Kitchin. Taken from [[https://emacs.stackexchange.com/a/20618/11909][here]].
-
-  #+begin_src emacs-lisp
-  ;; (defadvice org-babel-execute-src-block (around load-language nil activate)
-  ;;   "Load language if needed"
-  ;;   (let ((language (org-element-property :language (org-element-at-point))))
-  ;;     (unless (cdr (assoc (intern language) org-babel-load-languages))
-  ;; 	(add-to-list 'org-babel-load-languages (cons (intern language) t))
-  ;; 	(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
-  ;;     ad-do-it))
-  #+end_src
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (ruby . t)
+   (shell . t)
+   (R . t)))
+#+end_src
 
 **** Do not ask for confirmation when executing code block
 

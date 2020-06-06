@@ -21,7 +21,7 @@ pkill xbindkeys; xbindkeys &
 
 bspc monitor -d WWW DEV AUX READ
 
-bspc config border_width         3
+bspc config border_width         2
 bspc config window_gap          10
 # bspc config active_border_color "#FF0000"
 # bspc config active_border_color '#0C1115'
@@ -44,7 +44,7 @@ bspc config gapless_monocle      true
 
 #+begin_src shell
 xsetroot -cursor_name left_ptr &
-$HOME/.config/polybar/launch.sh &
+# $HOME/.config/polybar/launch.sh &
 # Use caps as an additional esc (useful for VIM)
 # setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
 # Use caps as an additional Ctrl (useful for emacs)
@@ -75,157 +75,16 @@ function run {
 # Syntax for 'run'
 # run <program_name> <command> <msg_if_not_running> <msg_if_running>
 #
-run dunst 'dunst' '' 'Dunst is already running'
+#run dunst 'dunst' '' 'Dunst is already running'
 #run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
-run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
+#run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
 run tmux 'tmux start-server' 'Starting tmux server' 'Tmux server already started'
 # run picom 'picom' 'Starting compositing manager' 'Picom already started'
 run xcompmgr 'xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55' 'Starting compositing manager' 'Xcompmgr already started'
-run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
+#run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
 #+end_src
 
-* COMMENT sxhkd configuration
-:properties:
-:header-args+: :tangle "bspwm/.config/sxhkd/sxhkdrc"
-:header-args+: :tangle-mode (identity #o755)
-:end:
-
-#+begin_src shell
-#
-# wm independent hotkeys
-#
-
-# terminal emulator
-#super + Return
-#	xterm
-
-# program launcher
-#super + @space
-#	rofi -show run
-
-# make sxhkd reload its configuration files:
-#super + Escape
-#	pkill -USR1 -x sxhkd
-
-# custom bindings
-#super + e
-#	emacsclient -c
-
-
-#xF86XK_MonBrightnessUp
-#	sudo ~/.local/bin/xbacklight -i 10
-
-#xF86XK_MonBrightnessDown
-#	sudo ~/.local/bin/xbacklight -d 10
-
-#
-# bspwm hotkeys
-#
-
-# quit/restart bspwm
-#super + alt + {q,r}
-#	bspc {quit,wm -r}
-
-# close and kill
-super + {_,shift + }w
-	bspc node -{c,k}
-
-# alternate between the tiled and monocle layout
-super + m
-	bspc desktop -l next
-
-# send the newest marked node to the newest preselected node
-super + y
-	bspc node newest.marked.local -n newest.!automatic.local
-
-# swap the current node and the biggest node
-super + g
-	bspc node -s biggest
-
-#
-# state/flags
-#
-
-# set the window state
-#super + {t,shift + t,s,f}
-#	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
-
-# set the node flags
-super + ctrl + {m,x,y,z}
-	bspc node -g {marked,locked,sticky,private}
-
-#
-# focus/swap
-#
-
-# focus the node in the given direction
-#super + {_,shift + }{h,j,k,l}
-#	bspc node -{f,s} {west,south,north,east}
-
-# focus the node for the given path jump
-super + {p,b,comma,period}
-	bspc node -f @{parent,brother,first,second}
-
-# focus the next/previous node in the current desktop
-super + {_,shift + }c
-	bspc node -f {next,prev}.local
-
-# focus the next/previous desktop in the current monitor
-super + bracket{left,right}
-	bspc desktop -f {prev,next}.local
-
-# focus the last node/desktop
-super + {grave,Tab}
-	bspc {node,desktop} -f last
-
-# focus the older or newer node in the focus history
-super + {o,i}
-	bspc wm -h off; \
-	bspc node {older,newer} -f; \
-	bspc wm -h on
-
-# focus or send to the given desktop
-#super + {_,shift + }{1-9,0}
-#	bspc {desktop -f,node -d} '^{1-9,10}'
-
-#
-# preselect
-#
-
-# preselect the direction
-super + ctrl + {h,j,k,l}
-	bspc node -p {west,south,north,east}
-
-# preselect the ratio
-super + ctrl + {1-9}
-	bspc node -o 0.{1-9}
-
-# cancel the preselection for the focused node
-super + ctrl + space
-	bspc node -p cancel
-
-# cancel the preselection for the focused desktop
-super + ctrl + shift + space
-	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
-
-#
-# move/resize
-#
-
-# expand a window by moving one of its side outward
-super + alt + {h,j,k,l}
-	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
-
-# contract a window by moving one of its side inward
-super + alt + shift + {h,j,k,l}
-	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
-
-# move a floating window
-super + {Left,Down,Up,Right}
-	bspc node -v {-20 0,0 20,0 -20,20 0}
-
-#+end_src
-* polybar
+* COMMENT polybar
 ** Launcher
 :properties:
 :header-args+: :tangle "bspwm/.config/polybar/launch.sh"

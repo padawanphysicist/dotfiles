@@ -75,13 +75,11 @@ function run {
 # Syntax for 'run'
 # run <program_name> <command> <msg_if_not_running> <msg_if_running>
 #
-#run dunst 'dunst' '' 'Dunst is already running'
+run dunst 'dunst' '' 'Dunst is already running'
 #run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
-#run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
-run tmux 'tmux start-server' 'Starting tmux server' 'Tmux server already started'
-# run picom 'picom' 'Starting compositing manager' 'Picom already started'
+run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
+run tmux 'tmux new-session -d -s vct 'Starting tmux server' 'Tmux server already started'
 run xcompmgr 'xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55' 'Starting compositing manager' 'Xcompmgr already started'
-#run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
 #+end_src
 
 * COMMENT polybar
@@ -529,6 +527,11 @@ margin-bottom = 2
 ;;                         (differences* ...)))))
 ;;    ((_ common-binding common-command ()) #t)))
 
+;; Define default applications
+(define terminal "st -e tmux attach-session")
+(define launcher "rofi -show run")
+(define text-editor "emacsclient -c")
+
 ;;(define Win Mod4)
 ;; Examples of commands:
 ;; Show keybindings
@@ -537,11 +540,11 @@ margin-bottom = 2
 (xbindkey '(Mod4 Shift backslash) "pkill -SIGHUP xbindkeys")
 
 ;; Terminal emulator
-(xbindkey '(Mod4 Shift "Return") "xterm")
+(xbindkey '(Mod4 Shift "Return") terminal)
 ;; Launcher
-(xbindkey '(mod4 p) "rofi -show run")
+(xbindkey '(Mod4 p) launcher)
 ;; Text editor
-(xbindkey '(Mod4 e) "emacsclient -c")
+(xbindkey '(Mod4 e) text-editor)
 
 ;; Brightness
 (xbindkey '(XF86MonBrightnessUp) "sudo ~/.local/bin/xbacklight -i 10")

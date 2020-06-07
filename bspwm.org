@@ -78,7 +78,7 @@ function run {
 run dunst 'dunst' '' 'Dunst is already running'
 #run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
 run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
-run tmux 'tmux new-session -d -s vct 'Starting tmux server' 'Tmux server already started'
+run tmux 'tmux new-session -d -s vct' 'Starting tmux server' 'Tmux server already started'
 run xcompmgr 'xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55' 'Starting compositing manager' 'Xcompmgr already started'
 #+end_src
 

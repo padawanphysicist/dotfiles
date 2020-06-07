@@ -569,11 +569,12 @@ Output commands to set the LS_COLORS environment variable.
 #     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
 #   fi
 # fi
+eval "$(dircolors ${HOME}/.config/shell/dir_colors_256_dark)" # Colors for ls
 #+end_src
 
 Took the themes from https://github.com/seebi/dircolors-solarized
 
-** COMMENT 256-dark
+** 256-dark
 
 #+begin_src bash :tangle "shell/.config/shell/dir_colors_256_dark" :noweb yes
 

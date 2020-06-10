@@ -51,7 +51,7 @@ The long line here is to interchange foreground and background colors depending 
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "xterm -e 'tmux attach -t vct'"
+vctTerminal = "st -e tmux attach -t vct"
 #+end_src
 
 ** Screensaver
@@ -92,6 +92,7 @@ vctWorkspaces = ["1:WWW", "2:DEV", "3:READ", "4:AUX"] ++ map show [5..9]
 * Keybindings
 
 #+begin_src haskell
+altMask = mod1Mask
 vctAdditionalKeys :: [((KeyMask, KeySym), X())]
 vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
                     , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
@@ -102,6 +103,8 @@ vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
                     , ((vctModMask, xK_b), sendMessage ToggleStruts)
                     , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
                     , ((vctModMask, xK_z), sendMessage (Toggle "Full"))
+                    , ((altMask .|. controlMask, xK_Delete), spawn "rofi -show powermenu -modi powermenu:~/.local/bin/rofi-power-menu" )
+                    , ((altMask, xK_Tab), spawn "rofi -modi window -show window")
                     ]
 #+end_src
 
@@ -169,7 +172,7 @@ The Tall layout has the master pane on the left, taking half of the screen. All 
 This my the go-to layout, meant to be the first one that you get when running xmonad. It's common to have one window in focus while a couple secondary windows are in view, so the Tall layout works great. It's very useful in many situations, but the windows on the right start to feel a little crowded beyond five windows.
 
 #+begin_src haskell
-vctLayoutTall = Tall 1 (3/100) (1/2)
+vctLayoutTall = Tall 1 (3/100) (7/10)
 #+end_src
 
 ** Layout mirror
@@ -352,7 +355,7 @@ run dunst 'dunst' '' 'Dunst is already running'
 run stalonetray 'stalonetray' 'Started systemtray' 'Systemtray already started'
 run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
 run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
-run tmux 'tmux start-server' 'Starting tmux server' 'Tmux server already started'
-run picom 'picom' 'Starting compositing manager' 'Picom already started'
+run tmux 'tmux new-session -d -s vct' 'Starting tmux server' 'Tmux server already started'
+run xcompmgr 'xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55' 'Starting compositing manager'
 run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
 #+end_src

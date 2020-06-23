@@ -324,7 +324,7 @@ When Emacs is started, it normally tries to load a Lisp program from an initiali
   The default is no line numbers. One can then toggle with =<f9>=.
 
   #+begin_src emacs-lisp
-  (global-display-line-numbers-mode)
+  ;; (global-display-line-numbers-mode)
   (global-set-key (kbd "<f9>") 'display-line-numbers-mode)
   #+end_src
 
@@ -345,6 +345,7 @@ When Emacs is started, it normally tries to load a Lisp program from an initiali
   Enable by default:
   #+begin_src emacs-lisp
   (global-visual-line-mode t)
+  (global-set-key (kbd "<f8>") 'visual-line-mode)
   #+end_src
 
   and this code enable a visual hint whether a paragraph is hard or soften wrapped:
@@ -761,7 +762,7 @@ Org mode configuration is defered to a separate package:
 
 Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
 #+begin_src emacs-lisp :noweb-ref set-org-directory
-(setq org-directory (expand-file-name "~/2.archive/Dropbox/org/"))
+(setq org-directory (expand-file-name "~/.zettelkasten/"))
 ;; (setq org-roam-directory (concat org-directory "notes/"))
 #+end_src
 
@@ -1224,10 +1225,19 @@ Apparentrly, =org-capture= does not have any keybinding in the last Org version;
 **** Set journal
 
 #+begin_src emacs-lisp
-(setq org-journal-dir (expand-file-name (concat org-directory "journal/")))
-(setq org-journal-date-prefix "#+title: ")
-(setq org-journal-file-format "%Y-%m-%d")
-(setq org-journal-date-format "%A, %d %B %Y")
+(use-package org-journal
+  :bind
+  ("C-c j" . org-journal-new-entry)
+  :custom
+  (org-journal-date-prefix "#+title: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-dir (expand-file-name  (concat org-directory "journal/")))
+  (org-journal-date-format "%A, %d %B %Y"))
+
+;; (setq org-journal-dir (expand-file-name (concat org-directory "journal/")))
+;; (setq org-journal-date-prefix "#+title: ")
+;; (setq org-journal-file-format "%Y-%m-%d")
+;; (setq org-journal-date-format "%A, %d %B %Y")
 #+end_src
 
 **** Set templates for notes

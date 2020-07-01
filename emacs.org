@@ -535,6 +535,7 @@ Useful no matter what theme you have installed!
 #+begin_src emacs-lisp
 (use-package dashboard
   :config
+  (setq recentf-exclude '("~/.emacs.d/bookmarks"))
   (dashboard-setup-startup-hook)
   (setq dashboard-center-content t)
   ;; Set the banner
@@ -1284,3 +1285,8 @@ Apparentrly, =org-capture= does not have any keybinding in the last Org version;
 ;; 	       "* %? %^G\nEntered on %U\n"))
 #+end_src
 
+**** Remove org capture from recentf
+
+#+begin_src emacs-lisp
+(-map (lambda (f) (add-to-list 'recentf-exclude f)) (org-agenda-files))
+#+end_src

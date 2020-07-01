@@ -450,8 +450,30 @@ Most of the time I want the which-key popup only when I need it. This will preve
 :properties:
 :header-args+: :noweb-ref sexy-emacs
 :end:
+*** Create a hook when theme changes
 
-*** Doom themes
+Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_hook_for_when_the_theme_changes/][here]].
+
+#+begin_src emacs-lisp
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+#+end_src
+
+*** Spacemacs theme
+
+#+begin_src emacs-lisp
+(use-package spacemacs-theme
+  :defer t
+  :init
+  (load-theme 'spacemacs-dark t)
+  (setq spacemacs-theme-org-agenda-height nil)
+  (setq spacemacs-theme-org-height nil))
+#+end_src
+
+*** COMMENT Doom themes
 
 #+begin_src emacs-lisp
 (use-package doom-themes
@@ -465,10 +487,10 @@ Most of the time I want the which-key popup only when I need it. This will preve
   (doom-themes-visual-bell-config)
 
   ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
+  ;; (doom-themes-neotree-config)
   ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
-  (doom-themes-treemacs-config)
+  ;; (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  ;; (doom-themes-treemacs-config)
 
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
@@ -762,7 +784,7 @@ Org mode configuration is defered to a separate package:
 
 Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
 #+begin_src emacs-lisp :noweb-ref set-org-directory
-(setq org-directory (expand-file-name "~/.zettelkasten/"))
+(setq org-directory (expand-file-name "~/2.archive/Dropbox/zettelkasten/"))
 ;; (setq org-roam-directory (concat org-directory "notes/"))
 #+end_src
 

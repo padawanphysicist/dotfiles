@@ -456,21 +456,13 @@ We want to check the size of the terminal window after each command and, if nece
 shopt -s checkwinsize
 #+end_src
 
-** Pager
+*** Set and configure pager
 
-Set the default pager
+for more info, see =man less=.
 
-These options will make =less= more friendly:
-- =-i= :: =less= will ignore case when searching. However, if your search pattern contains upper-case letters, the ignore-case feature will be automatically disabled;
-- =-F= :: Causes =less= to automatically exit if the entire file can be displayed on the first screen;
-- =-g= :: =less= will not highlight all strings matching the last search command, but only the last one. According to the manual, this will cause =less= to run faster than the default;
-- =-z-4= :: Change the default scrolling size to 4 lines fewer than the current screen size, so always keep 4 lines overlapping with previous screen when scrolling with the =space= key;
-- =-R= :: =less= will display ANSI "color" escape sequences like =ESC [ ... m=, preserving then =ls= colors for example.
-- =-S= :: =less= will chop long lines instead of truncate them 
-
-#+begin_src bash :noweb-ref shell-interactive :noweb-sep "\n"
+#+begin_src bash
 export PAGER="less"
-export LESS="-i -F -g -z-4 -R -S"
+export LESS="--quit-if-one-screen --ignore-case --status-column --RAW-CONTROL-CHARS --tabs=4 --no-init --window=4 --chop-long-lines"
 #+end_src
 
 * Readline

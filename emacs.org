@@ -509,10 +509,6 @@ Useful no matter what theme you have installed!
     "Theme looper"
     ("n" theme-looper-enable-next-theme "Next")
     ("p" theme-looper-enable-previous-theme "Previous")
-    ("e" (lambda ()
-           (interactive)
-           (theme-looper-enable-theme (car custom-enable-themes)))
-     "Enable" :color blue)
     ("q" nil "Quit" :color blue)))
 #+end_src
 

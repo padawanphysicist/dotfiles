@@ -26,6 +26,10 @@ import XMonad.Hooks.UrgencyHook
 import GHC.IO.Handle.Types
 import XMonad.Layout.Renamed -- For renaming workspaces
 import XMonad.Layout.ToggleLayouts -- For toggling layouts
+import XMonad.Util.NamedActions
+import System.IO (hClose)
+import System.Posix.Process(executeFile)
+import XMonad.Actions.GroupNavigation
 #+end_src
 
 * Change prefix key
@@ -86,26 +90,90 @@ vctWebBrowser = "firefox"
 
 #+begin_src haskell
 vctWorkspaces :: [String]
-vctWorkspaces = ["1:WWW", "2:DEV", "3:READ", "4:AUX"] ++ map show [5..9]
+vctWorkspaces = ["1:WWW", "2:DEV", "3:READ", "4:AUX", "5:EXTRA"] ++ map show [6..9]
 #+end_src
 
 * Keybindings
 
 #+begin_src haskell
-altMask = mod1Mask
-vctAdditionalKeys :: [((KeyMask, KeySym), X())]
-vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
-                    , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
-                    , ((vctModMask, xK_e), spawn vctEditor)
-                    , ((vctModMask, xK_f), spawn vctWebBrowser)
-                    , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
-                    , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
-                    , ((vctModMask, xK_b), sendMessage ToggleStruts)
-                    , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
-                    , ((vctModMask, xK_z), sendMessage (Toggle "Full"))
-                    , ((altMask .|. controlMask, xK_Delete), spawn "rofi -show powermenu -modi powermenu:~/.local/bin/rofi-power-menu" )
-                    , ((altMask, xK_Tab), spawn "rofi -modi window -show window")
-                    ]
+--altMask = mod1Mask
+--vctAdditionalKeys :: [((KeyMask, KeySym), X())]
+--vctAdditionalKeys = [ 
+--                    , ((0, xF86XK_MonBrightnessUp), )
+--                    , ((vctModMask, xK_f), spawn vctWebBrowser)
+--                    , ((0, xF86XK_MonBrightnessDown),)
+
+--                    , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
+
+--                    , ((altMask .|. controlMask, xK_Delete),  )
+--                    , ((altMask, xK_Tab), spawn "rofi -modi window -show window")
+--                    ]
+#+end_src
+
+#+begin_src haskell
+vctAdditionalKeys c = (subtitle "Custom Keys":) $ mkNamedKeymap c $
+   vctWindowManagerKeys ++ vctProgramKeys  ++ vctMediaKeys
+#+end_src
+** Show keybindings
+
+#+begin_src haskell
+-- | An action to send to 'addDescrKeys' for showing the keybindings. See also 'showKm' and 'showKmSimple'
+showKeybindings :: [((KeyMask, KeySym), NamedAction)] -> NamedAction
+showKeybindings x = addName "Show Keybindings" $ io $ do
+    xfork $ executeFile "rofi" True ["-location", "2", "-e", "\"" ++ (unlines $ showKm x) ++ "\"", "-font", "Monego 7", "-width", "100"] Nothing
+    return ()
+#+end_src
+
+** Window management keys
+
+#+begin_src haskell
+mySpacing = 5
+myLargeSpacing = 30
+vctWindowManagerKeys =
+  [ ("M-b"        , addName "Do (not) respect xmobar" $ sendMessage ToggleStruts)
+  , ("M-S-b"      , addName "Increase spacing between windows" $ incSpacing mySpacing)
+  , ("M-v"        , addName "Set default spacing between windows" $ setSpacing mySpacing)
+  , ("M-S-v"      , addName "Decrease spacing between windows" $ incSpacing (-mySpacing))
+  , ("M-c"        , addName "Set to default large spacing between windows" $ setSpacing myLargeSpacing)
+  , ("M1-<Tab>"   , addName "Change Window" $ spawn "rofi -modi window -show window")
+  , ("M-m"        , addName "Change to last focused window" $ nextMatch History (return True))
+  ]
+#+end_src
+
+** Program keys
+
+#+begin_src haskell
+vctProgramKeys = 
+  [ ("M-p"              , addName "Open application launcher" $ spawn vctLauncher)
+  , ("M-e"              , addName "Open text editor" $ spawn vctEditor)
+  , ("M-z"              , addName "Toggle zoom (fullscreen) on current window" $ sendMessage (Toggle "Full"))
+  , ("M-S-z"            , addName "Lock screen" $ spawn vctScreenSaver)
+  , ("M1-C-<Delete>"    , addName "Power Menu" $ spawn "rofi -show powermenu -modi powermenu:~/.local/bin/rofi-power-menu")
+  ]
+#+end_src
+
+** Media keys
+
+#+begin_src haskell
+vctMediaKeys =
+  [ ("<XF86MonBrightnessUp>"   , addName "Increase backlight" $ spawn "sudo ~/.local/bin/xbacklight -i 10")
+  , ("<XF86MonBrightnessDown>" , addName "Decrease backlight" $ spawn "sudo ~/.local/bin/xbacklight -d 10")
+  -- -- mpc
+  -- , ("<XF86AudioPrev>"         , addName "Previous track" $ spawn "mpc prev")
+  -- , ("<XF86AudioNext>"         , addName "Next track" $ spawn "mpc next")
+  -- , ("<XF86AudioPlay>"         , addName "Toggle play/pause" $ spawn "mpc toggle")
+  -- -- volume
+  -- , ("<XF86AudioRaiseVolume>"  , addName "Raise volume" $ spawn "pactl set-sink-volume 1 +5%")
+  -- , ("<XF86AudioLowerVolume>"  , addName "Lower volume" $ spawn "pactl set-sink-volume 1 -5%")
+  -- , ("<XF86AudioMute>"         , addName "Toggle mute" $ spawn "pactl set-sink-mute 1 toggle")
+  -- -- volume: for if meta keys are not available
+  -- , ("C-S-="                   , addName "Raise volume" $ spawn "pactl set-sink-volume 1 +5%")
+  -- , ("C-S--"                   , addName "Lower volume" $ spawn "pactl set-sink-volume 1 -5%")
+  -- -- media keys if meta keys are not available
+  -- , ("C-S-,"                   , addName "Previous track" $ spawn "mpc prev")
+  -- , ("C-S-."                   , addName "Next track" $ spawn "mpc next")
+  -- , ("C-S-/"                   , addName "Toggle play/pause" $ spawn "mpc toggle")
+  ]
 #+end_src
 
 * Log Hooks
@@ -151,7 +219,7 @@ vctPP h = dynamicLogWithPP xmobarPP
 
 #+begin_src haskell
 vctLogHook :: Handle -> X()
-vctLogHook h = vctTransparentInactive <+> (vctPP h)
+vctLogHook h = vctTransparentInactive <+> (vctPP h) <+> historyHook
 #+end_src
 
 * Manage Hooks
@@ -203,10 +271,15 @@ vctStartupHook = do
 
 Now we run xmonad with all the settings we defined previously:
 #+begin_src haskell
+-- $ addDescrKeys ((vctModMask, xK_F1), xMessage) vctAdditionalKeys
 main :: IO()
 main = do
   xmproc <- spawnPipe vctPanel -- spawnPipe returns a Handle
-  xmonad $ withUrgencyHook NoUrgencyHook $ ewmh $ desktopConfig
+  xmonad 
+    $ withUrgencyHook NoUrgencyHook
+    $ ewmh 
+    $ addDescrKeys ((vctModMask, xK_F1), showKeybindings) vctAdditionalKeys
+    $ desktopConfig
     { modMask            = vctModMask
     , borderWidth        = vctBorderWidth
     , workspaces         = vctWorkspaces
@@ -217,7 +290,7 @@ main = do
     , manageHook         = vctManageHook <+> manageHook desktopConfig
     , layoutHook         = avoidStruts $ vctLayoutHook
     , startupHook        = vctStartupHook
-    } `additionalKeys` vctAdditionalKeys
+    } -- `additionalKeys` vctAdditionalKeys
 #+end_src
 
 * Xmobar configuration :optional:

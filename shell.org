@@ -169,44 +169,44 @@ fi
 # Special Folders
 #+end_src
 
-*** =0.inbox=
+*** =1.inbox=
 
-Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =0.sandbox= to =1.docs=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
+Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =1.inbox= to =2.working=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export INBOX="${HOME}/0.inbox"
+export INBOX="${HOME}/1.inbox"
 #+end_src
 
-*** =1.working=
+*** =2.working=
 
 Is the big kahuna [fn:: Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.] of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but (to keep you sanity) don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export WORKING="${HOME}/1.working"
+export WORKING="${HOME}/2.working"
 #+end_src
 
-*** =2.archive=
+*** =3.archive=
 
 Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-# export ARCHIVE="${HOME}/2.archive"
+# export ARCHIVE="${HOME}/3.archive"
 #+end_src
 
-*** =3.media=
+*** =4.media=
 
 Multimedia files (games, pictures and movies). This is a file that usually I don't mind to keep a backup.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export MEDIA="${HOME}/3.media"
+export MEDIA="${HOME}/4.media"
 #+end_src
 
-*** =4.opt=
+*** =5.opt=
 
 Third-party software, not present among the official packages.
 
 #+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export OPT="${HOME}/4.opt"
+export OPT="${HOME}/5.opt"
 #+end_src
 
 * Aliases

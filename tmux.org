@@ -138,7 +138,7 @@ set-window-option -g xterm-keys on
 bind Tab last-window
 #+end_src
 
-* COMMENT Set default terminal
+* Set default terminal
 
 #+begin_src conf
 set -g default-terminal xterm-256color

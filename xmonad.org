@@ -55,7 +55,7 @@ The long line here is to interchange foreground and background colors depending 
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "st -e tmux attach -t vct"
+vctTerminal = "xterm -e tmux attach -t vct"
 #+end_src
 
 ** Screensaver
@@ -282,7 +282,7 @@ main = do
     $ desktopConfig
     { modMask            = vctModMask
     , borderWidth        = vctBorderWidth
-    , workspaces         = vctWorkspaces
+    -- , workspaces         = vctWorkspaces
     , terminal           = vctTerminal
     , normalBorderColor  = vctNormalBorderColor
     , focusedBorderColor = vctFocusedBorderColor

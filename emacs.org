@@ -165,7 +165,6 @@ This hook runs after loading init files and handling the command line.
 #+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
 <<sane-ui-defaults>>
 <<package-management>>
-;;<<enable-hydra>>
 <<enable-which-key>>
 <<sexy-emacs>>
 <<enable-helm>>
@@ -384,7 +383,8 @@ Also, we try to highlight the entire expression within the brackets:
 *** Show cursor as a bar
 
 #+begin_src emacs-lisp
-(setq-default cursor-type 'bar)
+(setq-default cursor-type 'box)
+(setq blink-cursor-interval 0.2)
 #+end_src
 
 *** No suspending Emacs on =C-z= or =C-x C-z=
@@ -459,20 +459,8 @@ Most of the time I want the which-key popup only when I need it. This will preve
   ;; make sure which-key doesn't show normally but refreshes quickly after it is
   ;; triggered.
   (setq which-key-idle-delay 0.5)
-  (setq which-key-idle-secondary-delay 0.05)
+  ;; (setq which-key-idle-secondary-delay 0.05)
   (which-key-mode))
-#+end_src
-
-** COMMENT Make bindings that stick around
-:properties:
-:header-args+: :noweb-ref enable-hydra
-:end:
-
-[[https://github.com/abo-abo/hydra][Hydra]] is a package that can be used to group related commands into a family of short bindings with a common prefix - a Hydra.
-
-#+begin_src emacs-lisp
-(use-package hydra)
-(use-package use-package-hydra)
 #+end_src
 
 ** Make Emacs sexy
@@ -491,19 +479,29 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (run-hooks 'after-load-theme-hook))
 #+end_src
 
-*** COMMENT Spacemacs theme
+*** Modeline
+
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :config
+  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-icon t)
+  (doom-modeline-mode 1))
+#+end_src
+
+*** Spacemacs theme
 
 #+begin_src emacs-lisp
 (use-package spacemacs-theme
   :defer t
   :init
-  ;;(load-theme 'spacemacs-dark t)
-  ;;(setq spacemacs-theme-org-agenda-height nil)
-  ;;(setq spacemacs-theme-org-height nil)
+  (load-theme 'spacemacs-dark t)
+  (setq spacemacs-theme-org-agenda-height nil)
+  (setq spacemacs-theme-org-height nil)
   )
 #+end_src
 
-*** Doom themes
+*** COMMENT Doom themes
 
 #+begin_src emacs-lisp
 (use-package doom-themes
@@ -526,24 +524,31 @@ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_ho
   (doom-themes-org-config))
 #+end_src
 
+*** COMMENT Humanoid themes
+
+#+begin_src emacs-lisp
+(use-package humanoid-themes :straight (:branch "main"))
+#+end_src
+
 *** Theme looper
 
 Useful no matter what theme you have installed!
 
 #+begin_src emacs-lisp
-(use-package theme-looper
-  ;;:after hydra
-  ;;:bind ("C-c h t" . hydra-theme-loop/body)
-  ;;:hydra
-  ;;(hydra-theme-loop (:color amaranth)
-  ;;  "Theme looper"
-  ;;  ("n" theme-looper-enable-next-theme "Next")
-  ;;  ("p" theme-looper-enable-previous-theme "Previous")
-  ;;  ("q" nil "Quit" :color blue))
-)
+(use-package heaven-and-hell
+  :init
+  (setq heaven-and-hell-theme-type 'dark) ;; Omit to use light by default
+  (setq heaven-and-hell-themes
+        '((light . spacemacs-light)
+          (dark . spacemacs-dark))) ;; Themes can be the list: (dark . (tsdh-dark wombat))
+  ;; Optionall, load themes without asking for confirmation.
+  (setq heaven-and-hell-load-theme-no-confirm t)
+  :hook (after-init . heaven-and-hell-init-hook)
+  :bind (("C-c <f6>" . heaven-and-hell-load-default-theme)
+         ("<f6>" . heaven-and-hell-toggle-theme)))
 #+end_src
 
-*** Dashboard
+*** COMMENT Dashboard
 **** Some buffers should never be deleted:
 #+begin_src emacs-lisp
 (defun vct--immortal-buffers ()
@@ -575,15 +580,6 @@ Useful no matter what theme you have installed!
   )
 #+end_src
 
-**** Modeline
-
-#+begin_src emacs-lisp
-(use-package doom-modeline
-  :config
-  (setq doom-modeline-minor-modes t)
-  (setq doom-modeline-icon t)
-  (doom-modeline-mode 1))
-#+end_src
 ** Completion framework
 :properties:
 :header-args+: :noweb-ref enable-helm
@@ -663,7 +659,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (("C-;" . avy-goto-char-timer)
    ("M-g M-g" . avy-goto-line))
   :config
-  (setq avy-timeout-seconds 0.7))
+  (setq avy-timeout-seconds 120.0))
 #+end_src
 
 *** Transpose window arrangement
@@ -680,7 +676,19 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (winum-mode))
 #+end_src
 
-** Autocompletion
+*** Visual Regex search 
+
+#+begin_src emacs-lisp
+(use-package visual-regexp-steroids
+  :init
+  (define-key global-map (kbd "C-c r") 'vr/replace)
+  (define-key global-map (kbd "C-c q") 'vr/query-replace)
+  ;; to use visual-regexp-steroids's isearch instead of the built-in regexp isearch, also include the following lines:
+  (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ;; C-M-r
+  (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
+)
+#+end_src
+** COMMENT Autocompletion
 :properties:
 :header-args+: :noweb-ref autocompletion
 :end:
@@ -1437,7 +1445,7 @@ Fleeting notes are the entry point for taking notes in a smart way. As the name 
 
 #+begin_src emacs-lisp
 (setq org-default-notes-directory (expand-file-name (concat org-directory "/capture")))
-(setq org-default-notes-file (concat org-default-notes-directory "/notes.org"))
+(setq org-default-notes-file (concat org-default-notes-directory "/notebook.org"))
 (setq org-agenda-files `(,org-default-notes-directory))
 (setq org-archive-location (concat org-default-notes-directory "/archive.org::"))
 #+end_src
@@ -1458,7 +1466,7 @@ Apparentrly, =org-capture= does not have any keybinding in the last Org version;
 (add-to-list 'org-capture-templates
 	     '("n" "Nota"  entry
 	       (file org-default-notes-file)
-	       "* NOTE %?\n%U" :empty-lines 1))
+	       "* %? :note:\n%U" :empty-lines 1))
 ;; (add-to-list 'org-capture-templates
 ;; 	     '("s" "Agendado" entry (file+headline org-default-notes-file "Agenda")
 ;; 	       "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1))
@@ -1473,7 +1481,7 @@ Apparentrly, =org-capture= does not have any keybinding in the last Org version;
 **** Remove org capture from recentf
 
 #+begin_src emacs-lisp
-(-map (lambda (f) (add-to-list 'recentf-exclude f)) (org-agenda-files))
+;; (-map (lambda (f) (add-to-list 'recentf-exclude f)) (org-agenda-files))
 #+end_src
 **** Create new blog post entry
 

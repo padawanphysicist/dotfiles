@@ -184,10 +184,17 @@ word_wrap = yes
 #+end_src
 
 ** Icons
+** Alignment of icons
+
+Possible values are "left", "center" and "right".
+#+begin_src conf :tangle no :noweb-ref global
+icon_position = left
+#+end_src
+
 *** Path for default icons
 
 #+begin_src conf :tangle no :noweb-ref global
-icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
+icon_path = /usr/share/icons/breeze/emblems/symbolic/:/usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
 #+end_src
 
 ** History

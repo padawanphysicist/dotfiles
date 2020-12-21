@@ -58,7 +58,7 @@ configuration {
 	scrollbar-width: 8;
 /*	scroll-method: 0;*/
 /*	fake-background: "screenshot";*/
-/*	window-format: "{w}    {c}   {t}";*/
+	window-format: "{c}   {t}";
 /*	click-to-exit: true;*/
 /*	show-match: true;*/
 /*	theme: ;*/

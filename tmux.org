@@ -5,12 +5,6 @@
 
 [[https://tmux.github.io/][tmux]] gives you terminal some superpowers. Enough said.
 
-* Create session
-
-#+begin_src conf
-new-session -d -s vct
-#+end_src
-
 * Changing prefix
 
 The prefix is used to distinguish tmux commands from the commands sent to the programs inside of it. I was using =C-a= instead but note that this might interfere with bash’s "go to beginning of line" command1. So I've decide to follow emacs prefix, and changed the default prefix to =M-x=.
@@ -60,6 +54,13 @@ bind '\' split-window -h -c "#{pane_current_path}"
 bind / split-window -h -c "#{pane_current_path}"
 #+end_src
 
+* Set clipboard
+
+#+begin_src conf
+bind-key -n -T copy-mode-emacs M-w send-keys -X copy-pipe-and-cancel 'xclip -in -selection clipboard '
+bind-key -n C-y run "xclip -o | tmux load-buffer - ; tmux paste-buffer"
+#+end_src
+
 * Pane switching
 
 Switching between panes is a frequent task when using tmux. Therefore it should be as easy as possible. I’ don't like triggering the prefix key all the time. I want to be able to simply say =M-<direction>= to go where I want to go (remember: M is for Meta, which is usually your Alt key). With this modification I can simply press =Alt-left= to go to the left pane (and other directions respectively):
@@ -93,7 +94,7 @@ Start window indexing at one instead of zero. Then it will be more like the keyb
 
 #+begin_src conf
 set -g base-index 1
-set -g pane-base-index 1
+setw -g pane-base-index 1
 #+end_src
 
 * Renumber windows when a window is closed

@@ -11,21 +11,65 @@
 Most of the libraries used here come from the package =xmonad-contrib=.
 
 #+begin_src haskell
-import XMonad -- For default configuration
-import XMonad.Hooks.FadeInactive -- Add transparency to inactive windows
-import XMonad.Util.EZConfig -- For custom keys
-import Graphics.X11.ExtraTypes.XF86 -- For Brightness keys
-import XMonad.Layout.Spacing -- Add spacing (gaps) between windows
+-- Base
+import XMonad
+import System.Exit (exitSuccess)
+import System.Directory
+import qualified XMonad.StackSet as W
+import GHC.IO.Handle.Types
+
+-- Config
+import XMonad.Config.Desktop -- desktopConfig
+
+-- Hooks
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks -- Automatically manage dock type programs (panel, mainly)
 import XMonad.Hooks.DynamicLog -- For panel
-import XMonad.Layout.Grid -- For Grid layout
-import XMonad.Util.Run -- For spawn
-import XMonad.Config.Desktop -- desktopConfig
-import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.WorkspaceHistory
+import XMonad.Hooks.FadeInactive -- Add transparency to inactive windows
 import XMonad.Hooks.UrgencyHook
-import GHC.IO.Handle.Types
-import XMonad.Layout.Renamed -- For renaming workspaces
+
+-- Util
+import XMonad.Util.SpawnOnce
+import XMonad.Util.Run -- For spawn
+import XMonad.Util.EZConfig -- For custom keys
+import XMonad.Util.NamedActions
+
+-- Actions
+import qualified XMonad.Actions.TreeSelect as TS
+import XMonad.Actions.CopyWindow (kill1, killAllOtherCopies)
+import XMonad.Actions.Promote
+import XMonad.Actions.RotSlaves (rotSlavesDown, rotAllDown)
+import XMonad.Actions.WithAll (sinkAll, killAll)
+import XMonad.Actions.GroupNavigation
+
+-- Layout
+import XMonad.Layout.Spacing -- Add spacing (gaps) between windows
 import XMonad.Layout.ToggleLayouts -- For toggling layouts
+import XMonad.Layout.Grid -- For Grid layout
+import XMonad.Layout.Renamed -- For renaming workspaces
+
+-- Data
+import qualified Data.Map as M
+import Data.Char (isSpace, toUpper)
+import Data.Monoid
+import Data.Maybe (isJust)
+import Data.Tree
+
+-- Prompt
+import XMonad.Prompt
+import XMonad.Prompt.Input
+import XMonad.Prompt.FuzzyMatch
+import XMonad.Prompt.Man
+import XMonad.Prompt.Pass
+import XMonad.Prompt.Shell
+import XMonad.Prompt.Ssh
+import XMonad.Prompt.XMonad
+import Control.Arrow (first)
+
+--import Graphics.X11.ExtraTypes.XF86 -- For Brightness keys
+--import System.IO (hClose)
+--import System.Posix.Process(executeFile)
 #+end_src
 
 * Change prefix key
@@ -37,7 +81,10 @@ vctModMask :: KeyMask
 vctModMask = mod4Mask
 #+end_src
 
-* Default applications
+* Custom Variables
+
+Here I set some values for things like font, terminal and editor. With this I only have to change the value here to make modifications globally.
+
 ** Application launcher
 
 #+begin_src haskell
@@ -47,11 +94,11 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 
 ** Terminal
 
-The long line here is to interchange foreground and background colors depending on the time of the day: light color during the day, dark color during the night.
+I like to be able to use the same terminal environment no matter which workspace I'm using. Therefore I always keep my terminal connected to a tmux session named =vct=.
 
 #+begin_src haskell
 vctTerminal :: String
-vctTerminal = "xterm -e 'tmux attach -t vct'"
+vctTerminal = "st -e tmux attach -t vct"
 #+end_src
 
 ** Screensaver
@@ -59,13 +106,6 @@ vctTerminal = "xterm -e 'tmux attach -t vct'"
 #+begin_src haskell
 vctScreenSaver :: String
 vctScreenSaver = "xscreensaver-command -lock"
-#+end_src
-
-** Panel
-
-#+begin_src haskell
-vctPanel :: String
-vctPanel = "xmobar"
 #+end_src
 
 ** Editor
@@ -82,27 +122,137 @@ vctWebBrowser :: String
 vctWebBrowser = "firefox"
 #+end_src
 
-* Workspaces
+** Width of Windows border
+
+Change this to a value > 0 to have border:
+#+begin_src haskell
+vctBorderWidth :: Dimension
+vctBorderWidth = 4
+#+end_src
+
+** Colors
+
+The usual behaviour of XMonad for highlight the focused (active) window is to draw a (usually red) border around it. You can change the color and width of the borders as follows:
 
 #+begin_src haskell
-vctWorkspaces :: [String]
-vctWorkspaces = ["1:WWW", "2:DEV", "3:READ", "4:AUX"] ++ map show [5..9]
+vctFocusedBorderColor :: String
+vctFocusedBorderColor = "#5294E2"
+
+vctNormalBorderColor :: String
+vctNormalBorderColor = "#282c34"
+#+end_src
+
+* Workspaces
+
+This code enables the mouse to be used to switch workspaces. This requires [[https://www.semicomplete.com/projects/xdotool/][xdotool]] to be installed.
+#+begin_src haskell
+xmobarEscape :: String -> String
+xmobarEscape = concatMap doubleLts
+  where
+        doubleLts '<' = "<<"
+        doubleLts x   = [x]
+
+myClickableWorkspaces :: [String]
+myClickableWorkspaces = clickable . (map xmobarEscape)
+                 $ ["1:WWW", "2:DEV", "3:READ", "4:AUX", "5:EXTRA"] ++ map show [6..9]
+  where
+        clickable l = [ "<action=xdotool key super+" ++ show (n) ++ ">" ++ ws ++ "</action>" |
+                      (i,ws) <- zip [1..9] l,
+                      let n = i ]
+#+end_src
+
+This variable keeps track of the number of windows within the workspace:
+#+begin_src haskell
+windowCount :: X (Maybe String)
+windowCount = gets $ Just . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
+#+end_src
+
+* TreeSelect
+
+[[https://hackage.haskell.org/package/xmonad-contrib-0.16/docs/XMonad-Actions-TreeSelect.html][TreeSelect]] displays your workspaces or actions in a Tree-like format. You can select desired workspace/action with the cursor or hjkl keys.
+
+#+begin_src haskell
+treeselectAction :: TS.TSConfig (X ()) -> X ()
+treeselectAction a = TS.treeselectAction a
+   [ Node (TS.TSNode "+ Power" "Shutdown/Restart/Logoff" (return ()))
+       [ Node (TS.TSNode "Poweroff" "Poweroff the system" (spawn "loginctl poweroff")) []
+       , Node (TS.TSNode "Reboot" "Reboot the system" (spawn "loginctl reboot")) []
+       , Node (TS.TSNode "Logout" "Logout current session" (spawn "loginctl terminate-session ${XDG_SESSION_ID")) []
+       ]
+   ]
+#+end_src
+
+** Tree Selection Settings
+
+#+begin_src haskell
+tsDefaultConfig :: TS.TSConfig a
+tsDefaultConfig = TS.TSConfig { TS.ts_hidechildren = True
+                              , TS.ts_background   = 0xdd282c34
+                              , TS.ts_font         = "xft:SFNS Display:pixelsize=20"
+                              , TS.ts_node         = (0xffd0d0d0, 0xff1c1f24)
+                              , TS.ts_nodealt      = (0xffd0d0d0, 0xff282c34)
+                              , TS.ts_highlight    = (0xffffffff, 0xff5294e2)
+                              , TS.ts_extra        = 0xffd0d0d0
+                              , TS.ts_node_width   = 200
+                              , TS.ts_node_height  = 30
+                              , TS.ts_originX      = 0
+                              , TS.ts_originY      = 0
+                              , TS.ts_indent       = 80
+                              , TS.ts_navigate     = myTreeNavigation
+                              }
+
+myTreeNavigation = M.fromList
+    [ ((0, xK_Escape),   TS.cancel)
+    , ((0, xK_q),        TS.cancel)
+    , ((0, xK_Return),   TS.select)
+    , ((0, xK_space),    TS.select)
+    , ((0, xK_Up),       TS.movePrev)
+    , ((0, xK_Down),     TS.moveNext)
+    , ((0, xK_Left),     TS.moveParent)
+    , ((0, xK_Right),    TS.moveChild)
+    , ((0, xK_k),        TS.movePrev)
+    , ((0, xK_j),        TS.moveNext)
+    , ((0, xK_h),        TS.moveParent)
+    , ((0, xK_l),        TS.moveChild)
+    , ((0, xK_o),        TS.moveHistBack)
+    , ((0, xK_i),        TS.moveHistForward)
+    ]
 #+end_src
 
 * Keybindings
 
 #+begin_src haskell
-vctAdditionalKeys :: [((KeyMask, KeySym), X())]
-vctAdditionalKeys = [ ((vctModMask, xK_p), spawn vctLauncher)
-                    , ((0, xF86XK_MonBrightnessUp), spawn "sudo ~/.local/bin/xbacklight -i 10")
-                    , ((vctModMask, xK_e), spawn vctEditor)
-                    , ((vctModMask, xK_f), spawn vctWebBrowser)
-                    , ((0, xF86XK_MonBrightnessDown), spawn "sudo ~/.local/bin/xbacklight -d 10")
-                    , ((vctModMask .|. shiftMask, xK_z), spawn vctScreenSaver)
-                    , ((vctModMask, xK_b), sendMessage ToggleStruts)
-                    , ((vctModMask, xK_w), spawn "CM_LAUNCHER=rofi clipmenu")
-                    , ((vctModMask, xK_z), sendMessage (Toggle "Full"))
-                    ]
+vctKeys :: String -> [([Char], X ())]
+vctKeys home =
+  -- XMonad
+  [ ("M-q", spawn "xmonad --restart") -- Recompiles XMonad
+  , ("M-S-q", io exitSuccess)  -- Exits XMonad
+  -- Programs
+  , ("M-p", spawn vctLauncher)
+  , ("M-a", spawn vctEditor)
+  , ("M-z", sendMessage (Toggle "Full"))
+  -- Increase/decrease spacing (gaps)
+  , ("M-d", decWindowSpacing 4)           -- Decrease window spacing
+  , ("M-i", incWindowSpacing 4)           -- Increase window spacing
+  , ("M-S-d", decScreenSpacing 4)         -- Decrease screen spacing
+  , ("M-S-i", incScreenSpacing 4)         -- Increase screen spacing
+  -- Kill windows
+  , ("M-S-c", kill1)     -- Kill the currently focused client
+  , ("M-S-a", killAll)   -- Kill all windows on current workspace
+  -- Windows navigation
+  , ("M-m", windows W.focusMaster)  -- Move focus to the master window
+  , ("M-j", windows W.focusDown)    -- Move focus to the next window
+  , ("M-k", windows W.focusUp)      -- Move focus to the prev window
+  , ("M-S-m", windows W.swapMaster) -- Swap the focused window and the master window
+  , ("M-S-j", windows W.swapDown)   -- Swap focused window with next window
+  , ("M-S-k", windows W.swapUp)     -- Swap focused window with prev window
+  , ("M-<Backspace>", promote)      -- Moves focused window to master, others maintain order
+  , ("M-S-<Tab>", rotSlavesDown)    -- Rotate all windows except master and keep focus in place
+  , ("M-C-<Tab>", rotAllDown)       -- Rotate all the windows in the current stack
+  , ("M1-<Tab>", spawn "rofi -modi window -show window")
+  -- Tree Select
+  , ("C-M1-<Delete>", treeselectAction tsDefaultConfig)
+  ]
 #+end_src
 
 * Log Hooks
@@ -111,36 +261,31 @@ xmonad calls the =logHook= with every internal state update, which is useful for
 
 ** Transparency to inactive windows
 
-The usual behaviour of XMonad for highlight the focused (active) window is to draw a (usually red) border around it. You can change the color and width of the borders as follows:
-
-#+begin_src haskell
--- Width of windows border
-vctBorderWidth :: Dimension
-vctBorderWidth = 4 -- Change this to a value > 0 to have border
-
--- Border colors for focused/unfocused windows
-vctFocusedBorderColor :: String
-vctFocusedBorderColor = "#FFAA00"
-vctNormalBorderColor :: String
-vctNormalBorderColor  = "#CCCCCC"
-#+end_src
 
 However, there is a neater way to do this: make the unfocused (inactive) windows transparent. However, in order to do this, you must install a compositor, like Compton of xcompmgr. For now I'm sticking to [[https://github.com/chjj/compton][compton]], by eventually I'll try [[https://github.com/yshui/picom][picom]], which is a fork being activelly maintained.
 
 #+begin_src haskell
 vctTransparentInactive :: X()
 vctTransparentInactive = fadeInactiveLogHook fadeAmount
-    where fadeAmount = 0.65
+    where fadeAmount = 0.7
 #+end_src
 
 ** Pretty print to panel
 
 #+begin_src haskell
 vctPP :: Handle -> X()
-vctPP h = dynamicLogWithPP xmobarPP 
+vctPP h = dynamicLogWithPP xmobarPP
   { ppOutput = hPutStrLn h
-  , ppCurrent = xmobarColor "#ffb90f" "" . wrap "[" "]"
-  , ppTitle = (\str -> "") 
+  , ppCurrent = xmobarColor "#ffb90f" "" . wrap "[" "]" -- Current workspace in xmobar
+  , ppTitle = (\str -> "")
+  --, ppVisible = xmobarColor "#98be65" ""                -- Visible but not current workspace
+  --, ppHidden = xmobarColor "#82AAFF" "" . wrap "*" ""   -- Hidden workspaces in xmobar
+  --, ppHiddenNoWindows = xmobarColor "#c792ea" ""        -- Hidden workspaces (no windows)
+  --, ppTitle = xmobarColor "#b3afc2" "" . shorten 60     -- Title of active window in xmobar
+  , ppSep =  "<fc=#666666> <fn=2>|</fn> </fc>"          -- Separators in xmobar
+  , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"  -- Urgent workspace
+  , ppExtras  = [windowCount]                           -- # of windows current workspace
+  -- , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
   }
 #+end_src
 
@@ -148,7 +293,7 @@ vctPP h = dynamicLogWithPP xmobarPP
 
 #+begin_src haskell
 vctLogHook :: Handle -> X()
-vctLogHook h = vctTransparentInactive <+> (vctPP h)
+vctLogHook h = vctTransparentInactive <+> (vctPP h) <+> historyHook
 #+end_src
 
 * Manage Hooks
@@ -169,7 +314,7 @@ The Tall layout has the master pane on the left, taking half of the screen. All 
 This my the go-to layout, meant to be the first one that you get when running xmonad. It's common to have one window in focus while a couple secondary windows are in view, so the Tall layout works great. It's very useful in many situations, but the windows on the right start to feel a little crowded beyond five windows.
 
 #+begin_src haskell
-vctLayoutTall = Tall 1 (3/100) (1/2)
+vctLayoutTall = Tall 1 (3/100) (7/10)
 #+end_src
 
 ** Layout mirror
@@ -188,12 +333,34 @@ vctLayoutHook = renamed [CutWordsLeft 1] $ spacingRaw True (Border 0 10 10 10) T
 
 * Startup hook
 
-Perform an arbitrary action each time xmonad starts or is restarted with =mod-q=. Used by, e.g., XMonad.Layout.PerWorkspace to initialize per-workspace layout choices.
-
+These are commands we want XMonad to execute on startup or is restarted with =mod-q=.
 #+begin_src haskell
 vctStartupHook :: X()
 vctStartupHook = do
-  spawn "~/.xmonad/autostart"
+  -- Set wallpaper
+  spawnOnce "~/.fehbg &"
+  -- Set cursor
+  spawnOnce "xsetroot -cursor_name left_ptr &"
+  -- Use caps as an additional Ctrl (useful for emacs)
+  spawnOnce "setxkbmap -layout br -option -option altwin:meta_alt -option ctrl:nocaps &"
+  -- Compositing
+  spawnOnce "picom --experimental-backend &"
+  -- Notifications
+  spawnOnce "dunst &"
+  -- Start tmux in server mode
+  spawnOnce "tmux new-session -d -s vct &"
+  -- Start Emacs in server mode
+  spawnOnce "emacs --daemon &"
+  -- Start systemtray
+  spawnOnce "stalonetray &"
+  -- Start clipboard manager
+  spawnOnce "klipper &"
+  -- Start dropbox
+  spawnOnce "dropbox start &"
+  -- Start screensaver daemon
+  spawnOnce "xscreensaver -no-splash &"
+  -- Show notification in the end
+  spawn "notify-send -i \"emblem-important-symbolic\" \"XMonad started\""
 #+end_src
 
 * Run XMonad
@@ -202,76 +369,80 @@ Now we run xmonad with all the settings we defined previously:
 #+begin_src haskell
 main :: IO()
 main = do
-  xmproc <- spawnPipe vctPanel -- spawnPipe returns a Handle
-  xmonad $ withUrgencyHook NoUrgencyHook $ ewmh $ desktopConfig
-    { modMask            = vctModMask
+  home <- getHomeDirectory
+  xmproc0 <- spawnPipe "xmobar -x 0 $HOME/.config/xmobar/xmobarrc"
+  xmonad
+    $ withUrgencyHook NoUrgencyHook
+    $ ewmh
+    $ desktopConfig
+    { modMask = vctModMask
+    , terminal = vctTerminal
     , borderWidth        = vctBorderWidth
-    , workspaces         = vctWorkspaces
-    , terminal           = vctTerminal
+    , workspaces         = myClickableWorkspaces
     , normalBorderColor  = vctNormalBorderColor
     , focusedBorderColor = vctFocusedBorderColor
-    , logHook            = vctLogHook xmproc
     , manageHook         = vctManageHook <+> manageHook desktopConfig
     , layoutHook         = avoidStruts $ vctLayoutHook
     , startupHook        = vctStartupHook
-    } `additionalKeys` vctAdditionalKeys
+    , logHook = workspaceHistoryHook <+> (vctLogHook xmproc0)
+    } `additionalKeysP` vctKeys home
 #+end_src
 
-* Xmobar configuration :optional:
+* Xmobar configuration                                             :optional:
 :properties:
-:header-args+: :tangle "xmonad/.xmobarrc"
+:header-args+: :tangle "xmonad/.config/xmobar/xmobarrc"
 :end:
 
 You would like to install/enable [[https://elpa.gnu.org/packages/rainbow-mode.html][rainbow-mode]] to see the colors here =)
 
 #+begin_src haskell
--- You can take a look at
--- https://beginners-guide-to-xmonad.readthedocs.io/configure_xmobar.html
-Config
-  {
-  -- appearance
-    font = "xft:Inconsolata for Powerline:size=15:antialias=true"
-  , additionalFonts = ["xft:Font Awesome 5 Free Regular:size=16", "xft:Font Awesome 5 Free Solid:size=16", "xft:Font Awesome 5 Brands Regular:size=16"] -- For the icons
-  , allDesktops = True
-  , position = BottomW L 100
---  , position = Static { xpos = 0, ypos = 0, width = 1890, height = 20 }
-  , sepChar =  "@"   -- delineator between plugin names and straight text
-  , alignSep = "}{"  -- separator between left-right alignment
-  , template = "@UnsafeStdinReader@ | <fc=#4f94cd>CPU</fc> @multicpu@ | @memory@ • @swap@ | <fc=#caff70>@uptime@</fc> }{ <fc=#ffff00>[B]</fc> @backlight@% • <fc=#008b45>[BATT]</fc> @battery@ | @date@     "
-  , commands =
-    [
-      Run UnsafeStdinReader
-    -- , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
-    , Run MultiCpu       ["-w", "2" -- Fix width of the field
-                         , "-c", "0"-- Padding with zeros
-                         , "--template" , "<total0>% • <total1>% • <total2>% • <total3>%"
-                         , "--Low"      , "50"         -- units: %
-                         , "--High"     , "85"         -- units: %
-                         , "--low"      , "green"
-                         , "--normal"   , "orange"
-                         , "--high"     , "red"
-                         ] 10
-    , Run Memory ["-w", "2", "-c", "0", "-t", "<fc=#4f94cd>RAM</fc>: <usedratio>%"] 10
-    , Run Swap ["-w", "2", "-c", "0", "-t", "<fc=#4f94cd>SWAP</fc>: <usedratio>%"] 10
-    , Run Com "uptime" ["-p"] "" 36000
-    , Run Com "xbacklight" ["-g"] "backlight" 1
-    , Run Date           "<fc=#ABABAB>%F (%a) %H:%M</fc>" "date" 10
-    , Run Battery        [ "--template" , "<acstatus>"
-                         , "--Low"      , "10"        -- units: %
-                         , "--High"     , "80"        -- units: %
-                         , "--low"      , "red"
-                         , "--normal"   , "orange"
-                         , "--high"     , "lightgreen"
-                         , "--" -- battery specific options
-                           -- discharging status
-                         , "-o"         , "<left>% (<timeleft>)"
-                           -- AC "on" status
-                         , "-O"         , "<fc=#dAA520>Charging</fc>"
-                           -- charged status
-                         , "-i"         , "<fc=#006000>Charged</fc>"
-                         ] 50
-    ]
-  }
+-- http://projects.haskell.org/xmobar/
+-- install xmobar with these flags: --flags="with_alsa" --flags="with_mpd" --flags="with_xft"  OR --flags="all_extensions"
+-- you can find weather location codes here: http://weather.noaa.gov/index.html
+
+Config { font    = "xft:Droid Sans Mono Slashed for Powerline:pixelsize=17:antialias=true:hinting=true"
+       , additionalFonts = ["xft:Mononoki Nerd Font:pixelsize=18:antialias=true:hinting=true", "xft:Mononoki Nerd Font:pixelsize=20:antialias=true:hinting=true", "xft:Font Awesome 5 Free Regular:size=16", "xft:Font Awesome 5 Free Solid:size=16", "xft:Font Awesome 5 Brands Regular:size=16"] -- For the icons
+       , bgColor = "#282c34"
+       , fgColor = "#999999"
+       -- , position = BottomW L 100
+       , position = Static { xpos = 0, ypos = 1055, width = 1880, height = 25 }
+       , lowerOnStart = True
+       , hideOnStart = False
+       , allDesktops = True
+       , persistent = True
+       , iconRoot = "/home/santos/.xmonad/xpm/"  -- default: "."
+       , commands = [
+                      -- Time and date
+                      Run Date "<icon=calendar-clock-icon_20.xpm/> %b %d %Y - %H:%M" "date" 50
+                    , Run Com "uptime" ["-p"] "" 36000
+                      -- Network up and down
+                    , Run Network "wlp2s0" ["-t", "<icon=net_up_20.xpm/> <rx>kb <icon=net_down_20.xpm/> <tx>kb"] 20
+                      -- Cpu usage in percent
+                    , Run MultiCpu       ["-w", "2" -- Fix width of the field
+                                         , "-c", "0"-- Padding with zeros
+                                         , "--template" , "<total0>% • <total1>% • <total2>% • <total3>%"
+                                         , "--Low"      , "50"         -- units: %
+                                         , "--High"     , "85"         -- units: %
+                                         , "--low"      , "green"
+                                         , "--normal"   , "orange"
+                                         , "--high"     , "red"
+                                         ] 10
+                      -- Ram used number and percent
+                    --, Run Memory ["-t", "RAM: <used>M (<usedratio>%)"] 20
+                    , Run Memory ["-w", "2", "-c", "0", "-t", "<fc=#5294E2>RAM</fc>: <usedratio>%"] 10
+                    , Run Swap ["-w", "2", "-c", "0", "-t", "<fc=#5294E2>SWAP</fc>: <usedratio>%"] 10
+                      -- Disk space free
+                    , Run DiskU [("/", "<fc=#5294E2>HD</fc>: <free> free")] [] 60
+                      -- Runs a standard shell command 'uname -r' to get kernel version
+                    , Run Com "uname" ["-r"] "" 3600
+                      -- Prints out the left side items such as workspaces, layout, etc.
+                      -- The workspaces are 'clickable' in my configs.
+                    , Run UnsafeStdinReader
+                    ]
+       , sepChar = "%"
+       , alignSep = "}{"
+       , template = "<action=`xdotool key ctrl+alt+Delete`> <icon=haskell_20.xpm/> </action><fn=2>|</fn> %UnsafeStdinReader% <fn=2>|</fn> <icon=cpu_20.xpm/> %multicpu%<fn=2> | </fn>%uptime% <fn=2>|</fn> <icon=memory-icon_20.xpm/> %memory% • %swap%<fn=2> |</fn> <icon=harddisk-icon_20.xpm/> %disku%}{<fc=#98be65>%wlp2s0%</fc><fn=2>|</fn> %date% "
+       }
 #+end_src
 
 * System tray :optional:
@@ -283,76 +454,16 @@ Config
 decorations none
 transparent false
 dockapp_mode none
-geometry 1x1-20+1060
-background "#000000"
+geometry 1x1-20+1055
+background "#282c34"
 kludges force_icons_size
 grow_gravity NW
 icon_gravity NW
-icon_size 20
+icon_size 25
 sticky true
 #window_strut none
 window_type dock
 window_layer bottom
 no_shrink false
 skip_taskbar true
-#+end_src
-
-* Autostart :optional:
-:properties:
-:header-args+: :tangle "xmonad/.xmonad/autostart"
-:header-args+: :tangle-mode (identity #o755)
-:end:
-
-#+begin_src bash
-#!/usr/bin/env bash
-#
-# Autostart script. This is automatically generated by xmonad.org config.
-# Please do not edit this file!
-#
-# This script should be run during the initialization of the
-# window/desktop manager.
-#
-# You should be careful for using this in the startupHook of Xmonad,
-# since it runs each time xmonad is restarted.
-#
-
-function run {
-  PROGRAM_NAME=$1
-  COMMAND=$2
-  MSG_IF_NOT_RUNNING=$3
-  MSG_IF_RUNNING=$4  
-
-  # Check if PROGRAM_NAME exists
-  command -v "${PROGRAM_NAME}" 2>&1 > /dev/null
-  if [[ "$?" == 0 ]]; then # PROGRAM_NAME exists
-    pgrep --full "${PROGRAM_NAME}" 2>&1 > /dev/null # Check if PROGRAM_NAME is running
-    if [[ "$?" == 1 ]]; then # $PROGRAM_NAME not running
-      ${COMMAND} &
-      if [ ! -z "$MSG_IF_NOT_RUNNING" ]; then notify-send "$MSG_IF_NOT_RUNNING"; fi
-    else # show MSG if command is already running
-      if [ ! -z "$MSG_IF_RUNNING" ]; then notify-send "$MSG_IF_RUNNING"; fi
-    fi
-  fi
-}
-
-xsetroot -cursor_name left_ptr &
-
-# Use caps as an additional esc (useful for VIM)
-# setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
-# Use caps as an additional Ctrl (useful for emacs)
-setxkbmap -layout br -option -option altwin:meta_alt -option ctrl:nocaps &
-
-# Set wallpaper
-[[ -f ~/.fehbg ]] && ~/.fehbg
-
-# Syntax for 'run'
-# run <program_name> <command> <msg_if_not_running> <msg_if_running>
-#
-run dunst 'dunst' '' 'Dunst is already running'
-run stalonetray 'stalonetray' 'Started systemtray' 'Systemtray already started'
-run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
-run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
-run tmux 'tmux start-server' 'Starting tmux server' 'Tmux server already started'
-run picom 'picom' 'Starting compositing manager' 'Picom already started'
-run dropbox '/home/santos/.local/bin/dropbox start' 'Starting dropbox...' 'Dropbox already started'
 #+end_src

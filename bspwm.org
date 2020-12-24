@@ -1,0 +1,724 @@
+#+title: bspwnm configuration
+#+property: header-args  :mkdirp yes
+#+property: header-args+ :tangle-mode (identity #o444)
+#+property: header-args+ :noweb yes
+
+[[https://github.com/baskerville/bspwm][bspwm]] is a tiling window manager that represents windows as the leaves of a full binary tree. bspwm supports multiple monitors and is configured and controlled through messages.
+
+* bspwm configuration
+:properties:
+:header-args+: :tangle "bspwm/.config/bspwm/bspwmrc"
+:header-args+: :tangle-mode (identity #o755)
+:header-args+: :shebang "#! /bin/sh"
+:end:
+
+bspwm configuration is done by a shell script. Therefore you can use bash syntax.
+
+** Setup bspwm options
+
+#+begin_src shell
+pkill xbindkeys; xbindkeys &
+
+bspc monitor -d WWW DEV AUX READ
+
+bspc config border_width         2
+bspc config window_gap          10
+# bspc config active_border_color "#FF0000"
+# bspc config active_border_color '#0C1115'
+# bspc config normal_border_color '#0C1115'
+# bspc config focused_border_color '#928374'
+bspc config focused_border_color '#FFAA00'
+
+bspc config split_ratio          0.62
+bspc config borderless_monocle   true
+bspc config gapless_monocle      true
+
+# bspc rule -a Gimp desktop='^8' state=floating follow=on
+# bspc rule -a Chromium desktop='^2'
+# bspc rule -a mplayer2 state=floating
+# bspc rule -a Kupfer.py focus=on
+# bspc rule -a Screenkey manage=off
+#+end_src
+
+** User applications (autostart)
+
+#+begin_src shell
+xsetroot -cursor_name left_ptr &
+# $HOME/.config/polybar/launch.sh &
+# Use caps as an additional esc (useful for VIM)
+# setxkbmap -layout br -option -option altwin:meta_alt -option caps:escape &
+# Use caps as an additional Ctrl (useful for emacs)
+setxkbmap -layout br -option -option altwin:meta_alt -option ctrl:nocaps &
+
+# Set wallpaper
+[[ -f ~/.fehbg ]] && ~/.fehbg 
+
+function run {
+  PROGRAM_NAME=$1
+  COMMAND=$2
+  MSG_IF_NOT_RUNNING=$3
+  MSG_IF_RUNNING=$4  
+
+  # Check if PROGRAM_NAME exists
+  command -v "${PROGRAM_NAME}" 2>&1 > /dev/null
+  if [[ "$?" == 0 ]]; then # PROGRAM_NAME exists
+    pgrep --full "${PROGRAM_NAME}" 2>&1 > /dev/null # Check if PROGRAM_NAME is running
+    if [[ "$?" == 1 ]]; then # $PROGRAM_NAME not running
+      ${COMMAND} &
+      if [ ! -z "$MSG_IF_NOT_RUNNING" ]; then notify-send "$MSG_IF_NOT_RUNNING"; fi
+    else # show MSG if command is already running
+      if [ ! -z "$MSG_IF_RUNNING" ]; then notify-send "$MSG_IF_RUNNING"; fi
+    fi
+  fi
+}
+
+# Syntax for 'run'
+# run <program_name> <command> <msg_if_not_running> <msg_if_running>
+#
+run dunst 'dunst' '' 'Dunst is already running'
+#run xscreensaver 'xscreensaver -no-splash' 'Started Xscreensaver' 'Screensaver already started'
+run emacs 'emacs --daemon' 'Initialized emacs server' 'Emacs server already started'
+run tmux 'tmux new-session -d -s vct' 'Starting tmux server' 'Tmux server already started'
+run xcompmgr 'xcompmgr -c -C -t-5 -l-5 -r4.2 -o.55' 'Starting compositing manager' 'Xcompmgr already started'
+#+end_src
+
+* COMMENT polybar
+** Launcher
+:properties:
+:header-args+: :tangle "bspwm/.config/polybar/launch.sh"
+:header-args+: :tangle-mode (identity #o755)
+:end:
+
+#+begin_src shell
+#!/usr/bin/env bash
+
+# Terminate already running bar instances
+killall -q polybar
+# If all your bars have ipc enabled, you can also use 
+# polybar-msg cmd quit
+
+# Launch bar1 and bar2
+echo "---" | tee -a /tmp/polybar.log # /tmp/polybar2.log
+polybar bottom >>/tmp/polybar.log 2>&1 &
+
+echo "Bars launched..."
+#+end_src
+
+** Configuration
+:properties:
+:header-args+: :tangle "bspwm/.config/polybar/config"
+:header-args+: :tangle-mode (identity #o755)
+:end:
+
+#+begin_src conf
+[colors]
+background = #222
+background-alt = #444
+foreground = #dfdfdf
+foreground-alt = #555
+primary = #ffb52a
+secondary = #e60053
+alert = #bd2c40
+
+[bar/bottom]
+;monitor = ${env:MONITOR:HDMI-1}
+width = 100%
+height = 28
+radius = 0.0 ;; Rounded corners
+fixed-center = false
+bottom = true
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+line-size = 3
+line-color = #f00
+
+border-size = 4
+border-color = #00000000
+
+padding-left = 0
+padding-right = 2
+
+module-margin-left = 1
+module-margin-right = 2
+
+font-0 = SFNS Display:fontformat=truetype:size=12:antialias=true;1
+font-1 = Font Awesome 5 Free:style=Solid:size=12;2
+font-2 = Font Awesome 5 Free:style=Regular:size=12;2
+font-3 = Font Awesome 5 Brands:style=Regular:size=12;2
+font-4 = unifont:fontformat=truetype:size=8:antialias=false;0
+font-5 = siji:pixelsize=10;1
+font-6 = icomoon:style=Regular:size=9;2
+
+modules-left = bspwm
+modules-center = xwindow
+modules-right = filesystem xkeyboard date
+;xbacklight alsa  memory cpu battery temperature date powermenu
+
+tray-position = right
+tray-padding = 2
+tray-scale = 1.0
+tray-maxsize = 28
+;tray-background = #0063ff
+
+wm-restack = bspwm
+override-redirect = false
+
+cursor-click = pointer
+cursor-scroll = ns-resize
+
+[module/xwindow]
+type = internal/xwindow
+label = %title:0:30:...%
+
+[module/xkeyboard]
+type = internal/xkeyboard
+blacklist-0 = num lock
+
+format-prefix = " "
+format-prefix-foreground = ${colors.foreground-alt}
+format-prefix-underline = ${colors.secondary}
+
+label-layout = %layout%
+label-layout-underline = ${colors.secondary}
+
+label-indicator-padding = 2
+label-indicator-margin = 1
+label-indicator-background = ${colors.secondary}
+label-indicator-underline = ${colors.secondary}
+
+[module/filesystem]
+type = internal/fs
+interval = 25
+
+mount-0 = /
+
+label-mounted = %{F#0a81f5}%mountpoint%%{F-}: %percentage_used%%
+label-unmounted = %mountpoint% not mounted
+label-unmounted-foreground = ${colors.foreground-alt}
+
+[module/bspwm]
+type = internal/bspwm
+
+label-focused = %name%
+label-focused-background = ${colors.background-alt}
+label-focused-underline= ${colors.primary}
+label-focused-padding = 2
+
+label-occupied = %name%
+label-occupied-padding = 2
+
+label-urgent = %name%!
+label-urgent-background = ${colors.alert}
+label-urgent-padding = 2
+
+label-empty = %name%
+label-empty-foreground = ${colors.foreground-alt}
+label-empty-padding = 2
+
+; Separator in between workspaces
+; label-separator = |
+
+;;[module/backlight-acpi]
+;;inherit = module/xbacklight
+;;type = internal/backlight
+;;card = intel_backlight
+
+;;[module/cpu]
+;;type = internal/cpu
+;;interval = 2
+;;format-prefix = " "
+;;format-prefix-foreground = ${colors.foreground-alt}
+;;format-underline = #f90000
+;;label = %percentage:2%%
+;;
+;;[module/memory]
+;;type = internal/memory
+;;interval = 2
+;;format-prefix = " "
+;;format-prefix-foreground = ${colors.foreground-alt}
+;;format-underline = #4bffdc
+;;label = %percentage_used%%
+;;
+;;[module/wlan]
+;;type = internal/network
+;;interface = 
+;;interval = 3.0
+;;
+;;format-connected = <ramp-signal> <label-connected>
+;;format-connected-underline = #9f78e1
+;;label-connected = %essid%
+;;
+;;format-disconnected =
+;;;format-disconnected = <label-disconnected>
+;;;format-disconnected-underline = ${self.format-connected-underline}
+;;;label-disconnected = %ifname% disconnected
+;;;label-disconnected-foreground = ${colors.foreground-alt}
+;;
+;;ramp-signal-0 = 
+;;ramp-signal-1 = 
+;;ramp-signal-2 = 
+;;ramp-signal-3 = 
+;;ramp-signal-4 = 
+;;ramp-signal-foreground = ${colors.foreground-alt}
+;;
+;;[module/eth]
+;;type = internal/network
+;;interface = 
+;;interval = 3.0
+;;
+;;format-connected-underline = #55aa55
+;;format-connected-prefix = " "
+;;format-connected-prefix-foreground = ${colors.foreground-alt}
+;;label-connected = %local_ip%
+;;
+;;format-disconnected =
+;;;format-disconnected = <label-disconnected>
+;;;format-disconnected-underline = ${self.format-connected-underline}
+;;;label-disconnected = %ifname% disconnected
+;;;label-disconnected-foreground = ${colors.foreground-alt}
+;;
+[module/date]
+type = internal/date
+interval = 5
+date =
+date-alt = " %Y-%m-%d"
+time = %H:%M
+time-alt = %H:%M:%S
+format-prefix = " "
+format-prefix-foreground = ${colors.foreground-alt}
+format-underline = #0a6cf5
+label = %date% %time%
+;;label-date-margin = 10
+
+;;[module/pulseaudio]
+;;type = internal/pulseaudio
+;;
+;;format-volume = <label-volume> <bar-volume>
+;;label-volume = VOL %percentage%%
+;;label-volume-foreground = ${root.foreground}
+;;
+;;label-muted = 🔇 muted
+;;label-muted-foreground = #666
+;;
+;;bar-volume-width = 10
+;;bar-volume-foreground-0 = #55aa55
+;;bar-volume-foreground-1 = #55aa55
+;;bar-volume-foreground-2 = #55aa55
+;;bar-volume-foreground-3 = #55aa55
+;;bar-volume-foreground-4 = #55aa55
+;;bar-volume-foreground-5 = #f5a70a
+;;bar-volume-foreground-6 = #ff5555
+;;bar-volume-gradient = false
+;;bar-volume-indicator = |
+;;bar-volume-indicator-font = 2
+;;bar-volume-fill = ─
+;;bar-volume-fill-font = 2
+;;bar-volume-empty = ─
+;;bar-volume-empty-font = 2
+;;bar-volume-empty-foreground = ${colors.foreground-alt}
+;;
+;;[module/alsa]
+;;type = internal/alsa
+;;
+;;format-volume = <label-volume> <bar-volume>
+;;label-volume = VOL
+;;label-volume-foreground = ${root.foreground}
+;;
+;;format-muted-prefix = " "
+;;format-muted-foreground = ${colors.foreground-alt}
+;;label-muted = sound muted
+;;
+;;bar-volume-width = 10
+;;bar-volume-foreground-0 = #55aa55
+;;bar-volume-foreground-1 = #55aa55
+;;bar-volume-foreground-2 = #55aa55
+;;bar-volume-foreground-3 = #55aa55
+;;bar-volume-foreground-4 = #55aa55
+;;bar-volume-foreground-5 = #f5a70a
+;;bar-volume-foreground-6 = #ff5555
+;;bar-volume-gradient = false
+;;bar-volume-indicator = |
+;;bar-volume-indicator-font = 2
+;;bar-volume-fill = ─
+;;bar-volume-fill-font = 2
+;;bar-volume-empty = ─
+;;bar-volume-empty-font = 2
+;;bar-volume-empty-foreground = ${colors.foreground-alt}
+;;
+;;[module/battery]
+;;type = internal/battery
+;;battery = BAT0
+;;adapter = AC
+;;full-at = 98
+;;
+;;format-charging = <animation-charging> <label-charging>
+;;format-charging-underline = #ffb52a
+;;
+;;format-discharging = <animation-discharging> <label-discharging>
+;;format-discharging-underline = ${self.format-charging-underline}
+;;
+;;format-full-prefix = " "
+;;format-full-prefix-foreground = ${colors.foreground-alt}
+;;format-full-underline = ${self.format-charging-underline}
+;;
+;;ramp-capacity-0 = 
+;;ramp-capacity-1 = 
+;;ramp-capacity-2 = 
+;;ramp-capacity-foreground = ${colors.foreground-alt}
+;;
+;;animation-charging-0 = 
+;;animation-charging-1 = 
+;;animation-charging-2 = 
+;;animation-charging-foreground = ${colors.foreground-alt}
+;;animation-charging-framerate = 750
+;;
+;;animation-discharging-0 = 
+;;animation-discharging-1 = 
+;;animation-discharging-2 = 
+;;animation-discharging-foreground = ${colors.foreground-alt}
+;;animation-discharging-framerate = 750
+;;
+;;[module/temperature]
+;;type = internal/temperature
+;;thermal-zone = 0
+;;warn-temperature = 60
+;;
+;;format = <ramp> <label>
+;;format-underline = #f50a4d
+;;format-warn = <ramp> <label-warn>
+;;format-warn-underline = ${self.format-underline}
+;;
+;;label = %temperature-c%
+;;label-warn = %temperature-c%
+;;label-warn-foreground = ${colors.secondary}
+;;
+;;ramp-0 = 
+;;ramp-1 = 
+;;ramp-2 = 
+;;ramp-foreground = ${colors.foreground-alt}
+;;
+;;[module/powermenu]
+;;type = custom/menu
+;;
+;;expand-right = true
+;;
+;;format-spacing = 1
+;;
+;;label-open = 
+;;label-open-foreground = ${colors.secondary}
+;;label-close =  cancel
+;;label-close-foreground = ${colors.secondary}
+;;label-separator = |
+;;label-separator-foreground = ${colors.foreground-alt}
+;;
+;;menu-0-0 = reboot
+;;menu-0-0-exec = menu-open-1
+;;menu-0-1 = power off
+;;menu-0-1-exec = menu-open-2
+;;
+;;menu-1-0 = cancel
+;;menu-1-0-exec = menu-open-0
+;;menu-1-1 = reboot
+;;menu-1-1-exec = sudo reboot
+;;
+;;menu-2-0 = power off
+;;menu-2-0-exec = sudo poweroff
+;;menu-2-1 = cancel
+;;menu-2-1-exec = menu-open-0
+
+[settings]
+screenchange-reload = true
+pseudo-transparency = true
+
+[global/wm]
+margin-top = 2
+margin-bottom = 2
+#+end_src
+
+* xbindkeys
+:properties:
+:header-args+: :tangle "bspwm/.xbindkeysrc.scm"
+:header-args+: :tangle-mode (identity #o755)
+:end:
+
+#+begin_src scheme
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Start of xbindkeys guile configuration ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; This configuration is guile based.
+;;   http://www.gnu.org/software/guile/guile.html
+;; any functions that work in guile will work here.
+;; see EXTRA FUNCTIONS:
+
+;; Version: 1.8.6
+
+;; If you edit this file, do not forget to uncomment any lines
+;; that you change.
+;; The semicolon(;) symbol may be used anywhere for comments.
+
+;; To specify a key, you can use 'xbindkeys --key' or
+;; 'xbindkeys --multikey' and put one of the two lines in this file.
+
+;; A list of keys is in /usr/include/X11/keysym.h and in
+;; /usr/include/X11/keysymdef.h
+;; The XK_ is not needed.
+
+;; List of modifier:
+;;   Release, Control, Shift, Mod1 (Alt), Mod2 (NumLock),
+;;   Mod3 (CapsLock), Mod4, Mod5 (Scroll).
+
+
+;; The release modifier is not a standard X modifier, but you can
+;; use it if you want to catch release instead of press events
+
+;; By defaults, xbindkeys does not pay attention to modifiers
+;; NumLock, CapsLock and ScrollLock.
+;; Uncomment the lines below if you want to use them.
+;; To dissable them, call the functions with #f
+
+
+;;;;EXTRA FUNCTIONS: Enable numlock, scrolllock or capslock usage
+;;(set-numlock! #t)
+;;(set-scrolllock! #t)
+;;(set-capslock! #t)
+
+;;;;; Scheme API reference
+;;;;
+;; Optional modifier state:
+;; (set-numlock! #f or #t)
+;; (set-scrolllock! #f or #t)
+;; (set-capslock! #f or #t)
+;; 
+;; Shell command key:
+;; (xbindkey key "foo-bar-command [args]")
+;; (xbindkey '(modifier* key) "foo-bar-command [args]")
+;; 
+;; Scheme function key:
+;; (xbindkey-function key function-name-or-lambda-function)
+;; (xbindkey-function '(modifier* key) function-name-or-lambda-function)
+;; 
+;; Other functions:
+;; (remove-xbindkey key)
+;; (run-command "foo-bar-command [args]")
+;; (grab-all-keys)
+;; (ungrab-all-keys)
+;; (remove-all-keys)
+;; (debug)
+(use-modules (ice-9 format))
+
+;;(define-syntax xbindkey/group
+;;  (syntax-rules ()
+;;    ((_ common-binding common-command (differences differences* ...))
+;;     (begin
+;;       (let* ((different-binding (car differences))
+;;              (binding (append common-binding
+;;                               (if (list? different-binding)
+;;                                   different-binding
+;;                                   (list different-binding))))
+;;              (different-command (cadr differences))
+;;              (command (if (list? different-command)
+;;                           different-command
+;;                           (list different-command))))
+;;         (xbindkey binding
+;;                   (apply format common-command command))
+;;         (xbindkey/group common-binding common-command
+;;                         (differences* ...)))))
+;;    ((_ common-binding common-command ()) #t)))
+
+;; Define default applications
+(define terminal "st -e tmux attach-session")
+(define launcher "rofi -show run")
+(define text-editor "emacsclient -c")
+
+;;(define Win Mod4)
+;; Examples of commands:
+;; Show keybindings
+(xbindkey '(control shift q) "xbindkeys_show")
+; Reload xbindkeys config
+(xbindkey '(Mod4 Shift backslash) "pkill -SIGHUP xbindkeys")
+
+;; Terminal emulator
+(xbindkey '(Mod4 Shift "Return") terminal)
+;; Launcher
+(xbindkey '(Mod4 p) launcher)
+;; Text editor
+(xbindkey '(Mod4 e) text-editor)
+
+;; Brightness
+(xbindkey '(XF86MonBrightnessUp) "sudo ~/.local/bin/xbacklight -i 10")
+(xbindkey '(XF86MonBrightnessDown) "sudo ~/.local/bin/xbacklight -d 10")
+
+;; Navigation -- focus the node in the given direction
+(xbindkey '(mod4 h) "bspc node -f west")
+(xbindkey '(mod4 j) "bspc node -f south")
+(xbindkey '(mod4 k) "bspc node -f north")
+(xbindkey '(mod4 l) "bspc node -f east")
+
+(xbindkey '(Mod4 Shift h) "bspc node -s west")
+(xbindkey '(Mod4 Shift j) "bspc node -s south")
+(xbindkey '(Mod4 Shift k) "bspc node -s north")
+(xbindkey '(Mod4 Shift l) "bspc node -s east")
+
+
+;; focus or send to the given desktop
+(xbindkey '(Mod4 "1") "bspc desktop -f '^1'")
+(xbindkey '(Mod4 "2") "bspc desktop -f '^2'")
+(xbindkey '(Mod4 "3") "bspc desktop -f '^3'")
+(xbindkey '(Mod4 "4") "bspc desktop -f '^4'")
+(xbindkey '(Mod4 Shift "1") "bspc node -d '^1'")
+(xbindkey '(Mod4 Shift "2") "bspc node -d '^2'")
+(xbindkey '(Mod4 Shift "3") "bspc node -d '^3'")
+(xbindkey '(Mod4 Shift "4") "bspc node -d '^4'")
+
+;; Quit menu
+(xbindkey '(Control Alt Delete) "rofi -show powermenu -modi powermenu:~/.local/bin/rofi-power-menu")
+(xbindkey '(Mod4 Mod1 r) "bspc wm -r")
+(xbindkey '(Mod4 Shift q) "bspc quit")
+(xbindkey '(Mod4 g) "bspc node -s biggest")
+
+(xbindkey '(Mod4 t) "bspc node -t tiled")
+(xbindkey '(Mod4 s) "bspc node -t floating")
+(xbindkey '(Mod4 f) "bspc node -t fullscreen")
+;;super + {t,shift + t,s,f}
+;;	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+
+
+(xbindkey '(Mod4 Shift c) "bspc node -c") 
+(xbindkey '(Mod4 w) "bspc node -k") 
+;;super + {_,shift + }w
+;;	bspc node -{c,k}
+
+(xbindkey '(Mod4 "Left") "bspc node -v -20 0")
+(xbindkey '(Mod4 "Down") "bspc node -v 0 20")
+(xbindkey '(Mod4 "Up") "bspc node -v 0 -20")
+(xbindkey '(Mod4 "Right") "bspc node -v 20 0")
+;super + {Left,Down,Up,Right}
+;	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+;; Resize with keyboard (tiling)
+;super + alt + {h,j,k,l}
+;    bspc window -e {left -10,down +10,up -10,right +10}
+
+;super + alt + shift + {h,j,k,l}
+;    bspc window -e {right -10,up +10,down -10,left +10}
+
+
+;;# swap the current node and the biggest node
+;;super + g
+;;	bspc node -s biggest
+;;super + alt + {q,r}
+;;	bspc {quit,wm -r}
+;; Switch to desktop
+;;(xbindkey/group '(mod4) "bspc desktop -f ^~a"
+;;                ('("1" 1) '("2" 2) '("3" 3)
+;;                 '("4" 4)))
+;;(xbindkey '(Mod4 2) "bspc desktop -f '^2'")
+;;(xbindkey '(Mod4 3) "bspc desktop -f '^3'")
+;;(xbindkey '(Mod4 4) "bspc desktop -f '^4'")
+;;(xbindkey '(Mod4 Shift 1) "bspc node -d '1'")
+;;(xbindkey '(Mod4 Shift 2) "bspc node -d '2'")
+;;(xbindkey '(Mod4 Shift 3) "bspc node -d '3'")
+;;(xbindkey '(Mod4 Shift 4) "bspc node -d '4'")
+;;super + {_,shift + }{1-9,0}
+;;	bspc {desktop -f,node -d} '^{1-9,10}'
+
+;; set directly keycode (here control + f with my keyboard)
+;;(xbindkey '("m:0x4" "c:41") "xterm")
+
+;; specify a mouse button
+;;(xbindkey '(control "b:2") "xterm")
+
+;;(xbindkey '(shift mod2 alt s) "xterm -geom 50x20+20+20")
+
+;; set directly keycode (control+alt+mod2 + f with my keyboard)
+;;(xbindkey '(alt "m:4" mod2 "c:0x29") "xterm")
+
+;; Control+Shift+a  release event starts rxvt
+;;(xbindkey '(release control shift a) "rxvt")
+
+;; Control + mouse button 2 release event starts rxvt
+;;(xbindkey '(release control "b:2") "rxvt")
+
+;; Extra features
+;;(xbindkey-function '(control a)
+;;		   (lambda ()
+;;		     (display "Hello from Scheme!")
+;;		     (newline)))
+
+;;(xbindkey-function '(shift p)
+;;		   (lambda ()
+;;		     (run-command "xterm")))
+
+
+;; Double click test
+;;(xbindkey-function '(control w)
+;;		   (let ((count 0))
+;;		     (lambda ()
+;;		       (set! count (+ count 1))
+;;		       (if (> count 1)
+;;			   (begin
+;;			    (set! count 0)
+;;			    (run-command "xterm"))))))
+
+;; Time double click test:
+;;  - short double click -> run an xterm
+;;  - long  double click -> run an rxvt
+;;(xbindkey-function '(shift w)
+;;		   (let ((time (current-time))
+;;			 (count 0))
+;;		     (lambda ()
+;;		       (set! count (+ count 1))
+;;		       (if (> count 1)
+;;			   (begin
+;;			    (if (< (- (current-time) time) 1)
+;;				(run-command "xterm")
+;;				(run-command "rxvt"))
+;;			    (set! count 0)))
+;;		       (set! time (current-time)))))
+
+
+;; Chording keys test: Start differents program if only one key is
+;; pressed or another if two keys are pressed.
+;; If key1 is pressed start cmd-k1
+;; If key2 is pressed start cmd-k2
+;; If both are pressed start cmd-k1-k2 or cmd-k2-k1 following the
+;;   release order
+;;(define (define-chord-keys key1 key2 cmd-k1 cmd-k2 cmd-k1-k2 cmd-k2-k1)
+;;    "Define chording keys"
+;;  (let ((k1 #f) (k2 #f))
+;;    (xbindkey-function key1 (lambda () (set! k1 #t)))
+;;    (xbindkey-function key2 (lambda () (set! k2 #t)))
+;;    (xbindkey-function (cons 'release key1)
+;;		       (lambda ()
+;;			 (if (and k1 k2)
+;;			     (run-command cmd-k1-k2)
+;;			     (if k1 (run-command cmd-k1)))
+;;			 (set! k1 #f) (set! k2 #f)))
+;;    (xbindkey-function (cons 'release key2)
+;;		       (lambda ()
+;;			 (if (and k1 k2)
+;;			     (run-command cmd-k2-k1)
+;;			     (if k2 (run-command cmd-k2)))
+;;			 (set! k1 #f) (set! k2 #f)))))
+
+
+;; Example:
+;;   Shift + b:1                   start an xterm
+;;   Shift + b:3                   start an rxvt
+;;   Shift + b:1 then Shift + b:3  start gv
+;;   Shift + b:3 then Shift + b:1  start xpdf
+
+;;(define-chord-keys '(shift "b:1") '(shift "b:3")
+;;  "xterm" "rxvt" "gv" "xpdf")
+
+;; Here the release order have no importance
+;; (the same program is started in both case)
+;;(define-chord-keys '(alt "b:1") '(alt "b:3")
+;;  "gv" "xpdf" "xterm" "xterm")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; End of xbindkeys guile configuration ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#+end_src

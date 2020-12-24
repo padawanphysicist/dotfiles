@@ -1,10 +1,11 @@
-CONFIG = dunst emacs git misc rofi shell tmux xmonad xresources 
+CONFIG = dunst emacs git misc rofi shell tmux xmonad xresources bspwm redshift ranger picom
 all: $(CONFIG)
 
 # A phony target is one that is not really the name of a file; rather it is
 # just a name for a recipe to be executed when you make an explicit request.
 .PHONY: clean force misc
 
+bspwm: bspwm.org
 dunst: dunst.org
 emacs: emacs.org
 git: git.org
@@ -15,6 +16,9 @@ shell: shell.org
 tmux: tmux.org
 xmonad: xmonad.org
 xresources: xresources.org
+redshift: redshift.org
+ranger: ranger.org
+picom: picom.org
 
 %: %.org
 	if [ -d "$@" ]; then stow --delete $@; rm -rf $@ ; fi

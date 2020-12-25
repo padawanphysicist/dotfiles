@@ -12,11 +12,11 @@
 - configure low-level X applications like: =xorg-xclock=, =xpdf=, =xterm=.
 
 you can set/add/update using the command [[https://www.x.org/archive/X11R7.5/doc/man/man1/xrdb.1.html][xrdb]] to:
-1. Load a resource file (such as the conventional .Xresources), replacing any current settings: 
+1. Load a resource file (such as the conventional .Xresources), replacing any current settings:
    #+begin_src shell
    $ xrdb ~/.Xresources
    #+end_src
-2. Load a resource file, and merge with the current settings: 
+2. Load a resource file, and merge with the current settings:
    #+begin_src shell
    $ xrdb -merge ~/.Xresources
    #+end_src
@@ -35,7 +35,7 @@ Here you can define your own font and sizes. Since some configuration is compute
 
 The sizes defined here are used when resizing the font, either from the menu or from the keyboard keybinding.
 
-*** VT Font Menu: Unreadable  
+*** VT Font Menu: Unreadable
 
 #+begin_src conf
 xterm*faceSize1: 7
@@ -151,7 +151,7 @@ xterm*dynamicColors: true
 
 ** Make 'Alt' key behave as on other terminal emulators
 
-The default =Alt= key behavior in xterm is a modifier to send eight bit input characters e.g. to insert =æ= by pressing =Alt+f=. To make =Alt= instead send a =^[= (escape) key (as in gnome-terminal and konsole), set 
+The default =Alt= key behavior in xterm is a modifier to send eight bit input characters e.g. to insert =æ= by pressing =Alt+f=. To make =Alt= instead send a =^[= (escape) key (as in gnome-terminal and konsole), set
 
 #+begin_src conf
 XTerm*metaSendsEscape: true
@@ -181,3 +181,18 @@ This has use only in stacking windows managers, to prevent the window appears to
 emacs.geometry: 100x40
 #+end_src
 
+* XScreensaver configuration
+:properties:
+:header-args+: :tangle "xresources/.Xresources.d/xscreensaver"
+:end:
+
+#+begin_src conf
+! font settings
+xscreensaver.Dialog.headingFont: -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+xscreensaver.Dialog.bodyFont:    -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+xscreensaver.Dialog.labelFont:   -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+xscreensaver.Dialog.unameFont:   -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+xscreensaver.Dialog.buttonFont:  -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+xscreensaver.Dialog.dateFont:    -*-helvetica-medium-r-*-*-14-*-*-*-*-*-*-*
+xscreensaver.passwd.passwdFont:  -*-helvetica-medium-r-*-*-17-*-*-*-*-*-*-*
+#+end_src

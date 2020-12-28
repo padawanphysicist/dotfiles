@@ -165,21 +165,17 @@ This hook runs after loading init files and handling the command line.
 #+begin_src emacs-lisp :tangle "emacs/.emacs.d/init.el" :shebang ";; -*- mode: emacs-lisp; lexical-binding: t; -*-"
 <<sane-ui-defaults>>
 <<package-management>>
-<<enable-which-key>>
-<<sexy-emacs>>
-<<enable-helm>>
-<<window-navigation>>
-<<autocompletion>>
-<<undo-on-steroids>>
-<<programming-language-support>>
-;;<<load-extra-configuration>>
-<<org-configuration>>
+<<packages>>
+<<theming>>
+<<programming-languages>>
+;;<<org-configuration>>
 <<custom-functions>>
+<<load-extra-configuration>>
 #+end_src
 
 When Emacs is started, it normally tries to load a Lisp program from an initialization file, or init file for short. This file, if it exists, specifies how to initialize Emacs for you.
 
-** Sane defaults
+** Sane UI defaults
 :properties:
 :header-args+: :noweb-ref sane-ui-defaults
 :end:
@@ -187,55 +183,55 @@ When Emacs is started, it normally tries to load a Lisp program from an initiali
 *** Smooth Scrolling
 **** Scroll one line at a time
 
-  This is less "jumpy" than the default behaviour.
+This is less "jumpy" than the default behaviour.
 
-  #+begin_src emacs-lisp
-  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-  #+end_src
+#+begin_src emacs-lisp
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+#+end_src
 
 **** Don't accelerate scrolling
 
-  The original behaviour is to scroll as fast as the user moves the wheel.
+The original behaviour is to scroll as fast as the user moves the wheel.
 
-  #+begin_src emacs-lisp
-  (setq mouse-wheel-progressive-speed nil)
-  #+end_src
+#+begin_src emacs-lisp
+(setq mouse-wheel-progressive-speed nil)
+#+end_src
 
 **** Scroll window under mouse
 
-  Ensure that the mouse wheel scroll the window the mouse is over.
+Ensure that the mouse wheel scroll the window the mouse is over.
 
-  #+begin_src emacs-lisp
-  (setq mouse-wheel-follow-mouse 't)
-  #+end_src
+#+begin_src emacs-lisp
+(setq mouse-wheel-follow-mouse 't)
+#+end_src
 
 **** Keyboard scroll one line at a time
 
-  #+begin_src emacs-lisp
-  (setq scroll-step 1)
-  #+end_src
+#+begin_src emacs-lisp
+(setq scroll-step 1)
+#+end_src
 
 **** Scroll window up/down by one line
 
-  Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here]]:
-  #+begin_src emacs-lisp
-  (global-set-key (kbd "M-n") (kbd "C-u 1 C-v"))
-  (global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
-  #+end_src
+Taken from [[http://pragmaticemacs.com/emacs/scrolling-and-moving-by-line/][here]]:
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-n") (kbd "C-u 1 C-v"))
+(global-set-key (kbd "M-p") (kbd "C-u 1 M-v"))
+#+end_src
 
 **** Pixel scrolling                                       :testing:document:
 
-  #+begin_src emacs-lisp
-  (setq pixel-scroll-mode t)
-  #+end_src
+#+begin_src emacs-lisp
+(setq pixel-scroll-mode t)
+#+end_src
 
 *** Change "yes or no" to "y or n"
 
-  Lazy people like me never want to type "yes" when "y" will suffice.
+Lazy people like me never want to type "yes" when "y" will suffice.
 
-  #+begin_src emacs-lisp
-  (fset 'yes-or-no-p 'y-or-n-p)
-  #+end_src
+#+begin_src emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+end_src
 
 *** Show matching brackets
 
@@ -256,118 +252,117 @@ Also, we try to highlight the entire expression within the brackets:
 
 *** Disable bell sound
 
-  #+begin_src emacs-lisp
-  (setq ring-bell-function 'ignore)
-  #+end_src
+#+begin_src emacs-lisp
+(setq ring-bell-function 'ignore)
+#+end_src
 
 *** Change backup behaviour
 
-  This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
+This is one of the things people usually want to change right away. By default, Emacs saves backup files in the current directory. These are the files ending in =~= that are cluttering up your directory lists. The following code stashes them all in =~/.emacs.d/backups=, where I can find them with =C-x C-f= (=find-file=) if I really need to.
 
-  #+begin_src emacs-lisp
-  ;; Don't litter my filesystem tree
-  (setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
-  #+end_src
+#+begin_src emacs-lisp
+;; Don't litter my filesystem tree
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups/")))
+#+end_src
 
-  Since disk space is cheap, I prefer to save a lot!
-  #+begin_src emacs-lisp
-  (setq backup-by-copying t) ;; don't clobber symlinks
-  (setq delete-old-versions t)
-  (setq kept-new-versions 8)
-  (setq kept-old-versions 4)
-  (setq version-control t)
-  #+end_src
+Since disk space is cheap, I prefer to save a lot!
+#+begin_src emacs-lisp
+(setq backup-by-copying t) ;; don't clobber symlinks
+(setq delete-old-versions t)
+(setq kept-new-versions 8)
+(setq kept-old-versions 4)
+(setq version-control t)
+#+end_src
 
 *** Save minibuffer history
 
-  #+begin_src emacs-lisp
-  (savehist-mode 1)
-  #+end_src
+#+begin_src emacs-lisp
+(savehist-mode 1)
+#+end_src
 
 *** Add my elisp directory and other files
 
-  Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
+Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
 
-  #+begin_src emacs-lisp
-  (add-to-list 'load-path "~/.elisp")
-  #+end_src
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.elisp")
+#+end_src
 
 *** Line numbering
 
-  Line numbering is really helpful for simple file movement.
+Line numbering is really helpful for simple file movement.
 
 **** Number of columns reserved for line number display
 
-  #+begin_src emacs-lisp
-  (setq-default display-line-numbers-width 4)
-  #+end_src
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-width 4)
+#+end_src
 
 **** Do not shrink line number width
 
-  #+begin_src emacs-lisp
-  (setq display-line-numbers-grow-only t)
-  #+end_src
+#+begin_src emacs-lisp
+(setq display-line-numbers-grow-only t)
+#+end_src
 
 **** Relative line numbers taking into account screen lines
 
-  #+begin_src emacs-lisp
-  (setq-default display-line-numbers-type 'visual)
-  #+end_src
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-type 'visual)
+#+end_src
 
 **** Display the absolute number of the current line
 
-  #+begin_src emacs-lisp
-  (setq-default display-line-numbers-current-absolute t)
-  #+end_src
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-current-absolute t)
+#+end_src
 
 **** Disregard narrowing when showing line numbers
 
-  #+begin_src emacs-lisp
-  (setq-default display-line-numbers-widen t)
-  #+end_src
+#+begin_src emacs-lisp
+(setq-default display-line-numbers-widen t)
+#+end_src
 
 **** Keybinding for toggling
 
-  The default is no line numbers. One can then toggle with =<f9>=.
+The default is no line numbers. One can then toggle with =<f9>=.
 
-  #+begin_src emacs-lisp
-  ;; (global-display-line-numbers-mode)
-  (global-set-key (kbd "<f9>") 'display-line-numbers-mode)
-  #+end_src
+#+begin_src emacs-lisp
+(global-set-key (kbd "<f9>") 'display-line-numbers-mode)
+#+end_src
 
 **** Show cursor position within line
 
-  #+begin_src emacs-lisp
-  (column-number-mode 1)
-  #+end_src
+#+begin_src emacs-lisp
+(column-number-mode 1)
+#+end_src
 
 *** Setup visual lines
 
-  Visual line mode actually does several things. From a user's point of view, it:
-  - Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
-  - Makes up/down arrow keys move by a visual line. (controlled by the var line-move-visual.)
-  - Makes the kill-line command delete by a visual line, as opposed to a logical line.
-  - Turns off the display of little return arrow at the edge of window. (controlled by the var fringe-indicator-alist.)
+Visual line mode actually does several things. From a user's point of view, it:
+- Makes lines wrap at word boundaries. (controlled by var truncate-lines and word-wrap.)
+- Makes up/down arrow keys move by a visual line. (controlled by the var line-move-visual.)
+- Makes the kill-line command delete by a visual line, as opposed to a logical line.
+- Turns off the display of little return arrow at the edge of window. (controlled by the var fringe-indicator-alist.)
 
-  Enable by default:
-  #+begin_src emacs-lisp
-  (global-visual-line-mode -1)
-  (global-set-key (kbd "<f8>") 'visual-line-mode)
-  #+end_src
+Enable by default:
+#+begin_src emacs-lisp
+(global-visual-line-mode -1)
+(global-set-key (kbd "<f8>") 'visual-line-mode)
+#+end_src
 
-  and this code enable a visual hint whether a paragraph is hard or soften wrapped:
-  #+begin_src emacs-lisp
-  (defface my-custom-curly-face
-    '((t (:foreground "orange")))
-    "Face for fringe curly bitmaps."
-    :group 'basic-faces)
-  (setq-default left-fringe-width 10)
-  (set-fringe-bitmap-face 'left-curly-arrow 'my-custom-curly-face)
-  (set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
-  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
-  #+end_src
+and this code enable a visual hint whether a paragraph is hard or soften wrapped:
+#+begin_src emacs-lisp
+(defface my-custom-curly-face
+  '((t (:foreground "orange")))
+  "Face for fringe curly bitmaps."
+  :group 'basic-faces)
+(setq-default left-fringe-width 10)
+(set-fringe-bitmap-face 'left-curly-arrow 'my-custom-curly-face)
+(set-fringe-bitmap-face 'right-curly-arrow 'my-custom-curly-face)
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+#+end_src
 
-*** Set initial mode for *scratch*
+*** COMMENT Set initial mode for *scratch*
 
 #+begin_src emacs-lisp
 (setq initial-scratch-message "\
@@ -438,10 +433,11 @@ We can integrate it with =use-package=:
 (straight-use-package 'use-package)
 #+end_src
 
-** Make Emacs discoverable
+** Packages
 :properties:
-:header-args+: :noweb-ref enable-which-key
+:header-args+: :noweb-ref packages
 :end:
+*** which-key
 
 Emacs by default is built around this idea of discoverability. It is a self-documented editor. To see this, check =C-h ?=.
 
@@ -453,137 +449,14 @@ Most of the time I want the which-key popup only when I need it. This will preve
 
 #+begin_src emacs-lisp
 (use-package which-key
-  :config
-  ;; Allow C-h to trigger which-key before it is done automatically
-  ;; (setq which-key-show-early-on-C-h t)
-  ;; make sure which-key doesn't show normally but refreshes quickly after it is
-  ;; triggered.
-  (setq which-key-idle-delay 0.5)
-  ;; (setq which-key-idle-secondary-delay 0.05)
-  (which-key-mode))
-#+end_src
-
-** Make Emacs sexy
-:properties:
-:header-args+: :noweb-ref sexy-emacs
-:end:
-*** Create a hook when theme changes
-
-Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_hook_for_when_the_theme_changes/][here]].
-
-#+begin_src emacs-lisp
-(defvar after-load-theme-hook nil
-  "Hook run after a color theme is loaded using `load-theme'.")
-(defadvice load-theme (after run-after-load-theme-hook activate)
-  "Run `after-load-theme-hook'."
-  (run-hooks 'after-load-theme-hook))
-#+end_src
-
-*** Modeline
-
-#+begin_src emacs-lisp
-(use-package doom-modeline
-  :config
-  (setq doom-modeline-minor-modes t)
-  (setq doom-modeline-icon t)
-  (doom-modeline-mode 1))
-#+end_src
-
-*** Spacemacs theme
-
-#+begin_src emacs-lisp
-(use-package spacemacs-theme
-  :defer t
   :init
-  (load-theme 'spacemacs-dark t)
-  (setq spacemacs-theme-org-agenda-height nil)
-  (setq spacemacs-theme-org-height nil)
-  )
-#+end_src
-
-*** COMMENT Doom themes
-
-#+begin_src emacs-lisp
-(use-package doom-themes
+  (which-key-mode)
   :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
-
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
-  ;; (doom-themes-treemacs-config)
-
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+  (setq which-key-idle-delay 0.2
+        which-key-idle-secondary-delay 0.05))
 #+end_src
 
-*** COMMENT Humanoid themes
-
-#+begin_src emacs-lisp
-(use-package humanoid-themes :straight (:branch "main"))
-#+end_src
-
-*** Theme looper
-
-Useful no matter what theme you have installed!
-
-#+begin_src emacs-lisp
-(use-package heaven-and-hell
-  :init
-  (setq heaven-and-hell-theme-type 'dark) ;; Omit to use light by default
-  (setq heaven-and-hell-themes
-        '((light . spacemacs-light)
-          (dark . spacemacs-dark))) ;; Themes can be the list: (dark . (tsdh-dark wombat))
-  ;; Optionall, load themes without asking for confirmation.
-  (setq heaven-and-hell-load-theme-no-confirm t)
-  :hook (after-init . heaven-and-hell-init-hook)
-  :bind (("C-c <f6>" . heaven-and-hell-load-default-theme)
-         ("<f6>" . heaven-and-hell-toggle-theme)))
-#+end_src
-
-*** COMMENT Dashboard
-**** Some buffers should never be deleted:
-#+begin_src emacs-lisp
-(defun vct--immortal-buffers ()
-  (if (or (eq (current-buffer) (get-buffer "*scratch*"))
-          (eq (current-buffer) (get-buffer "*Messages*"))
-          (eq (current-buffer) (get-buffer "*dashboard*")))
-      (progn (bury-buffer)
-             nil)
-    t))
-
-(add-hook 'kill-buffer-query-functions 'vct--immortal-buffers)
-#+end_src
-
-**** Configure Dashboard
-
-#+begin_src emacs-lisp
-(use-package dashboard
-  :config
-  (setq recentf-exclude '("~/.emacs.d/bookmarks"))
-  (dashboard-setup-startup-hook)
-  (setq dashboard-center-content t)
-  ;; Set the banner
-  (setq dashboard-startup-banner "~/.images/blackhole-lines.svg")
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-  (setq dashboard-items '((recents  . 5)
-                        (bookmarks . 5)
-                        (agenda . 5)
-                        (registers . 5)))
-  )
-#+end_src
-
-** Completion framework
-:properties:
-:header-args+: :noweb-ref enable-helm
-:end:
+*** helm
 
 Emacs uses completion mechanism in a variety of contexts: code, menus, commands, variables, functions, etc. Completion entails listing, sorting, filtering, previewing, and applying actions on selected items. [[https://emacs-helm.github.io/helm][Helm]] is an interactive interface for completion in Emacs.
 
@@ -614,42 +487,29 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
   (define-key helm-map (kbd "C-z") 'helm-select-action)
   (helm-mode 1))
+
+(use-package helm-swoop
+  :bind
+  (("M-o" . helm-swoop)
+   ("M-O" . helm-swoop-back-to-last-point)
+   ("C-c M-o" . helm-multi-swoop)
+   ("C-c M-O" . helm-multi-swoop-all))
+  :config
+  ;; Save buffer when helm-multi-swoop-edit complete
+  (setq helm-multi-swoop-edit-save t)
+  ;; If this value is t, split window inside the current window
+  (setq helm-swoop-split-with-multiple-windows nil)
+  ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
+  (setq helm-swoop-split-direction 'split-window-horizontally)
+  ;; If nil, you can slightly boost invoke speed in exchange for text color
+  (setq helm-swoop-speed-or-color t)
+  (bind-keys :map isearch-mode-map
+             ("M-o" . helm-swoop-from-isearch))
+  (bind-keys :map helm-swoop-map
+             ("M-o" . helm-multi-swoop-all-from-helm-swoop)))
 #+end_src
 
-*** Search with helm
-
-  #+begin_src emacs-lisp
-  (use-package helm-swoop
-    :bind
-    (("M-o" . helm-swoop)
-     ("M-O" . helm-swoop-back-to-last-point)
-     ("C-c M-o" . helm-multi-swoop)
-     ;; ("C-c M-O" . helm-multi-swoop-all)
-     )
-    :config
-    ;; Save buffer when helm-multi-swoop-edit complete
-    (setq helm-multi-swoop-edit-save t)
-    ;; If this value is t, split window inside the current window
-    (setq helm-swoop-split-with-multiple-windows nil)
-    ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
-    (setq helm-swoop-split-direction 'split-window-horizontally)
-    ;; If nil, you can slightly boost invoke speed in exchange for text color
-    (setq helm-swoop-speed-or-color t)
-    (bind-keys :map isearch-mode-map
-               ("M-o" . helm-swoop-from-isearch))
-    (bind-keys :map helm-swoop-map
-               ("M-o" . helm-multi-swoop-all-from-helm-swoop)
-               ;; ("M-i" . helm-swoop-from-evil-search)
-               )
-    )
-  #+end_src
-
-** Navigation 
-:properties:
-:header-args+: :noweb-ref window-navigation
-:end:
-
-*** Window jumping with Avy
+*** avy
 
 #+begin_src emacs-lisp
 (use-package avy
@@ -662,13 +522,13 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (setq avy-timeout-seconds 120.0))
 #+end_src
 
-*** Transpose window arrangement
+*** transpose-frame
 
 #+begin_src emacs-lisp
 (use-package transpose-frame)
 #+end_src
 
-*** Window numbering
+*** winum
 
 #+begin_src emacs-lisp
 (use-package winum
@@ -676,7 +536,7 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (winum-mode))
 #+end_src
 
-*** Visual Regex search 
+*** visual-regexp-steroids
 
 #+begin_src emacs-lisp
 (use-package visual-regexp-steroids
@@ -684,10 +544,74 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (define-key global-map (kbd "C-c r") 'vr/replace)
   (define-key global-map (kbd "C-c q") 'vr/query-replace)
   ;; to use visual-regexp-steroids's isearch instead of the built-in regexp isearch, also include the following lines:
-  (define-key esc-map (kbd "C-r") 'vr/isearch-backward) ;; C-M-r
-  (define-key esc-map (kbd "C-s") 'vr/isearch-forward) ;; C-M-s
-)
+  (define-key esc-map (kbd "C-M-r") 'vr/isearch-backward)
+  (define-key esc-map (kbd "C-M-s") 'vr/isearch-forward))
 #+end_src
+
+*** undo-tree
+
+#+begin_src emacs-lisp
+(use-package undo-tree
+  :init
+  (global-undo-tree-mode))
+#+end_src
+
+*** flycheck
+
+#+begin_src emacs-lisp
+(use-package flycheck
+  :config
+  (add-hook 'prog-mode-hook 'flycheck-mode))
+#+end_src
+
+*** saveplace
+
+Save last cursor position across sessions
+
+#+begin_src emacs-lisp
+(use-package saveplace
+  :init
+  (setq save-place-file "~/.emacs.d/saveplace")
+  :config
+  (save-place-mode 1))
+#+end_src
+
+*** magit
+
+[[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
+
+#+begin_src emacs-lisp
+(use-package magit
+  :bind
+  ("C-x g" . magit-status))
+#+end_src
+
+** Theming
+:properties:
+:header-args+: :noweb-ref theming
+:end:
+*** Create a hook when theme changes
+
+ Taken from [[https://www.reddit.com/r/emacs/comments/4v7tcj/does_emacs_have_a_hook_for_when_the_theme_changes/][here]].
+
+#+begin_src emacs-lisp
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+#+end_src
+
+*** Modeline
+
+#+begin_src emacs-lisp
+(use-package doom-modeline
+  :config
+  (setq doom-modeline-minor-modes t)
+  (setq doom-modeline-icon t)
+  (doom-modeline-mode 1))
+#+end_src
+
 ** COMMENT Autocompletion
 :properties:
 :header-args+: :noweb-ref autocompletion
@@ -699,88 +623,50 @@ Emacs uses completion mechanism in a variety of contexts: code, menus, commands,
   (add-hook 'after-init-hook 'global-company-mode))
 #+end_src
 
-** Undo on steroids
+** Programming languages
 :properties:
-:header-args+: :noweb-ref undo-on-steroids
-:end:
-
-#+begin_src emacs-lisp
-(use-package undo-tree
-  :init
-  (global-undo-tree-mode))
-#+end_src
-
-** Programming/markup languages support
-:properties:
-:header-args+: :noweb-ref programming-language-support
+:header-args+: :noweb-ref programming-languages
 :end:
 
 In this section I try to setup some support for programming/markup languages, much like what is done by [[http://spacemacs.org/][Spacemacs]] layers.
 
-The first thing to enable is [[https://github.com/flycheck/flycheck][flycheck]]:
-#+begin_src emacs-lisp
-(use-package flycheck
-  :config
-  (add-hook 'prog-mode-hook 'flycheck-mode))
-#+end_src
-
-*** Save cursor position
-
-#+begin_src emacs-lisp
-(use-package saveplace
-  :init
-  (setq save-place-file "~/.emacs.d/saveplace")
-  :config
-  (save-place-mode 1))
-#+end_src
-
-*** Version control with Git
-
-[[https://magit.vc/][Magit]] is a wonderful git interface for emacs.
-
-#+begin_src emacs-lisp
-(use-package magit
-  :bind
-  ("C-x g" . magit-status))
-#+end_src
-
 *** Ruby
 **** Enable enhanced ruby mode
 
- Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
+Enhanced Ruby Mode replaces the emacs ruby mode that comes with ruby.
 
- #+begin_src emacs-lisp
- (use-package enh-ruby-mode
-   :config
-   (add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode)))
- #+end_src
+#+begin_src emacs-lisp
+(use-package enh-ruby-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\(?:\\.rb\\|ru\\|rake\\|thor\\|jbuilder\\|gemspec\\|podspec\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . enh-ruby-mode)))
+#+end_src
 
 **** Enable inferior Ruby
 
- #+begin_src emacs-lisp
- (use-package inf-ruby
-   :config
-   (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
-   (setq inf-ruby-default-implementation "pry"))
- #+end_src
+#+begin_src emacs-lisp
+(use-package inf-ruby
+  :config
+  (add-hook 'enh-ruby-mode-hook 'inf-ruby-minor-mode)
+  (setq inf-ruby-default-implementation "pry"))
+#+end_src
 
 **** Enable Rubocop
 
- Ruby static code analyzer and formatter, based on the community Ruby style guide. https://docs.rubocop.org
+Ruby static code analyzer and formatter, based on the community Ruby style guide. https://docs.rubocop.org
 
- #+begin_src emacs-lisp
- (use-package rubocop
-   :config
-   (add-hook 'enh-ruby-mode-hook 'rubocop-mode))
- #+end_src
+#+begin_src emacs-lisp
+(use-package rubocop
+  :config
+  (add-hook 'enh-ruby-mode-hook 'rubocop-mode))
+#+end_src
 
 **** Enable Robe
 
- #+begin_src emacs-lisp
- (use-package robe
-   :config
-   (add-hook 'enh-ruby-mode-hook 'robe-mode))
- #+end_src
+#+begin_src emacs-lisp
+(use-package robe
+  :config
+  (add-hook 'enh-ruby-mode-hook 'robe-mode))
+#+end_src
 
 *** R
 
@@ -884,18 +770,6 @@ I also set integration with Org:
   (add-hook 'geiser-mode-hook #'rainbow-delimiters-mode)) 
 #+end_src
 
-** Load additional configuration
-   :properties:
-   :header-args+: :noweb-ref load-extra-configuration
-   :end:
-
-To avoid constantly modifying this dotfile, you can keep any extra/testing configuration in a non-versioned file (defaults to =~/.custom.emacs.org=). You can keep your personal settings there and use some configuration for some time until you decide to move the code to this file. The file is loaded only if it exists:
-#+begin_src emacs-lisp
-(let ((personal-settings (expand-file-name "~/.custom.emacs.org")))
- (when (file-exists-p personal-settings)
-   (org-babel-load-file personal-settings)
-   ))
-#+end_src
 ** Org configuration
 :properties:
 :header-args+: :noweb-ref org-configuration
@@ -1516,3 +1390,14 @@ Apparentrly, =org-capture= does not have any keybinding in the last Org version;
 (global-set-key (kbd "C-c e") #'config-visit)
 #+end_src
 
+** Load additional configuration
+:properties:
+:header-args+: :noweb-ref load-extra-configuration
+:end:
+
+To avoid constantly modifying this dotfile, you can keep any extra/testing configuration in a non-versioned file (defaults to =~/.custom.emacs.org=). You can keep your personal settings there and use some configuration for some time until you decide to move the code to this file. The file is loaded only if it exists:
+#+begin_src emacs-lisp
+(let ((personal-settings (expand-file-name "~/.custom.emacs.org")))
+ (when (file-exists-p personal-settings)
+   (org-babel-load-file personal-settings)))
+#+end_src

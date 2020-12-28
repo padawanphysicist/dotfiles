@@ -1,4 +1,4 @@
-CONFIG = dunst emacs git misc rofi shell tmux xmonad xresources bspwm redshift ranger picom
+CONFIG = dunst emacs git misc rofi shell tmux xmonad xresources bspwm redshift ranger picom doom
 all: $(CONFIG)
 
 # A phony target is one that is not really the name of a file; rather it is
@@ -19,6 +19,7 @@ xresources: xresources.org
 redshift: redshift.org
 ranger: ranger.org
 picom: picom.org
+doom: doom.org
 
 %: %.org
 	if [ -d "$@" ]; then stow --delete $@; rm -rf $@ ; fi

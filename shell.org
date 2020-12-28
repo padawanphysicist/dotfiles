@@ -6,7 +6,7 @@
 
 This shell configuration is similar to that described in the article [[https://medium.com/@webprolific/getting-started-with-dotfiles-43c3602fd789#.a9jfn51ix][Getting Started With Dotfiles]].
 
-The shell program uses a collection of startup files to help create an environment. Each file has a specific use and may affect /login/  and /interactive/ environment differently.
+The shell program uses a collection of startup files to help create an environment. Each file has a specific use and may affect /login/ and /interactive/ environment differently.
 
 An /interactive login shell/ is started after a successful login, using =/bin/login=, by reading the =/etc/passwd= file. This shell invocation normally reads =/etc/profile= and its private equivalent =~/.bash_profile= (or =~/.profile= if called as =/bin/sh=) upon startup. 
 
@@ -27,21 +27,17 @@ The above descriptions lead to the following plan: Use =.profile= for one-time c
 So, let's take a look at these three configuration files:
 
 #+caption: Source listing for =.profile=.
-#+begin_src bash :tangle "shell/.profile" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
-# Configuration for interactive login shell
+#+begin_src bash :tangle "shell/.profile" :noweb yes :mkdirp yes
 <<shell-profile>>
 #+end_src
 
 #+caption: Source listing for =.bashrc=.
-#+begin_src bash :tangle "shell/.bashrc" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
-# Source installed interactive shell configurations:
+#+begin_src bash :tangle "shell/.bashrc" :noweb yes :mkdirp yes
 <<shell-bashrc>>
 #+end_src
 
 #+caption: Source listing for =.bash_profile=.
 #+begin_src bash :tangle "shell/.bash_profile" :noweb yes :shebang "#!/bin/bash\n" :mkdirp yes
-# Configuration for interactive non-login shell
-
 # Load =.profile= if it exists
 if [ -f "${HOME}/.profile" ]; then
     source "${HOME}/.profile"
@@ -66,7 +62,7 @@ enabled=False
 Let's create a file =$HOME/.config/bash/xdg= that, when sourced, sets these variables correctly. The full listing of this file is shown below:
 
 #+caption: Source listing for =.config/bash/xdg=.
-#+begin_src bash :tangle "shell/.config/bash/xdg" :noweb yes :shebang "#!/bin/sh\n" :mkdirp yes
+#+begin_src bash :tangle "shell/.config/bash/xdg" :noweb yes :mkdirp yes
 <<shell-xdg>>
 #+end_src
 
@@ -98,7 +94,6 @@ The variables =$XDG_BIN_DIRS=, =$XDG_LIB_DIRS=, =$XDG_DATA_DIRS=, and =$XDG_CONF
 The remaining variables (namely, =$XDG_DATA_HOME=, =$XDG_CONFIG_HOME=, =$XDG_BIN_HOME=, =$XDG_LIB_HOME=, and =$XDG_CACHE_HOME=), though, should be set in our shell configuration. I use the following, which happen to be the defaults anyway:
 
 #+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n"
-# XDG Basedir variables
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_BIN_HOME="$HOME/.local/bin"
@@ -119,22 +114,20 @@ While just configuring this should be enough, it's not. There is an annoying amo
 
 We also add a few more directories, handled by [[https://www.freedesktop.org/wiki/Software/xdg-user-dirs/][xdg-user-dirs]]
 #+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n\n" :exports none
-# XDG User directories
-export XDG_DESKTOP_DIR="$HOME/0.inbox"
-export XDG_DOWNLOAD_DIR="$HOME/0.inbox"
-export XDG_TEMPLATES_DIR="$HOME/0.inbox"
-export XDG_PUBLICSHARE_DIR="$HOME/0.inbox"
-export XDG_DOCUMENTS_DIR="$HOME/1.working"
-export XDG_MUSIC_DIR="$HOME/3.media/music"
-export XDG_PICTURES_DIR="$HOME/3.media/pictures"
-export XDG_VIDEOS_DIR="$HOME/3.media/videos"
+export XDG_DESKTOP_DIR="${HOME}/1.inbox"
+export XDG_DOWNLOAD_DIR="${HOME}/1.inbox"
+export XDG_TEMPLATES_DIR="${HOME}/1.inbox"
+export XDG_PUBLICSHARE_DIR="${HOME}/1.inbox"
+export XDG_DOCUMENTS_DIR="${HOME}/2.working"
+export XDG_MUSIC_DIR="${HOME}/4.media/music"
+export XDG_PICTURES_DIR="${HOME}/4.media/images"
+export XDG_VIDEOS_DIR="${HOME}/4.media/videos"
 #+end_src
 
 TeX stores its cache right under the home directory by default, so we set the
 following environment variable to move it to the cache directory:
 
 #+begin_src bash :noweb-ref shell-xdg :noweb-sep "\n"
-# Per-software configuration to use XDG basedirs
 export TEXMFVAR="$XDG_CACHE_HOME/texmf-var"
 #+end_src
 
@@ -143,7 +136,7 @@ export TEXMFVAR="$XDG_CACHE_HOME/texmf-var"
 The remaining environment variables are either set in or conditionally sourced from =$HOME/.config/bash/env=. A full listing of this file is shown below:
 
 #+caption: Source listing for =.config/bash/env=.
-#+begin_src bash :tangle "shell/.config/bash/env" :noweb yes :shebang "#!/bin/sh\n"
+#+begin_src bash :tangle "shell/.config/bash/env" :noweb yes
 <<shell-env>>
 #+end_src
 
@@ -161,52 +154,6 @@ I also set another file for environment variables, containing any variables spec
 if [ -s "${HOME}/.env" ]; then
     source "${HOME}/.env"
 fi
-#+end_src
-
-** Special folders
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-# Special Folders
-#+end_src
-
-*** =1.inbox=
-
-Unprocessed items that don’t have a place yet in here. It is a temporary folder for files you're messing around with but don't need to save long-term. This may be items like software installers you’ve downloaded, files sent to you from colleagues, random text clippings and testing scripts. Files I decide I want to keep graduate from =1.inbox= to =2.working=. This folder must be emptied everyday. To avoid procrastination, resulting in a completely cluttered folder, you can keep a 'janitor' script, deleting its contents regularly.
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export INBOX="${HOME}/1.inbox"
-#+end_src
-
-*** =2.working=
-
-Is the big kahuna [fn:: Kahuna is a Hawaiian word, defined in Pukui & Elbert (1986) as a "priest, sorcerer, magician, wizard, minister, expert in any profession". (See also Ancient Hawaii.) Forty types of kahuna are listed in the book Tales from the Night Rainbow.] of all directories. It's the place where all the working files for your currently in-progress tasks, projects and clients go. Each project gets its own unique directory. You may have many sub-folders in this directory, but (to keep you sanity) don't go deeper than 3 subfolders. This directory changes often and frequently, so you must clean it regularly. Because of this most of the files here are kept under github/gitlab control.
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export WORKING="${HOME}/2.working"
-#+end_src
-
-*** =3.archive=
-
-Completed projects, general reference items, and anything else which is important and you might want to look at again go here. From here you can create aliases for the default folder from your system, like 'Books' or 'Pictures'.  The files here don't change much if ever, and so you can back them up on a different (less frequent) schedule. Therefore I elected this folder to be actually a symbolic link to my Dropbox folder.
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-# export ARCHIVE="${HOME}/3.archive"
-#+end_src
-
-*** =4.media=
-
-Multimedia files (games, pictures and movies). This is a file that usually I don't mind to keep a backup.
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export MEDIA="${HOME}/4.media"
-#+end_src
-
-*** =5.opt=
-
-Third-party software, not present among the official packages.
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n" :exports none
-export OPT="${HOME}/5.opt"
 #+end_src
 
 * Aliases
@@ -250,20 +197,6 @@ The =du= command displays the estimate file space usage. Like =df=, the default 
 alias du="du -h"
 #+end_src
 
-** Emacs
-
-Set Emacs as our default editor for the session. We want the behavior to be "open a new buffer for the existing Emacs session. If that session does not exist, open Emacs in daemon mode and then open a terminal frame connection to it. Setting =$VISUAL= and =$EDITOR= to =emacsclient= accomplishes the first part, and setting =$ALTERNATIVE_EDITOR= to an empty string accomplishes the second part, as described in the article [[http://stuff-things.net/2014/12/16/working-with-emacsclient/][Working with EmacsClient]].
-
-#+begin_src bash :noweb-ref shell-env :noweb-sep "\n\n"
-if [ -z "$SSH_CONNECTION" ]; then
-    export EDITOR="emacsclient -c"
-    export ALTERNATE_EDITOR=""
-else
-    export EDITOR=$(type -P emacs || type -P vim || type -P vi)
-fi
-export VISUAL=$EDITOR
-#+end_src
-
 * Functions
 
 In addition to aliases, I use some shell functions for functionality that is more complicated than what aliases can provide but not complicated enough to warrant a separate shell script. These functions are stored in =$HOME/.config/bash/function=, reproduced below:
@@ -285,29 +218,29 @@ The functions I use most commonly manage my =$PATH= variable, the environment va
 
 #+begin_src bash :noweb-ref shell-function :noweb yes :noweb-sep "\n\n"
 # $PATH management functions
-path_append()  { path_remove $1; export PATH="$PATH:$1";   }
-path_prepend() { path_remove $1; export PATH="$1:$PATH";   }
 path_remove()  { export PATH=`<<shell-function-pathremove>>`; }
+path_append()  { path_remove $1; export PATH="$PATH:$1"; }
+path_prepend() { path_remove $1; export PATH="$1:$PATH"; }
 #+end_src
 
 The =path_append()= and =path_prepend()= functions are rather self-explanatory, but the =path_remove()= function may not be.  In fact, it's slightly modified from the version in the StackOverflow question linked above. Let's break it down. Our goal is to export the =$PATH= variable to a new value, so let's look inside the backtick-quoted string to see what is run:
 
 1. First, we print out the current =$PATH=, which we will use as input. The =$PATH= variable should not end in a newline, which gives us two options: =echo -n=, which is not completely portable, or =printf=. In the name of portability, we will choose the later.
-   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
-   printf '%s' "$PATH"
-   #+end_src
+#+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
+printf '%s' "$PATH"
+#+end_src
 2. We want to parse this output into a series of records separated by colons. To this, we turn to awk. The awk [[http://www.grymoire.com/Unix/Awk.html#uh-19][=RS= variable]] stores the line/record separator used in parsing, and the [[http://www.grymoire.com/Unix/Awk.html#uh-20][=ORS= variable]] stores the line/record separator used in printing. We can use these two variables to piggyback on awk's parsing capabilities, setting both of them to colons. Awk can then loop over these parsed directory names to determine whether any of them are the directory we are trying to remove. If they are, we ignore them.
-   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
-   awk -v RS=: -v ORS=: '$0 != "'$1'"'
-   #+end_src
-   The expression here used to filter is a little opaque, but works as follows:
-   - We have an initial, single-quoted string in which the =$0= is an _awk_ variable meaning "this record". This string ends with a double quote.
-   - Then, we have a _shell_ variable that interpolates to the first argument to our function.
-   - Finally, we have a third string that closes the opening quote from the first string.
+#+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
+awk -v RS=: -v ORS=: '$0 != "'$1'"'
+#+end_src
+The expression here used to filter is a little opaque, but works as follows:
+  - We have an initial, single-quoted string in which the =$0= is an _awk_ variable meaning "this record". This string ends with a double quote.
+  - Then, we have a _shell_ variable that interpolates to the first argument to our function.
+  - Finally, we have a third string that closes the opening quote from the first string.
 3. Unfortunately, awk outputs the value of =ORS= at the end of the string, too, so we need to chop it off. The following sed invocation does that:
-   #+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
-   sed 's/:$//'
-   #+end_src
+#+begin_src bash :noweb-ref shell-function-pathremove :noweb-sep " | "
+sed 's/:$//'
+#+end_src
 
 * Bash Prompt
 
@@ -529,20 +462,10 @@ set menu-complete-display-prefix On
 #+end_src
 
 ** Bindings for specific applications
-*** Bash
-
-#+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
-$if bash
-  "\C-o": "> ttt.txt"
-$endif
-#+end_src
-
 *** R
 
 #+begin_src conf :noweb-ref inputrc :noweb-sep "\n"
 $if R
-  "<<": "<- "
-  "\C-j": "\C-a(\C-e)"
   "\C-xd": "q('no')\n"
 $endif
 #+end_src
@@ -552,15 +475,6 @@ $endif
 Output commands to set the LS_COLORS environment variable. 
 
 #+begin_src bash :noweb-ref shell-bashrc :noweb-sep "\n"
-# if [[ -n "${TMUX}" ]]; then
-#   if [ $(date +'(%H-18)*3600 + (%M-00)*60' | bc) -le 0 ] && [ $(date +'(%H-06)*3600 + (%M-00)*60' | bc) -ge 0 ]; then 
-#     # xterm -rv -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
-#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
-#   else 
-#     # xterm -e 'tmux attach-session -t santos || tmux new-session -t santos'; 
-#     eval "$(dircolors ${HOME}/.config/shell/dir_colors)" # Colors for ls
-#   fi
-# fi
 eval "$(dircolors ${HOME}/.config/shell/dir_colors_256_dark)" # Colors for ls
 #+end_src
 

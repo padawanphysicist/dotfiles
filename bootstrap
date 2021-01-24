@@ -1,0 +1,119 @@
+#!/bin/bash
+
+USAGE="
+Bootstrap configuration for a program
+
+Usage: $(basename "$0") [-h | -i [PROGRAM] | -t [PROGRAM]]
+
+  -h, --help                Show this message
+  -i, --install [PROGRAM]   Install PROGRAM configuration
+  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM
+"
+
+# Check if a file exists
+function existp () {
+    test -f "$1"
+}
+
+# Tangle a single file using Emacs
+function tangle () {
+    file=$1.org
+    if existp "${file}"; then
+	emacs -q --batch -l org --eval "(org-babel-tangle-file \"${file}\")"
+    else
+	echo "File ${file} does not exist!"
+	exit 1
+    fi
+}
+
+# Prepend text to file
+function prepend () {
+    text=$1
+    file=$2
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    cat <(echo "${text}") ${file} > ${tmp}
+    mv ${tmp} ${file}
+}
+
+# Remove text from file
+function remove () {
+    text=$1
+    file=$2
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    grep -v "${text}" ${file} > ${tmp}
+    mv ${tmp} ${file}
+}
+
+case "$1" in
+  -h | --help)
+    echo "${USAGE}"
+    exit 0
+    ;;
+  -t | --tangle)
+      if [[ ! -z "$2" ]]; then
+	  echo "Tangling $2..."
+	  tangle "$2"
+	  exit 0
+      else
+	  echo "Error: missing argument"
+	  exit 1
+      fi
+      ;;
+  -i | --install)
+      if [[ ! -z "$2" ]]; then
+	  case $2 in
+	      xterm*)
+		  echo "Installing configuration for $2"
+		  tangle $2
+		  stow --restow $2
+		  echo "Adding entry in ~/.Xresources..."
+		  if ! existp ~/.Xresources; then
+		      touch ~/.Xresources
+		  fi
+		  grep --quiet '^#include ".Xresources.d/xterm"' ~/.Xresources || prepend '#include ".Xresources.d/xterm"' ~/.Xresources
+		  xrdb -load ~/.Xresources
+		  ;;
+	      bash*)
+		  echo "Installing configuration for $2"
+		  ;;
+	      *)
+		  echo "Error: unknown rule ${2}"
+		  exit 1
+		  ;;
+	  esac
+	  exit 0
+      else
+	  echo "Error: missing argument"
+	  exit 1
+      fi
+      ;;
+  -r | --remove)
+      if [[ ! -z "$2" ]]; then
+	  case $2 in
+	      xterm*)
+		  echo "Removing configuration of $2"
+		  stow --delete $2
+		  echo "Reverting changes in ~/.Xresources..."
+		  grep --quiet '^#include ".Xresources.d/xterm"' ~/.Xresources && remove '^#include ".Xresources.d/xterm"' ~/.Xresources
+		  xrdb -load ~/.Xresources
+		  rm -rf xterm
+		  ;;
+	      bash*)
+		  echo "Removing configuration of $2"
+		  ;;
+	      *)
+		  echo "Error: unknown rule ${2}"
+		  exit 1
+		  ;;
+	  esac
+	  exit 0
+      else
+	  echo "Error: missing argument"
+	  exit 1
+      fi
+      ;;
+  *)
+      echo "${USAGE}"
+      exit 0
+    ;;
+esac

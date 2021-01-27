@@ -104,6 +104,15 @@ export HISTFILESIZE=-1
 #+begin_src bash
 export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -n; history -c; history -r"
 #+end_src
+* Load additional configuration
+
+Additional configuration, which is not supposed to be versioned within this file, can be written to the file =~/.env=:
+#+begin_src bash
+if [ -f "${HOME}/.env" ]; then
+    source "${HOME}/.env"
+fi
+#+end_src
+
 * Colored =ls=
 
 #+begin_src bash

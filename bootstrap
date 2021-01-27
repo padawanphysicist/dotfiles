@@ -24,6 +24,13 @@
       (lambda (port)
 	(format port "~a\n~a" line old-contents)))))
 
+(define (f/append line path)
+  ;; Prepend LINE to PATH
+  (let ((old-contents (f/read path)))
+    (call-with-output-file path
+      (lambda (port)
+	(format port "~a\n~a" old-contents line)))))
+
 (define (f/remove-line line path)
   ;; Remove LINE from PATH
   (let* ((old-contents (f/read path)))
@@ -72,13 +79,12 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
       (system (format #f "xrdb -load ~a" xresources))))
    ((string= prog "bash")
     (let ((bash-profile (home ".bash_profile"))
-	  (lines '("if [[ $- == *i* ]]; then source \"${HOME}/.bashrc\"; fi")))
-      
+	  (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi")))
       (unless (file-exists? bash-profile)
 	(touch bash-profile))
       (for-each (lambda (line)
 		  (unless (f/has-line? line bash-profile)
-		    (f/prepend line bash-profile)))
+		    (f/append line bash-profile)))
 		lines))))
   #t)
 
@@ -95,7 +101,7 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
 	(system (format #f "xrdb -load ~a" xresources)))))
    ((string= prog "bash")
     (let ((bash-profile (home ".bash_profile"))
-	  (lines '("if [[ $- == *i* ]]; then source \"${HOME}/.bashrc\"; fi")))
+	  (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi")))
       (for-each (lambda (line)
 		  (when (f/has-line? line bash-profile)
 		    (f/remove-line line bash-profile)))

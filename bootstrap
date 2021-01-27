@@ -1,119 +1,131 @@
-#!/bin/bash
+#! /usr/bin/guile \
+-e main -s
+!#
+(use-modules
+ (ice-9 textual-ports)
+ (ice-9 regex)
+ (ice-9 getopt-long))
 
-USAGE="
+(define (f/read path)
+  ;; Return contents of PATH as a string
+  (let ((abs-path (canonicalize-path path)))
+    (call-with-input-file abs-path
+      get-string-all)))
+
+(define (f/has-line? line path)
+  ;; Check whether a line of FILE contains a LINE
+  (let ((file-contents (f/read path)))
+    (regexp-exec (make-regexp (format #f "^~a" (regexp-quote line)) regexp/newline) file-contents)))
+
+(define (f/prepend line path)
+  ;; Prepend LINE to PATH
+  (let ((old-contents (f/read path)))
+    (call-with-output-file path
+      (lambda (port)
+	(format port "~a\n~a" line old-contents)))))
+
+(define (f/remove-line line path)
+  ;; Remove LINE from PATH
+  (let* ((old-contents (f/read path)))
+    (call-with-output-file path
+      (lambda (port)
+	(regexp-substitute/global port (format #f "~a" (regexp-quote line)) old-contents 'pre "" 'post)))))
+
+(define (org/tangle path)
+  (system (format #f "emacs -q --batch -l org --eval '(org-babel-tangle-file ~s)'" path)))
+
+(define (stow rule)
+  (system (format #f "stow --verbose --restow ~a" rule)))
+
+(define (unstow rule)
+  (system (format #f "stow --delete ~a" rule)))
+
+(define (touch path)
+  (system (format #f "touch ~a" path)))
+
+(define (home file)
+  (format #f "~a/~a" (getenv "HOME") file))
+
+(define (help _)
+  (format #t "\
 Bootstrap configuration for a program
 
-Usage: $(basename "$0") [-h | -i [PROGRAM] | -t [PROGRAM]]
-
+Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
   -h, --help                Show this message
   -i, --install [PROGRAM]   Install PROGRAM configuration
-  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM
-"
+  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM\n")
+  #t)
 
-# Check if a file exists
-function existp () {
-    test -f "$1"
-}
+(define (install prog)
+  (format #t "Installing configuration for ~a\n" prog)
+  (tangle prog)
+  (stow prog)
+  (stow "assets")
+   (cond
+   ((string= prog "xterm")
+    (let ((xresources (home ".Xresources"))
+	  (line "#include \".Xresources.d/xterm\""))
+      (unless (file-exists? xresources)
+	(touch xresources))
+      (unless (f/has-line? line xresources)
+	(f/prepend line xresources))
+      (system (format #f "xrdb -load ~a" xresources))))
+   ((string= prog "bash")
+    (let ((bash-profile (home ".bash_profile"))
+	  (lines '("if [[ $- == *i* ]]; then source \"${HOME}/.bashrc\"; fi")))
+      
+      (unless (file-exists? bash-profile)
+	(touch bash-profile))
+      (for-each (lambda (line)
+		  (unless (f/has-line? line bash-profile)
+		    (f/prepend line bash-profile)))
+		lines))))
+  #t)
 
-# Tangle a single file using Emacs
-function tangle () {
-    file=$1.org
-    if existp "${file}"; then
-	emacs -q --batch -l org --eval "(org-babel-tangle-file \"${file}\")"
-    else
-	echo "File ${file} does not exist!"
-	exit 1
-    fi
-}
+(define (remove prog)
+  (format #t "Removing configuration for ~a\n" prog)
+  (unstow prog)
+  (system (format #f "rm --recursive --verbose --force ~a" prog))
+  (cond
+   ((string= prog "xterm")
+    (let ((xresources (home ".Xresources"))
+	  (line "#include \".Xresources.d/xterm\""))
+      (when (f/has-line? line xresources)
+	(f/remove-line line xresources)
+	(system (format #f "xrdb -load ~a" xresources)))))
+   ((string= prog "bash")
+    (let ((bash-profile (home ".bash_profile"))
+	  (lines '("if [[ $- == *i* ]]; then source \"${HOME}/.bashrc\"; fi")))
+      (for-each (lambda (line)
+		  (when (f/has-line? line bash-profile)
+		    (f/remove-line line bash-profile)))
+		lines)
+      (system (format #f "source ~a" bash-profile)))))
+  #t)
 
-# Prepend text to file
-function prepend () {
-    text=$1
-    file=$2
-    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
-    cat <(echo "${text}") ${file} > ${tmp}
-    mv ${tmp} ${file}
-}
+(define (tangle prog)
+  (format #t "Tangling configuration file for ~a...\n" prog)
+  (org/tangle (format #f "~a.org" prog))
+  #t)
 
-# Remove text from file
-function remove () {
-    text=$1
-    file=$2
-    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
-    grep -v "${text}" ${file} > ${tmp}
-    mv ${tmp} ${file}
-}
+(define option-spec
+  `((install (single-char #\i)
+	     (value #t)
+	     (predicate ,install))
+    (remove (single-char #\r)
+	     (value #t)
+	     (predicate ,remove))
+    (tangle  (single-char #\t)
+	     (value #t)
+	     (predicate ,tangle))
+    (help (single-char #\h)
+	  (value #f)
+	  (predicate ,help))))
 
-case "$1" in
-  -h | --help)
-    echo "${USAGE}"
-    exit 0
-    ;;
-  -t | --tangle)
-      if [[ ! -z "$2" ]]; then
-	  echo "Tangling $2..."
-	  tangle "$2"
-	  exit 0
-      else
-	  echo "Error: missing argument"
-	  exit 1
-      fi
-      ;;
-  -i | --install)
-      if [[ ! -z "$2" ]]; then
-	  case $2 in
-	      xterm*)
-		  echo "Installing configuration for $2"
-		  tangle $2
-		  stow --restow $2
-		  echo "Adding entry in ~/.Xresources..."
-		  if ! existp ~/.Xresources; then
-		      touch ~/.Xresources
-		  fi
-		  grep --quiet '^#include ".Xresources.d/xterm"' ~/.Xresources || prepend '#include ".Xresources.d/xterm"' ~/.Xresources
-		  xrdb -load ~/.Xresources
-		  ;;
-	      bash*)
-		  echo "Installing configuration for $2"
-		  ;;
-	      *)
-		  echo "Error: unknown rule ${2}"
-		  exit 1
-		  ;;
-	  esac
-	  exit 0
-      else
-	  echo "Error: missing argument"
-	  exit 1
-      fi
-      ;;
-  -r | --remove)
-      if [[ ! -z "$2" ]]; then
-	  case $2 in
-	      xterm*)
-		  echo "Removing configuration of $2"
-		  stow --delete $2
-		  echo "Reverting changes in ~/.Xresources..."
-		  grep --quiet '^#include ".Xresources.d/xterm"' ~/.Xresources && remove '^#include ".Xresources.d/xterm"' ~/.Xresources
-		  xrdb -load ~/.Xresources
-		  rm -rf xterm
-		  ;;
-	      bash*)
-		  echo "Removing configuration of $2"
-		  ;;
-	      *)
-		  echo "Error: unknown rule ${2}"
-		  exit 1
-		  ;;
-	  esac
-	  exit 0
-      else
-	  echo "Error: missing argument"
-	  exit 1
-      fi
-      ;;
-  *)
-      echo "${USAGE}"
-      exit 0
-    ;;
-esac
+(define (main args)
+  (define options (getopt-long args option-spec))
+  (newline))
+
+ 
+
+

@@ -22,6 +22,7 @@ R_LIBS_USER="${HOME}/5.opt/R_packages"
 #+begin_src shell
 options("width"=80)
 options("repos" = c(CRAN = "http://cran.r-project.org/"))
+options("crayon.enabled"=FALSE)
 options(java.parameters = "-Xmx8000m")
 
 q <- function (save="no", ...) {

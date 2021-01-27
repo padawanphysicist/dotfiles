@@ -110,8 +110,14 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
   #t)
 
 (define (tangle prog)
-  (format #t "Tangling configuration file for ~a...\n" prog)
-  (org/tangle (format #f "~a.org" prog))
+  (let ((org-file (format #f "~a.org" prog)))
+    (if (file-exists? org-file)
+	(begin
+	  (format #t "Tangling configuration file for ~a...\n" prog)
+	  (org/tangle org-file)))
+	(begin
+	  (format #t "Error: there is no configuration for ~a\n" prog)
+	  (exit 1)))
   #t)
 
 (define option-spec

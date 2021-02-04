@@ -168,7 +168,7 @@ This hook runs after loading init files and handling the command line.
 <<packages>>
 <<theming>>
 <<programming-languages>>
-;;<<org-configuration>>
+<<org-configuration>>
 <<custom-functions>>
 <<load-extra-configuration>>
 #+end_src

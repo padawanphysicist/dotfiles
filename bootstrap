@@ -42,7 +42,9 @@
   (system (format #f "emacs -q --batch -l org --eval '(org-babel-tangle-file ~s)'" path)))
 
 (define (stow rule)
-  (system (format #f "stow --verbose --restow ~a" rule)))
+  ;;(system (format #f "stow --verbose --restow ~a" rule))
+  (system (format #f "stow --verbose ~a" rule))
+  )
 
 (define (unstow rule)
   (system (format #f "stow --delete ~a" rule)))
@@ -66,8 +68,6 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
 (define (install prog)
   (format #t "Installing configuration for ~a\n" prog)
   (tangle prog)
-  (stow prog)
-  ;;(stow "assets")
    (cond
    ((string= prog "xterm")
     (let ((xresources (home ".Xresources"))
@@ -79,13 +79,18 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
       (system (format #f "xrdb -load ~a" xresources))))
    ((string= prog "bash")
     (let ((bash-profile (home ".bash_profile"))
+	  (bashrc (home ".bashrc"))
 	  (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi")))
+      (when (file-exists? bashrc)
+	  (rename-file bashrc (string-join `(,bashrc ".backup") "")))
       (unless (file-exists? bash-profile)
 	(touch bash-profile))
       (for-each (lambda (line)
 		  (unless (f/has-line? line bash-profile)
 		    (f/append line bash-profile)))
 		lines))))
+   (stow prog)
+   (stow "assets")
   #t)
 
 (define (remove prog)

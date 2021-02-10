@@ -116,5 +116,5 @@ fi
 * Colored =ls=
 
 #+begin_src bash
-eval "$(dircolors ${HOME}/.dir_colors_256_dark)"
+eval "$(dircolors ${HOME}/.dircolors_256dark)"
 #+end_src

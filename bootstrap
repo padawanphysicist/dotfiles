@@ -67,7 +67,7 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
   (format #t "Installing configuration for ~a\n" prog)
   (tangle prog)
   (stow prog)
-  (stow "assets")
+  ;;(stow "assets")
    (cond
    ((string= prog "xterm")
     (let ((xresources (home ".Xresources"))
@@ -114,10 +114,11 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
     (if (file-exists? org-file)
 	(begin
 	  (format #t "Tangling configuration file for ~a...\n" prog)
-	  (org/tangle org-file)))
+	  (org/tangle org-file))
 	(begin
 	  (format #t "Error: there is no configuration for ~a\n" prog)
 	  (exit 1)))
+    )
   #t)
 
 (define option-spec

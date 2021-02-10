@@ -61,7 +61,7 @@ XTerm*metaSendsEscape: true
 
 #+begin_src conf
 XTerm*faceName: xft:Monego
-XTerm*faceSize: 17
+XTerm*faceSize: 9
 #+end_src
 
 ** Font sizes

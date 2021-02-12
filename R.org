@@ -11,7 +11,7 @@
 
 #+begin_src emacs-lisp
 R_HISTFILE="${HOME}/.Rhistory"
-R_LIBS_USER="${HOME}/5.opt/R_packages"
+R_LIBS_USER="${HOME}/Programs/r-packages"
 #+end_src
 
 * Rprofile

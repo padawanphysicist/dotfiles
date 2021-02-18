@@ -80,7 +80,7 @@ Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
    ((string= prog "bash")
     (let ((bash-profile (home ".bash_profile"))
 	  (bashrc (home ".bashrc"))
-	  (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi")))
+	  (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi" "if [ -f \"$HOME/.ranger_automatic_cd.sh\" ]; then source \"$HOME/.ranger_automatic_cd.sh\"; fi")))
       (when (file-exists? bashrc)
 	  (rename-file bashrc (string-join `(,bashrc ".backup") "")))
       (unless (file-exists? bash-profile)

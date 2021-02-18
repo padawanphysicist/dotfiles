@@ -285,7 +285,12 @@ Since disk space is cheap, I prefer to save a lot!
 Sometimes I load files outside the package system. As long as they're in a directory in my =load-path=, Emacs can find them. 
 
 #+begin_src emacs-lisp
-(add-to-list 'load-path "~/.elisp")
+(let* ((my-lisp-dir "~/.elisp/")
+       (default-directory my-lisp-dir)
+       (orig-load-path load-path))
+  (setq load-path (cons my-lisp-dir nil))
+  (normal-top-level-add-subdirs-to-load-path)
+  (nconc load-path orig-load-path))
 #+end_src
 
 *** Line numbering
@@ -346,7 +351,7 @@ Visual line mode actually does several things. From a user's point of view, it:
 
 Enable by default:
 #+begin_src emacs-lisp
-(global-visual-line-mode -1)
+(global-visual-line-mode 1)
 (global-set-key (kbd "<f8>") 'visual-line-mode)
 #+end_src
 
@@ -775,14 +780,18 @@ I also set integration with Org:
 :header-args+: :noweb-ref org-configuration
 :end:
 
-Org mode configuration is defered to a separate package:
-
 #+begin_src emacs-lisp :noweb yes
 ;; Use builtin version of Org
-(use-package org :straight (:type built-in))
+(use-package org 
+  :straight (:type built-in)
+  :init
+  (setq org-directory (expand-file-name "~/Dropbox/zettelkasten/")))
+
 (use-package htmlize)
+
+<<zettelkasten>>
+
 (with-eval-after-load 'org
-  <<set-org-directory>>
   <<block-invisible-edits>>
   <<clean-view>>
   <<babel-configuration>>
@@ -792,16 +801,147 @@ Org mode configuration is defered to a separate package:
   <<fix-latex-behaviour>>
   <<start-with-image-preview>>
   <<agenda-configuration>>
-  <<zettelkasten>>
   )
 #+end_src
 
-*** Set main folder (root directory)
+*** Zettelkasten
+:properties:
+:header-args+: :noweb-ref zettelkasten
+:end:
 
-Here I set all the main folders I use. All paths defined later should be relative to one of these variables:
-#+begin_src emacs-lisp :noweb-ref set-org-directory
-(setq org-directory (expand-file-name "~/Dropbox/zettelkasten/"))
-;; (setq org-roam-directory (concat org-directory "notes/"))
+My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book
+- [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
+
+The aim is to have notes created using org capture facilities, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
+
+**** Setup org-roam
+
+#+begin_src emacs-lisp
+(use-package org-roam
+  :hook (after-init . org-roam-mode)
+  :after org
+  :config
+  (global-set-key (kbd "C-c C") 'org-roam-capture)
+  (setq org-roam-directory (expand-file-name (concat org-directory "notes/")))
+  (setq org-roam-tag-sources '(vanilla prop))
+  :bind (:map org-roam-mode-map
+	      (("C-c n l" . org-roam)
+	       ("C-c n f" . org-roam-find-file)
+	       ("C-c n j" . org-roam-jump-to-index)
+	       ("C-c n b" . org-roam-switch-to-buffer)
+	       ("C-c n g" . org-roam-graph))
+	      :map org-mode-map
+	      (("C-c n i" . org-roam-insert)
+	       )))
+#+end_src
+
+**** Setup org-download
+
+[[https://github.com/abo-abo/org-download][Org-download]] lets you screenshot and yank images from the web into your notes:
+
+#+begin_src emacs-lisp
+(use-package org-download
+  :after org-roam
+  :config
+  (setq org-download-image-dir (expand-file-name (concat org-roam-directory "img/")))
+  (setq org-download-screenshot-method "spectacle --background --region --output %s")
+)
+#+end_src
+
+**** Setup deft
+
+[[https://jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by Notational Velocity. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
+
+#+begin_src emacs-lisp
+(use-package deft
+  :bind
+  ("<f12>" . deft)
+  ("C-x C-g" . deft-find-file)
+  :config
+
+  (setq deft-directory org-roam-directory)
+  (setq deft-recursive nil)
+  (setq deft-default-extension "org")
+  (setq deft-extensions '("org" "gpg" "md" "txt"))
+  (setq deft-use-filename-as-title nil)
+  (setq deft-use-filter-string-for-filename t)
+  (setq deft-file-naming-rules '((noslash . "-")
+				 (nospace . "-")
+				 (case-fn . downcase)))
+  (setq deft-text-mode 'org-mode))
+#+end_src
+
+**** Configure templates
+
+#+begin_src emacs-lisp
+(setq org-roam-capture-templates
+      '(
+	("d" "default" plain (function org-roam--capture-get-point)
+	 "%?"
+	 :file-name "%<%Y%m%d-%H%M%S>"
+	 :head "#+title: ${title}\n#+date: %(org-insert-time-stamp (current-time) t)\n#+modified: \n#+filetags: :tag1:tag2:\n#+options: \n\n"
+	 :unnarrowed t)))
+#+end_src
+
+**** Set fleeting notes location
+
+Fleeting notes are the entry point for taking notes in a smart way. As the name says, they are supposed to be ephemeral, for dumping whatever it is in your head.
+
+#+begin_src emacs-lisp
+(setq org-default-notes-directory (expand-file-name (concat org-directory "/capture")))
+(setq org-default-notes-file (concat org-default-notes-directory "/notebook.org"))
+(setq org-agenda-files `(,org-default-notes-directory))
+(setq org-archive-location (concat org-default-notes-directory "/archive.org::"))
+#+end_src
+
+Apparentrly, =org-capture= does not have any keybinding in the last Org version; therefore, I set to the old keybinding =C-c c=:
+#+begin_src emacs-lisp
+;; (define-key org-mode-map (kbd "C-c c") 'org-capture) ;; For org mode only
+(global-set-key (kbd "C-c c") 'org-capture)
+#+end_src
+
+**** Set templates for notes
+
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+	     '("t" "Tarefa"  entry
+	       (file org-default-notes-file)
+	       "* TODO %?\n%U" :empty-lines 1))
+(add-to-list 'org-capture-templates
+	     '("n" "Nota"  entry
+	       (file org-default-notes-file)
+	       "* %? :note:\n%U" :empty-lines 1))
+;; (add-to-list 'org-capture-templates
+;; 	     '("s" "Agendado" entry (file+headline org-default-notes-file "Agenda")
+;; 	       "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1))
+;; (add-to-list 'org-capture-templates
+;; 	     '("d" "Prazo" entry (file+headline org-default-notes-file "Agenda")
+;; 	       "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1))
+;; (add-to-list 'org-capture-templates
+;; 	     '("j" "Diário" entry (file+datetree journal-file)
+;; 	       "* %? %^G\nEntered on %U\n"))
+#+end_src
+
+**** Remove org capture from recentf
+
+#+begin_src emacs-lisp
+;; (-map (lambda (f) (add-to-list 'recentf-exclude f)) (org-agenda-files))
+#+end_src
+**** Create new blog post entry
+
+#+begin_src emacs-lisp
+(setq blog-post-directory (expand-file-name (concat org-directory "articles/")))
+
+(add-to-list 'org-capture-templates
+	     `("b" "Postagem blog" plain
+	       (file ,(expand-file-name (concat blog-post-directory (format-time-string "%Y%m%d-%H%M%S.org"))))
+	       ,(concat 
+		"#+title: %?\n"
+		"#+date: " (format-time-string "<%Y-%m-%d %a %H:%M>\n")
+		"#+modified: \n"
+		"#+options: \n"
+		"#+filetags: :unsorted: \n\n\n"
+		"# TEASER_END") :empty-lines 1))
 #+end_src
 
 *** Block invisible edits
@@ -1235,143 +1375,6 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq org-refile-targets (quote ((nil :maxlevel . 9) (org-agenda-files :maxlevel . 9))))
 (setq org-outline-path-complete-in-steps nil) ; Refile in a single go
 (setq org-refile-use-outline-path t)          ; Show full paths for refiling
-#+end_src
-
-*** Zettelkasten
-    :properties:
-    :header-args+: :noweb-ref zettelkasten
-    :end:
-
-My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book
-- [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
-
-The aim is to have notes created using org capture facilities, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
-
-**** Setup org-roam
-
-#+begin_src emacs-lisp
-(use-package org-roam
-  :hook (after-init . org-roam-mode)
-  :after org
-  :config
-  (global-set-key (kbd "C-c C") 'org-roam-capture)
-  :custom
-  (org-roam-directory (concat org-directory "notes/"))
-  (org-roam-tag-sources '(vanilla prop))
-  :bind (:map org-roam-mode-map
-	      (("C-c n l" . org-roam)
-	       ("C-c n f" . org-roam-find-file)
-	       ("C-c n j" . org-roam-jump-to-index)
-	       ("C-c n b" . org-roam-switch-to-buffer)
-	       ("C-c n g" . org-roam-graph))
-	      :map org-mode-map
-	      (("C-c n i" . org-roam-insert)
-	       )))
-#+end_src
-
-**** Setup deft
-
-[[https://jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by Notational Velocity. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
-
-#+begin_src emacs-lisp
-(use-package deft
-  :bind
-  ("<f12>" . deft)
-  ("C-x C-g" . deft-find-file)
-  :config
-
-  (setq deft-directory org-roam-directory)
-  (setq deft-recursive nil)
-  (setq deft-default-extension "org")
-  (setq deft-extensions '("org" "gpg" "md" "txt"))
-  (setq deft-use-filename-as-title nil)
-  (setq deft-use-filter-string-for-filename t)
-  (setq deft-file-naming-rules '((noslash . "-")
-				 (nospace . "-")
-				 (case-fn . downcase)))
-  (setq deft-text-mode 'org-mode))
-#+end_src
-
-**** Setup org-download
-
-[[https://github.com/abo-abo/org-download][Org-download]] lets you screenshot and yank images from the web into your notes:
-
-#+begin_src emacs-lisp
-(setq org-download-image-dir (expand-file-name (concat org-roam-directory "img/")))
-(setq org-download-screenshot-method "spectacle --background --region --output %s")
-#+end_src
-
-**** Configure templates
-
-#+begin_src emacs-lisp
-(setq org-roam-capture-templates
-      '(
-	("d" "default" plain (function org-roam--capture-get-point)
-	 "%?"
-	 :file-name "%<%Y%m%d-%H%M%S>"
-	 :head "#+title: ${title}\n#+date: %(org-insert-time-stamp (current-time) t)\n#+modified: \n#+filetags: :tag1:tag2:\n#+options: \n\n"
-	 :unnarrowed t)))
-#+end_src
-
-**** Set fleeting notes location
-
-Fleeting notes are the entry point for taking notes in a smart way. As the name says, they are supposed to be ephemeral, for dumping whatever it is in your head.
-
-#+begin_src emacs-lisp
-(setq org-default-notes-directory (expand-file-name (concat org-directory "/capture")))
-(setq org-default-notes-file (concat org-default-notes-directory "/notebook.org"))
-(setq org-agenda-files `(,org-default-notes-directory))
-(setq org-archive-location (concat org-default-notes-directory "/archive.org::"))
-#+end_src
-
-Apparentrly, =org-capture= does not have any keybinding in the last Org version; therefore, I set to the old keybinding =C-c c=:
-#+begin_src emacs-lisp
-;; (define-key org-mode-map (kbd "C-c c") 'org-capture) ;; For org mode only
-(global-set-key (kbd "C-c c") 'org-capture)
-#+end_src
-
-**** Set templates for notes
-
-#+begin_src emacs-lisp
-(add-to-list 'org-capture-templates
-	     '("t" "Tarefa"  entry
-	       (file org-default-notes-file)
-	       "* TODO %?\n%U" :empty-lines 1))
-(add-to-list 'org-capture-templates
-	     '("n" "Nota"  entry
-	       (file org-default-notes-file)
-	       "* %? :note:\n%U" :empty-lines 1))
-;; (add-to-list 'org-capture-templates
-;; 	     '("s" "Agendado" entry (file+headline org-default-notes-file "Agenda")
-;; 	       "* TODO %? %^G \nSCHEDULED: %^t\n  %U" :empty-lines 1))
-;; (add-to-list 'org-capture-templates
-;; 	     '("d" "Prazo" entry (file+headline org-default-notes-file "Agenda")
-;; 	       "* TODO %? %^G \n  DEADLINE: %^t" :empty-lines 1))
-;; (add-to-list 'org-capture-templates
-;; 	     '("j" "Diário" entry (file+datetree journal-file)
-;; 	       "* %? %^G\nEntered on %U\n"))
-#+end_src
-
-**** Remove org capture from recentf
-
-#+begin_src emacs-lisp
-;; (-map (lambda (f) (add-to-list 'recentf-exclude f)) (org-agenda-files))
-#+end_src
-**** Create new blog post entry
-
-#+begin_src emacs-lisp
-(setq blog-post-directory (expand-file-name "~/2.working/padawanphysicist.gitlab.io/articles/"))
-
-(add-to-list 'org-capture-templates
-	     `("b" "Postagem blog" plain
-	       (file ,(expand-file-name (concat blog-post-directory (format-time-string "%Y%m%d-%H%M%S.org"))))
-	       ,(concat 
-		"#+title: %?\n"
-		"#+date: " (format-time-string "<%Y-%m-%d %a %H:%M>\n")
-		"#+modified: \n"
-		"#+options: \n"
-		"#+filetags: :unsorted: \n\n\n"
-		"# TEASER_END") :empty-lines 1))
 #+end_src
 
 ** Custom functions

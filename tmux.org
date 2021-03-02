@@ -72,12 +72,14 @@ bind -n M-Up select-pane -U
 bind -n M-Down select-pane -D
 #+end_src
 
-* Mouse mode off by default
+* Mouse mode on by default
 
-This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
+While you can change panes and windows within tmux using the mouse, you can not copy directory with the mouse as usual. 
+
+To recover the usual mouse behaviour you must press and hold Shift. This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
 
 #+begin_src conf
-set -g mouse off
+set -g mouse on
 #+end_src
 
 * Stop renaming windows automatically

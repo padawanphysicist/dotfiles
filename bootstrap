@@ -1,172 +1,232 @@
-#! /usr/bin/guile \
--e main -s
-!#
-(use-modules
- (ice-9 textual-ports)
- (ice-9 regex)
- (ice-9 getopt-long))
+#!/usr/bin/env bash
 
-(define (f/read path)
-  ;; Return contents of PATH as a string
-  (let ((abs-path (canonicalize-path path)))
-    (call-with-input-file abs-path
-      get-string-all)))
+# Set debugging
+# set -o xtrace
+# Abort on errors and unbound variables
+#set -o errexit   # abort on nonzero exitstatus
+#set -o nounset   # abort on unbound variable
+#set -o pipefail  # don't hide errors within pipes
 
-(define (f/has-line? line path)
-  ;; Check whether a line of FILE contains a LINE
-  (let ((file-contents (f/read path)))
-    (regexp-exec (make-regexp (format #f "^~a" (regexp-quote line)) regexp/newline) file-contents)))
+# Set magic variables for current file & dir
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+__base="$(basename ${__file} .sh)"
+__root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
-(define (f/prepend line path)
-  ;; Prepend LINE to PATH
-  (let ((old-contents (f/read path)))
-    (call-with-output-file path
-      (lambda (port)
-	(format port "~a\n~a" line old-contents)))))
-
-(define (f/append line path)
-  ;; Prepend LINE to PATH
-  (let ((old-contents (f/read path)))
-    (call-with-output-file path
-      (lambda (port)
-	(format port "~a\n~a" old-contents line)))))
-
-(define (f/remove-line line path)
-  ;; Remove LINE from PATH
-  (let* ((old-contents (f/read path)))
-    (call-with-output-file path
-      (lambda (port)
-	(regexp-substitute/global port (format #f "~a" (regexp-quote line)) old-contents 'pre "" 'post)))))
-
-(define (org/tangle path)
-  (system (format #f "emacs -q --batch -l org --eval '(org-babel-tangle-file ~s)'" path)))
-
-(define (stow rule)
-  ;;(system (format #f "stow --verbose --restow ~a" rule))
-  (system (format #f "stow --verbose ~a" rule))
-  )
-
-(define (unstow rule)
-  (system (format #f "stow --delete ~a" rule)))
-
-(define (touch path)
-  (system (format #f "touch ~a" path)))
-
-(define (home file)
-  (format #f "~a/~a" (getenv "HOME") file))
-
-(define (help _)
-  (format #t "\
+__usage_msg="
 Bootstrap configuration for a program
 
-Usage: ./bootstrap [-h | -i [PROGRAM] | -t [PROGRAM]]
+Usage: ${__base} [-h | -i [PROGRAM] | -t [PROGRAM]]
+
   -h, --help                Show this message
   -i, --install [PROGRAM]   Install PROGRAM configuration
-  -r, --remove [PROGRAM]    Remove PROGRAM configuration
-  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM\n")
-  #t)
+  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM
+"
 
-(define (pre/install prog)
-  (cond
-    ((string= prog "xterm")
-     (let ((xresources (home ".Xresources"))
-	   (line "#include \".Xresources.d/xterm\""))
-       (unless (file-exists? xresources)
-	 (touch xresources))
-       (unless (f/has-line? line xresources)
-	 (f/prepend line xresources))))
+error() {
+    echo "[Error] ${*}" >&2
+    exit 1
+}
 
-    ((string= prog "bash")
-     (let ((bash-profile (home ".bash_profile"))
-	   (bashrc (home ".bashrc"))
-	   (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi" "if [ -f \"$HOME/.ranger_automatic_cd.sh\" ]; then source \"$HOME/.ranger_automatic_cd.sh\"; fi")))
-       (when (file-exists? bashrc)
-	 (rename-file bashrc (string-join `(,bashrc ".backup") "")))
-       (unless (file-exists? bash-profile)
-	 (touch bash-profile))
-       (for-each (lambda (line)
-		   (unless (f/has-line? line bash-profile)
-		(f/append line bash-profile)))
-	    lines)))
+help() {
+    echo "${__usage_msg}"
+    exit 0
+}
 
-    ((string= prog "git")
-     (let ((gitconfig (home ".gitconfig")))
-       (when (file-exists? gitconfig)
-	 (rename-file gitconfig (string-join `(,gitconfig ".backup") "")))))
-    ((string= prog "readline")
-     (let ((inputrc (home ".inputrc")))
-       (when (file-exists? inputrc)
-	 (rename-file inputrc (string-join `(,inputrc ".backup") "")))))))
+# Tangle a single file using Emacs
+tangle() {
+    prog="${1:-}"
+    orgfile="${prog}.org"
+    if [ -f "${orgfile}" ]; then
+        emacs -q --batch -l org --eval "(org-babel-tangle-file \"${orgfile}\")"
+    else
+        error "in ${FUNCNAME[0]}: file ${file} does not exist!"
+    fi
+}
 
-(define (post/install prog)
-  (cond
-    ((string= prog "xterm")
-     (let ((xresources (home ".Xresources"))
-	   (line "#include \".Xresources.d/xterm\""))
-       (system (format #f "xrdb -load ~a" xresources))))
-    ((string= prog "bash")
-     (stow "assets"))))
+# Check there is any configuration for the rule
+has_program() {
+    prog="${1:-}"
 
-(define (install prog)
-  (format #t "Installing configuration for ~a\n" prog)
-  (tangle prog)
-  (pre/install prog)
-  (stow prog)
-  (post/install prog)
-  #t)
+    for i in "${config[@]}"; do
+        if [[ "${prog}" == "${i}" ]]; then
+            echo 0
+            break
+        fi
+    done
 
-(define (remove prog)
-  (format #t "Removing configuration for ~a\n" prog)
-  (unstow prog)
-  (system (format #f "rm --recursive --verbose --force ~a" prog))
-  (cond
+    echo 1
+}
 
-    ((string= prog "xterm")
-     (let ((xresources (home ".Xresources"))
-	   (line "#include \".Xresources.d/xterm\""))
-       (when (f/has-line? line xresources)
-	 (f/remove-line line xresources)
-	 (system (format #f "xrdb -load ~a" xresources)))))
+config=("xterm" "bash" "ranger" "dunst" "git" "picom" "redshift" "R" "readline" "rofi" "xmonad")
 
-    ((string= prog "bash")
-     (let ((bash-profile (home ".bash_profile"))
-	   (lines '("if [ -f \"$HOME/.bashrc\" ] && [ -r \"$HOME/.bashrc\" ]; then source \"${HOME}/.bashrc\"; fi")))
-       (for-each (lambda (line)
-		   (when (f/has-line? line bash-profile)
-		     (f/remove-line line bash-profile)))
-		 lines)
-       (system (format #f "source ~a" bash-profile)))))
-  #t)
+parse_parameter() {
+    prog="${1:-}"
+    has=$(has_program "${prog}")
 
-(define (tangle prog)
-  (let ((org-file (format #f "~a.org" prog)))
-    (if (file-exists? org-file)
-	(begin
-	  (format #t "Tangling configuration file for ~a...\n" prog)
-	  (org/tangle org-file))
-	(begin
-	  (format #t "Error: there is no configuration for ~a\n" prog)
-	  (exit 1))))
-  #t)
+    if [[ "${prog}" == "" ]]; then
+        error "Missing argument"
+    elif [[ "${has}" == 1 ]]; then
+        error "No rule for ${prog}"
+    else
+        echo 0
+    fi
+}
 
-(define option-spec
-  `((install (single-char #\i)
-	     (value #t)
-	     (predicate ,install))
-    (remove (single-char #\r)
-	    (value #t)
-	    (predicate ,remove))
-    (tangle  (single-char #\t)
-	     (value #t)
-	     (predicate ,tangle))
-    (help (single-char #\h)
-	  (value #f)
-	  (predicate ,help))))
+# Prepend text to file
+prepend() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    cat <(echo "${text}") "${file}" > "${tmp}"
+    mv "${tmp}" "${file}"
+}
 
-(define (main args)
-  (define options (getopt-long args option-spec))
-  (newline))
+# Append text to file
+append() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    cat "${file}" <(echo "${text}") > "${tmp}"
+    mv "${tmp}" "${file}"
+}
 
 
+# Remove text from file
+remove() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    grep --invert-match --fixed-strings "${text}" "${file}" > "${tmp}"
+    mv "${tmp}" "${file}"
+}
 
+dispatch() {
+    cmd="${1:-}"
+    hook="${2:-}"
+    prog="${3:-}"
 
+    case "${cmd}" in
+        install)
+            case "${hook}" in
+                pre)
+                    case "${prog}" in
+                        xterm)
+                            ## Configure Xresources
+                            line='#include ".Xresources.d/xterm"'
+                            file="${HOME}/.Xresources"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || prepend "${line}" "${file}"
+                            ;;
+                        bash)
+                            line='if [ -f "${HOME}/.bashrc" ] && [ -r "${HOME}/.bashrc" ]; then source "${HOME}/.bashrc"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || prepend "${line}" "${file}"
+                            stow --verbose --dir="assets/" --target="${HOME}" bash
+                            ;;
+                        ranger)
+                            line='if [ -f "${HOME}/.ranger_automatic_cd.sh" ]; then source "${HOME}/.ranger_automatic_cd.sh"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || append "${line}" "${file}"
+                            stow --verbose --dir="assets/" --target="${HOME}" ranger
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                post)
+                    case "${prog}" in
+                        xterm)
+                            xrdb -load "${HOME}/.Xresources"
+                            ;;
+                        bash)
+                            source "${HOME}/.bash_profile"
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                *)
+                    ;;
+            esac
+            ;;
+        remove)
+            case "${hook}" in
+                pre)
+                    case "${prog}" in
+                        xterm)
+                            line='#include ".Xresources.d/xterm"'
+                            file="${HOME}/.Xresources"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            ;;
+                        bash)
+                            line='if [ -f "${HOME}/.bashrc" ] && [ -r "${HOME}/.bashrc" ]; then source "${HOME}/.bashrc"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            stow --delete --verbose --dir="assets/" --target="${HOME}" bash
+                            ;;
+                        ranger)
+                            line='if [ -f "${HOME}/.ranger_automatic_cd.sh" ]; then source "${HOME}/.ranger_automatic_cd.sh"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            stow  --delete --verbose --dir="assets/" --target="${HOME}" ranger
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                post)
+                    case "${prog}" in
+                        xterm)
+                            xrdb -load "${HOME}/.Xresources"
+                            ;;
+                        bash)
+                            source "${HOME}/.bash_profile"
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    rm --recursive --force --verbose "${prog}"
+                    ;;
+                *)
+                    ;;
+            esac
+            ;;
+        *)
+            ;;
+    esac
+}
+
+main() {
+    opt="${1:-}"
+    prog="${2:-}"
+    case "${opt}" in
+        -h | --help)
+            help
+            ;;
+        -t | --tangle)
+            parse_parameter "${prog}"
+            tangle "${prog}"
+            exit 0
+            ;;
+        -i | --install)
+            parse_parameter "${prog}"
+            tangle "${prog}"
+            dispatch "install" "pre" "${prog}"
+            stow --verbose "${prog}"
+            dispatch "install" "post" "${prog}"
+            exit 0
+            ;;
+        -r | --remove)
+            parse_parameter "${prog}"
+            dispatch "remove" "pre" "${prog}"
+            stow --verbose --delete "${prog}"
+            dispatch "remove" "post" "${prog}"
+            exit 0
+            ;;
+        *)
+            help
+            ;;
+    esac
+}
+
+main $*

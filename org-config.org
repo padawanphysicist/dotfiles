@@ -261,16 +261,16 @@ Example: (vct/set-default-headers-args 'R 'width 10)"
 ** Set default header arguments
 
 #+begin_src emacs-lisp
-(setq org-babel-default-header-args:ruby '((:session . "session")
+(setq org-babel-default-header-args:ruby '((:session . "ruby")
                                            (:noweb . "yes")
                                            (:results . "output")))
 
-(setq org-babel-default-header-args:R '((:session . "session")
+(setq org-babel-default-header-args:R '((:session . "*R*")
                                         (:noweb . "yes")
                                         (:results . "output")))
 
 ;; Ob-sagemath supports only evaluating with a session.
-(setq org-babel-default-header-args:sage '((:session . "session")
+(setq org-babel-default-header-args:sage '((:session . t)
                                            (:noweb . "yes")
                                            (:results . "output")))
 ;;;; C-c c for asynchronous evaluating (only for SageMath code blocks).

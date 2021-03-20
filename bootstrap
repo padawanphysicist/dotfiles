@@ -1,0 +1,250 @@
+#!/usr/bin/env bash
+
+# Set debugging
+# set -o xtrace
+# Abort on errors and unbound variables
+#set -o errexit   # abort on nonzero exitstatus
+#set -o nounset   # abort on unbound variable
+#set -o pipefail  # don't hide errors within pipes
+
+# Set magic variables for current file & dir
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+__base="$(basename ${__file} .sh)"
+__root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+
+__usage_msg="
+Bootstrap configuration for a program
+
+Usage: ${__base} [-h | -i [PROGRAM] | -t [PROGRAM]]
+
+  -h, --help                Show this message
+  -i, --install [PROGRAM]   Install PROGRAM configuration
+  -t, --tangle  [PROGRAM]   Only tangle configuration files for PROGRAM
+"
+
+error() {
+    echo "[Error] ${*}" >&2
+    exit 1
+}
+
+help() {
+    echo "${__usage_msg}"
+    exit 0
+}
+
+# Tangle a single file using Emacs
+tangle() {
+    prog="${1:-}"
+    orgfile="${prog}.org"
+    if [ -f "${orgfile}" ]; then
+        emacs -q --batch -l org --eval "(org-babel-tangle-file \"${orgfile}\")"
+    else
+        error "in ${FUNCNAME[0]}: file ${file} does not exist!"
+    fi
+}
+
+# Check there is any configuration for the rule
+has_program() {
+    prog="${1:-}"
+
+    for i in "${config[@]}"; do
+        if [[ "${prog}" == "${i}" ]]; then
+            echo 0
+            break
+        fi
+    done
+
+    echo 1
+}
+
+config=("xterm" "bash" "ranger" "dunst" "git" "picom" "redshift" "R" "readline" "rofi" "xmonad" "doom" "emacs" "tmux")
+
+parse_parameter() {
+    prog="${1:-}"
+    has=$(has_program "${prog}")
+
+    if [[ "${prog}" == "" ]]; then
+        error "Missing argument"
+    elif [[ "${has}" == 1 ]]; then
+        error "No rule for ${prog}"
+    else
+        echo 0
+    fi
+}
+
+# Prepend text to file
+prepend() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    cat <(echo "${text}") "${file}" > "${tmp}"
+    mv "${tmp}" "${file}"
+}
+
+# Append text to file
+append() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    cat "${file}" <(echo "${text}") > "${tmp}"
+    mv "${tmp}" "${file}"
+}
+
+
+# Remove text from file
+remove() {
+    text="${1:-}"
+    file="${2:-}"
+    tmp=$(mktemp /tmp/dotfiles.XXXXXXXXX)
+    grep --invert-match --fixed-strings "${text}" "${file}" > "${tmp}"
+    mv "${tmp}" "${file}"
+}
+
+dispatch() {
+    cmd="${1:-}"
+    hook="${2:-}"
+    prog="${3:-}"
+
+    case "${cmd}" in
+        install)
+            case "${hook}" in
+                pre)
+                    case "${prog}" in
+                        xterm)
+                            ## Configure Xresources
+                            line='#include ".Xresources.d/xterm"'
+                            file="${HOME}/.Xresources"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || prepend "${line}" "${file}"
+                            ;;
+                        bash)
+                            line='if [ -f "${HOME}/.bashrc" ] && [ -r "${HOME}/.bashrc" ]; then source "${HOME}/.bashrc"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || prepend "${line}" "${file}"
+                            stow --verbose --dir="assets/" --target="${HOME}" bash
+                            ;;
+                        ranger)
+                            line='if [ -f "${HOME}/.ranger_automatic_cd.sh" ]; then source "${HOME}/.ranger_automatic_cd.sh"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || append "${line}" "${file}"
+                            stow --verbose --dir="assets/" --target="${HOME}" ranger
+                            ;;
+                        doom)
+                            mv ~/.emacs.d/ ~/.emacs.d.backup
+                            line='export PATH="${HOME}/.emacs.d/bin:${PATH}"'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || append "${line}" "${file}"
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                post)
+                    case "${prog}" in
+                        xterm)
+                            xrdb -load "${HOME}/.Xresources"
+                            ;;
+                        bash)
+                            source "${HOME}/.bash_profile"
+                            ;;
+                        doom)
+                            git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+                            ~/.emacs.d/bin/doom install
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                *)
+                    ;;
+            esac
+            ;;
+        remove)
+            case "${hook}" in
+                pre)
+                    case "${prog}" in
+                        xterm)
+                            line='#include ".Xresources.d/xterm"'
+                            file="${HOME}/.Xresources"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            ;;
+                        bash)
+                            line='if [ -f "${HOME}/.bashrc" ] && [ -r "${HOME}/.bashrc" ]; then source "${HOME}/.bashrc"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            stow --delete --verbose --dir="assets/" --target="${HOME}" bash
+                            ;;
+                        ranger)
+                            line='if [ -f "${HOME}/.ranger_automatic_cd.sh" ]; then source "${HOME}/.ranger_automatic_cd.sh"; fi'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            stow  --delete --verbose --dir="assets/" --target="${HOME}" ranger
+                            ;;
+                        doom)
+                            line='export PATH="${HOME}/.emacs.d/bin:${PATH}"'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    ;;
+                post)
+                    case "${prog}" in
+                        xterm)
+                            xrdb -load "${HOME}/.Xresources"
+                            ;;
+                        bash)
+                            source "${HOME}/.bash_profile"
+                            ;;
+                        doom)
+                            rm -rf ~/.emacs.d
+                            ;;
+                        *)
+                            ;;
+                    esac
+                    rm --recursive --force --verbose "${prog}"
+                    ;;
+                *)
+                    ;;
+            esac
+            ;;
+        *)
+            ;;
+    esac
+}
+
+main() {
+    opt="${1:-}"
+    prog="${2:-}"
+    case "${opt}" in
+        -h | --help)
+            help
+            ;;
+        -t | --tangle)
+            parse_parameter "${prog}"
+            tangle "${prog}"
+            exit 0
+            ;;
+        -i | --install)
+            parse_parameter "${prog}"
+            tangle "${prog}"
+            dispatch "install" "pre" "${prog}"
+            stow --verbose "${prog}"
+            dispatch "install" "post" "${prog}"
+            exit 0
+            ;;
+        -r | --remove)
+            parse_parameter "${prog}"
+            dispatch "remove" "pre" "${prog}"
+            stow --verbose --delete "${prog}"
+            dispatch "remove" "post" "${prog}"
+            exit 0
+            ;;
+        *)
+            help
+            ;;
+    esac
+}
+
+main $*

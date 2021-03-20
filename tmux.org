@@ -16,8 +16,8 @@ unbind C-b
 
 and then define a new prefix:
 #+begin_src conf
-set -g prefix M-x
-bind-key M-x send-prefix
+set -g prefix C-z
+bind-key C-z send-prefix
 #+end_src
 
 * Quickly reload tmux configuration
@@ -57,8 +57,14 @@ bind / split-window -h -c "#{pane_current_path}"
 * Set clipboard
 
 #+begin_src conf
-bind-key -n -T copy-mode-emacs M-w send-keys -X copy-pipe-and-cancel 'xclip -in -selection clipboard '
-bind-key -n C-y run "xclip -o | tmux load-buffer - ; tmux paste-buffer"
+# # Emacs mode
+# bind-key -n -T copy-mode-emacs M-w send-keys -X copy-pipe-and-cancel 'xclip -in -selection clipboard '
+# bind-key -n C-y run "xclip -o | tmux load-buffer - ; tmux paste-buffer"
+# Vi mode
+setw -g mode-keys vi
+bind-key -T copy-mode-vi 'v' send-keys -X begin-selection
+bind-key -T copy-mode-vi 'r' send-keys -X rectangle-toggle
+bind-key -T copy-mode-vi 'y' send-keys -X copy-pipe-and-cancel 'xclip -in -selection clipboard'
 #+end_src
 
 * Pane switching
@@ -72,12 +78,14 @@ bind -n M-Up select-pane -U
 bind -n M-Down select-pane -D
 #+end_src
 
-* Mouse mode off by default
+* Mouse mode on by default
 
-This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
+While you can change panes and windows within tmux using the mouse, you can not copy directory with the mouse as usual. 
+
+To recover the usual mouse behaviour you must press and hold Shift. This makes Tmux pass control directly to the used terminal emulator, so when I want, I can copy&paste as if I am not using Tmux.
 
 #+begin_src conf
-set -g mouse off
+set -g mouse on
 #+end_src
 
 * Stop renaming windows automatically

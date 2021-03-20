@@ -48,8 +48,8 @@ It is also possible to use different settings for day and night.
 
 #+begin_src conf
 ;brightness=0.9
-brightness-day=0.85
-brightness-night=0.75
+brightness-day=0.95
+brightness-night=0.85
 #+end_src
 
 * Set screen gamma

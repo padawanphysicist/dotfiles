@@ -105,7 +105,8 @@ I like to be able to use the same terminal environment no matter which workspace
 #+begin_src haskell
 vctTerminal :: String
 -- vctTerminal = "st -e tmux attach -t vct"
-vctTerminal = "xterm"
+-- vctTerminal = "xterm"
+vctTerminal = "st"
 #+end_src
 
 ** Screensaver
@@ -334,7 +335,7 @@ vctStartupHook = do
   -- Start systemtray
   spawnOnce "stalonetray &"
   -- Start clipboard manager
-  spawnOnce "klipper &"
+  -- spawnOnce "klipper &"
   -- Start dropbox
   spawnOnce "dropbox start &"
   -- Start screensaver daemon

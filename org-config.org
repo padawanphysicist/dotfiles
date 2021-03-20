@@ -1,0 +1,547 @@
+#+title: Org configuration
+
+This is probably the most complex part of configuration. [[https://orgmode.org/][Org-mode]] is such a behemoth that it deserves a whole file for it!
+
+* Set main variables
+
+Here I set the main directories used for my personal notes and bibliography.
+
+I add a prefix =vct/= so I can use almost the same name as the Emacs variable.
+
+#+begin_src emacs-lisp
+(setq org-directory "~/Dropbox/Org/")
+
+(defun vct/org-dir (fpath)
+  "Expand FPATH relative to org-directory"
+  (concat org-directory fpath))
+
+(setq vct/org-roam-directory (vct/org-dir "2.Archive/Cards/"))
+
+(let ((vct/bibliography (vct/org-dir "2.Archive/References/bibliography.bib")))
+    (setq vct/bibtex-completion-bibliography vct/bibliography)
+    (setq vct/bibtex-completion-library-path vct/bibliography)
+    (setq vct/reftex-default-bibliography `(,vct/bibliography))
+    (setq vct/org-ref-bibliography-notes vct/bibliography)
+    (setq vct/org-ref-default-bibliography `(,vct/bibliography)))
+
+(setq vct/deft-directory org-directory)
+(setq vct/org-default-notes-file (vct/org-dir "1.Inbox/notebook.org"))
+(setq vct/org-archive-location (vct/org-dir "2.Archive/archive.org::"))
+
+(setq vct/org-noter-notes-search-path `(,(vct/org-dir "2.Archive/References/")))
+(setq vct/org-ref-pdf-directory (vct/org-dir "2.Archive/Library/"))
+(setq vct/org-ref-notes-directory (vct/org-dir "2.Archive/References"))
+(setq vct/bibtex-completion-find-note-functions '(orb-find-note-file))
+#+end_src
+
+* Initial visibility
+
+Entering Org mode will switch to OVERVIEW
+
+#+begin_src emacs-lisp
+(setq org-startup-folded t)
+#+end_src
+
+* Clean view
+
+Org’s default outline with stars and no indents can become too cluttered for short documents. For book-like long documents, the effect is not as noticeable. Org provides an alternate stars and indentation scheme, as shown on the right in the following table. It uses only one star and indents text to line with the heading:
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+* Block invisible edits
+
+Don't allow to edit subtree when folded
+
+#+begin_src emacs-lisp
+(setq org-catch-invisible-edits 'show-and-error)
+#+end_src
+
+* Set folding symbol
+
+The =...= ellipsis that org-mode uses to indicate hidden content is usually just fine. It’s only when you’re staring at a document where every line is a folded headline, that you start to feel like they’re a little too much. Choosing a "smaller" one reduces the visual clutter: 
+#+begin_src emacs-lisp
+;;(setq org-ellipsis "  ")
+(setq org-ellipsis "…")
+#+end_src
+
+* Fix Org bullets when changing theme
+
+Taken from [[https://www.reddit.com/r/emacs/comments/906bnj/after_switching_the_custom_theme_leading_stars/][here]].
+#+begin_src emacs-lisp
+(add-hook 'after-load-theme-hook
+	  (lambda ()
+	    (save-current-buffer
+	      (mapc (lambda (b)
+		      (set-buffer b)
+		      (when (equal major-mode 'org-mode)
+			(progn
+			  (font-lock-fontify-buffer)
+			  (set-face-attribute
+			   'org-hide nil
+			   :foreground (face-attribute 'default :background)))))
+		    (buffer-list)))))
+#+end_src
+
+* Startup with inline image previews
+
+#+begin_src emacs-lisp
+(setq org-startup-with-inline-images t)
+
+(defun vct/org-redisplay-inline-images ()
+  (org-display-inline-images nil t)
+  (org-redisplay-inline-images))
+
+;; Always show inline images:
+(add-hook 'org-mode-hook 'vct/org-redisplay-inline-images)
+(add-hook 'org-babel-after-execute-hook 'vct/org-redisplay-inline-images)
+#+end_src
+
+* LaTeX behaviour
+** Startup with LaTeX previews
+
+#+begin_src emacs-lisp
+(setq org-startup-with-latex-preview t)
+#+end_src
+
+** Quick insertion of LaTeX environment
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+#+end_src
+
+** LaTeX code syntax highlighting
+
+#+begin_src emacs-lisp
+(setq org-highlight-latex-and-related '(native latex script entities))
+#+end_src
+
+** Previewing fragments
+*** Fix fragment preview scale when font-resizing
+
+Solution from [[https://ipfs-sec.stackexchange.cloudflare-ipfs.com/emacs/A/question/3387.html][here]]. This can be a little bit slow, since it regenerates all fragments within the file.
+
+#+begin_src emacs-lisp
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+(defun update-org-latex-fragments ()
+  (org-latex-preview '(4)) ;; Clear all fragments in the buffer
+  (let ((text-scale-factor (expt text-scale-mode-step text-scale-mode-amount)))
+    (plist-put org-format-latex-options :scale (* 2.1 text-scale-factor))
+    ;; Print scale factor on *Messages* buffer
+    (princ (plist-get org-format-latex-options :scale)))
+  (org-latex-preview '(3))) ;; Display all fragments in the buffer
+
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'text-scale-mode-hook
+		      'update-org-latex-fragments nil 'make-it-local)))
+#+end_src
+
+*** Fix fragment preview numbering
+
+In org-mode we can use LaTeX equations, and toggle an overlay that shows what the rendered equation will look like. However, each fragment is created in isolation, meaning that numbering is almost always wrong, and typically with each numbered equation starting with (1). [[http://kitchingroup.cheme.cmu.edu/blog/2016/11/07/Better-equation-numbering-in-LaTeX-fragments-in-org-mode/][This hack]], stolen from John Kitchin, solves this in a nice way for my purposes.
+#+begin_src emacs-lisp
+(require 'cl-lib)
+(require 'cl)
+
+(defun org-renumber-environment (orig-func &rest args)
+  "Improve equation numbering"
+  (let ((results '())
+        (counter -1)
+        (numberp))
+    (setq results (loop for (begin . env) in
+                        (org-element-map (org-element-parse-buffer) 'latex-environment
+                          (lambda (env)
+                            (cons
+                             (org-element-property :begin env)
+                             (org-element-property :value env))))
+                        collect
+                        (cond
+                         ((and (string-match "\\\\begin{equation}" env)
+			       (not (string-match "\\\\tag{" env)))
+                          (incf counter)
+                          (cons begin counter))
+                         ((string-match "\\\\begin{align}" env)
+                          (prog2
+                              (incf counter)
+                              (cons begin counter)
+                            (with-temp-buffer
+                              (insert env)
+                              (goto-char (point-min))
+                              ;; \\ is used for a new line. Each one leads to a number
+                              (incf counter (count-matches "\\\\$"))
+                              ;; unless there are nonumbers.
+                              (goto-char (point-min))
+                              (decf counter (count-matches "\\nonumber")))))
+                         (t
+                          (cons begin nil)))))
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+            (concat
+             (format "\\setcounter{equation}{%s}\n" numberp)
+             (car args)))))
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+#+end_src
+
+*** Fix fragment color
+
+This code changes the color of the fragment based on the current theme.
+
+#+begin_src emacs-lisp
+(defun vct-update-org-latex-fragment-colors ()
+  (org-latex-preview '(4))
+  (setq org-format-latex-options (plist-put org-format-latex-options :foreground (face-attribute 'default :foreground)))
+  (setq org-format-latex-options (plist-put org-format-latex-options :background (face-attribute 'default :background)))
+  (org-latex-preview '(3)))
+
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'after-load-theme-hook
+		      'vct-update-org-latex-fragment-colors nil 'make-it-local)))
+#+end_src
+
+* Babel configuration
+** Do not ask for confirmation when executing code block
+
+#+begin_src emacs-lisp
+(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Make TABS act natively on code blocks
+
+#+begin_src emacs-lisp
+(setq org-src-tab-acts-natively t)
+#+end_src
+
+** Preserve leading whitespace on export
+
+#+begin_src emacs-lisp
+(setq org-src-preserve-indentation t)
+#+end_src
+
+** Helper functions
+
+These functions help to set header args
+#+begin_src emacs-lisp
+(setq vct/lang-header-args 
+      '((R . org-babel-header-args:R) (ruby . org-babel-header-args:ruby)))
+
+(defun vct/set-default-headers-args (lang property value)
+  "Easily set system header arguments in org mode.
+
+LANG is a symbol for the language that you would like to modify the header.
+
+PROPERTY is the system-wide value that you would like to modify.
+
+VALUE is the new value you wish to store.
+
+Example: (vct/set-default-headers-args 'R 'width 10)"
+  (let ((lang-var (cdr (assq lang vct/lang-header-args))))
+    (setq lang-var
+          (cons (cons property value)
+		(assq-delete-all property (eval lang-var))))))
+#+end_src
+
+** Load languages
+
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '((emacs-lisp . t)
+    (ruby . t)
+    (shell . t)
+    (R . t)
+    (scheme . t)))
+#+end_src
+
+** Set default header arguments
+
+#+begin_src emacs-lisp
+(setq org-babel-default-header-args:ruby '((:session . "session")
+                                           (:noweb . "yes")
+                                           (:results . "output")))
+
+(setq org-babel-default-header-args:R '((:session . "session")
+                                        (:noweb . "yes")
+                                        (:results . "output")))
+
+;; Ob-sagemath supports only evaluating with a session.
+(setq org-babel-default-header-args:sage '((:session . "session")
+                                           (:noweb . "yes")
+                                           (:results . "output")))
+;;;; C-c c for asynchronous evaluating (only for SageMath code blocks).
+;;;;(define-key org-mode-map (kbd "C-c c") 'ob-sagemath-execute-async)
+#+end_src
+
+* Agenda configuration
+
+#+begin_src emacs-lisp
+;;(setq vct/org-agenda-todo-view
+;;      `("a" "Agenda"
+;;        (
+;;         (tags "website" )
+;;         (todo "TODO"
+;;               ((org-agenda-overriding-header "To Refile")
+;;                (org-agenda-files '("~/Dropbox/Org/1.Inbox/notebook.org"))))
+;;         nil)))
+;;
+;;(add-to-list 'org-agenda-custom-commands `,vct/org-agenda-todo-view)
+(with-eval-after-load 'org-agenda
+  (setq org-agenda-files (directory-files-recursively org-directory "\\.org$"))
+  
+  (setq vct/org-agenda-bookmarks
+    `("b"  "List of bookmarks"
+      ((tags "LEVEL=2+website")
+       (tags "LEVEL=2+link"))))
+  
+  (add-to-list 'org-agenda-custom-commands `,vct/org-agenda-bookmarks))
+#+end_src
+
+* Zettelkasten
+
+My personal notes are structured trying to follow as much as possible the concept of the famous "slip box" of [[https://pt.wikipedia.org/wiki/Niklas_Luhmann][Niklas Luhmann]], as described in the book
+- [[https://www.amazon.com.br/How-Take-Smart-Notes-Nonfiction-ebook/dp/B06WVYW33Y][How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers]]
+
+The aim is to have notes created using org capture facilities, organized using [[https://jblevins.org/projects/deft/][Deft]] and exported using Org publishing capabilities.
+** Setup org-protocol
+
+#+begin_src emacs-lisp
+;; Org capture with steroids!
+(require 'org-protocol)
+  
+;; Convert buffer text and decorations to HTML
+(use-package htmlize)
+
+;; Library functions and commands useful for retrieving web page
+;; content and processing it into Org-mode content.
+(use-package org-web-tools)
+(use-package org-protocol-capture-html
+  :straight (org-protocol-capture-html :type git :host github :repo "alphapapa/org-protocol-capture-html"))
+
+;; Automatic latex preview
+(use-package org-fragtog
+  :config
+  (add-hook 'org-mode-hook 'org-fragtog-mode))
+#+end_src
+
+** Setup org-roam
+
+#+begin_src emacs-lisp
+(use-package org-roam
+  :config
+  (setq org-roam-directory vct/org-roam-directory)
+  (setq org-roam-graph-viewer (executable-find "firefox"))
+  (setq bibtex-completion-bibliography vct/bibtex-completion-bibliography )
+  (setq bibtex-completion-library-path vct/bibtex-completion-library-path)
+  (setq reftex-default-bibliography vct/reftex-default-bibliography)
+  (setq org-ref-bibliography-notes vct/org-ref-bibliography-notes)
+  (setq bibtex-completion-find-note-functions vct/bibtex-completion-find-note-functions)
+
+  ;; Set automatic key generator for Bibtex entries
+  (setf bibtex-autokey-additional-names "etal"
+        bibtex-autokey-name-separator "-"
+        bibtex-autokey-name-year-separator "-"
+        bibtex-autokey-year-title-separator "-"
+        bibtex-autokey-titleword-separator "-"
+        bibtex-autokey-year-length 4
+        bibtex-autokey-names 1
+        bibtex-autokey-names-stretch 1
+        bibtex-autokey-titlewords-stretch 1
+        bibtex-autokey-titlewords-length 1
+        bibtex-autokey-titlewords 2)
+
+  (setq org-roam-graph-exclude-matcher '("private"))
+
+  (setq org-roam-capture-templates 
+    '(("d" "default" plain #'org-roam-capture--get-point "%?" :file-name "%<%Y%m%d%H%M%S>" :head "#+title: ${title}
+#+created: %U
+#+last_modified: %U
+#+roam_tags: 
+" :unnarrowed t)))
+) 
+
+(use-package org-roam-server)
+(use-package org-roam-bibtex)
+#+end_src
+
+** Setup org-noter
+
+#+begin_src emacs-lisp
+(use-package org-noter
+  :config
+  (setq
+      org-noter-pdftools-markup-pointer-color "yellow"
+      org-noter-notes-search-path vct/org-noter-notes-search-path
+      ;; org-noter-insert-note-no-questions t
+      org-noter-doc-split-fraction '(0.7 . 03)
+      org-noter-always-create-frame nil
+      org-noter-hide-other nil
+      org-noter-pdftools-free-pointer-icon "Note"
+      org-noter-pdftools-free-pointer-color "red"
+      org-noter-kill-frame-at-session-end nil)
+)
+#+end_src
+
+** Setup org-pdftools
+
+#+begin_src emacs-lisp
+(use-package org-pdftools
+  :hook (org-load . org-pdftools-setup-link))
+
+(use-package org-noter-pdftools
+  :after org-noter
+  :config
+  (with-eval-after-load 'pdf-annot
+    (add-hook 'pdf-annot-activate-handler-functions #'org-noter-pdftools-jump-to-note)))
+#+end_src
+
+** Setup org-ref
+
+#+begin_src emacs-lisp
+(use-package org-ref
+  :config
+  (setq org-ref-default-bibliography vct/org-ref-default-bibliography
+	    org-ref-pdf-directory vct/org-ref-pdf-directory
+	    org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
+	    org-ref-notes-directory vct/org-ref-notes-directory
+	    org-ref-notes-function 'orb-edit-notes))
+#+end_src
+
+** Setup org-download
+
+[[https://github.com/abo-abo/org-download][Org-download]] lets you screenshot and yank images from the web into your notes:
+
+#+begin_src emacs-lisp
+(use-package org-download
+  ;;:after org-roam
+  :config
+  ;;(setq org-download-image-dir (expand-file-name (concat org-roam-directory "img/")))
+  (setq org-download-screenshot-method "spectacle --background --region --output %s")
+)
+#+end_src
+
+** Setup deft
+
+[[https://jblevins.org/projects/deft/][Deft]] is an Emacs mode for quickly browsing, filtering, and editing directories of plain text notes, inspired by Notational Velocity. It was designed for increased productivity when writing and taking notes by making it fast and simple to find the right file at the right time and by automating many of the usual tasks such as creating new files and saving files.
+
+#+begin_src emacs-lisp
+(use-package deft
+  :bind
+  ;;("<f12>" . deft)
+  ("C-x C-g" . deft-find-file)
+  :config
+  (setq deft-directory vct/deft-directory)
+  (setq deft-recursive t)
+  (setq deft-default-extension "org")
+  (setq deft-extensions '("org" "gpg" "md" "txt" "tid"))
+  (setq deft-use-filename-as-title nil)
+  (setq deft-use-filter-string-for-filename t)
+  (setq deft-file-naming-rules '((noslash . "-")
+				 (nospace . "-")
+				 (case-fn . downcase)))
+  (setq deft-text-mode 'org-mode))
+#+end_src
+
+** Set timestamps
+
+https://org-roam.discourse.group/t/update-a-field-last-modified-at-save/321/4
+
+#+begin_src emacs-lisp
+;; Handling file properties for ‘CREATED’ & ‘LAST_MODIFIED’
+(defun zp/org-find-time-file-property (property &optional anywhere)
+  "Return the position of the time file PROPERTY if it exists.
+When ANYWHERE is non-nil, search beyond the preamble."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((first-heading
+           (save-excursion
+             (re-search-forward org-outline-regexp-bol nil t))))
+      (when (re-search-forward (format "^#\\+%s:" property)
+                               (if anywhere nil first-heading)
+                               t)
+	(point)))))
+
+(defun zp/org-has-time-file-property-p (property &optional anywhere)
+  "Return the position of time file PROPERTY if it is defined.
+As a special case, return -1 if the time file PROPERTY exists but
+is not defined."
+  (when-let ((pos (zp/org-find-time-file-property property anywhere)))
+    (save-excursion
+      (goto-char pos)
+      (if (and (looking-at-p " ")
+               (progn (forward-char)
+                      (org-at-timestamp-p 'lax)))
+          pos
+        -1))))
+
+(defun zp/org-set-time-file-property (property &optional anywhere pos)
+  "Set the time file PROPERTY in the preamble.
+When ANYWHERE is non-nil, search beyond the preamble.
+If the position of the file PROPERTY has already been computed,
+it can be passed in POS."
+  (when-let ((pos (or pos
+                      (zp/org-find-time-file-property property))))
+    (save-excursion
+      (goto-char pos)
+      (if (looking-at-p " ")
+          (forward-char)
+        (insert " "))
+      (delete-region (point) (line-end-position))
+      (let* ((now (format-time-string "[%Y-%m-%d %a %H:%M]")))
+        (insert now)))))
+
+(defun zp/org-set-last-modified ()
+  "Update the LAST_MODIFIED file property in the preamble."
+  (when (derived-mode-p 'org-mode)
+    (zp/org-set-time-file-property "LAST_MODIFIED")))
+
+(add-hook 'before-save-hook #'zp/org-set-last-modified)
+#+end_src
+
+** Set fleeting notes location
+
+Fleeting notes are the entry point for taking notes in a smart way. As the name says, they are supposed to be ephemeral, for dumping whatever it is in your head.
+
+#+begin_src emacs-lisp
+(setq org-default-notes-file vct/org-default-notes-file)
+(setq org-archive-location vct/org-archive-location)
+#+end_src
+
+** Customize capture templates
+
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+	     `("t" "Task"  entry
+	       (file+headline org-default-notes-file "Tasks")
+	       "* TODO %?\n%T\n %i\n %a" :empty-lines 1))
+(add-to-list 'org-capture-templates
+	     `("n" "Quick Note"  entry
+	       (file+headline org-default-notes-file "Notes")
+	       "* NOTE %?" :empty-lines 1))
+
+;;(setq jethro/org-agenda-directory "~/.org/gtd/")
+;; Template for org-capture
+#+end_src
+
+*** Templates for using with org-protocol
+**** Capture link only
+
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+      `("c" "org-protocol-capture" entry (file+headline org-default-notes-file "Bookmarks")
+         "* TODO [[%:link][%:description]] :link:\n\n %i" :immediate-finish t))
+#+end_src
+
+**** Capture webpage
+
+#+begin_src emacs-lisp
+(add-to-list 'org-capture-templates
+      `("w" "Web site" entry
+	  (file+headline org-default-notes-file "Bookmarks")
+	  "* %c :website:\n%U %?%:initial" :immediate-finish t))
+#+end_src
+

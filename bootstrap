@@ -58,7 +58,7 @@ has_program() {
     echo 1
 }
 
-config=("xterm" "bash" "ranger" "dunst" "git" "picom" "redshift" "R" "readline" "rofi" "xmonad")
+config=("xterm" "bash" "ranger" "dunst" "git" "picom" "redshift" "R" "readline" "rofi" "xmonad" "doom" "emacs" "tmux")
 
 parse_parameter() {
     prog="${1:-}"
@@ -129,6 +129,12 @@ dispatch() {
                             grep --quiet --fixed-strings -- "${line}" "${file}" || append "${line}" "${file}"
                             stow --verbose --dir="assets/" --target="${HOME}" ranger
                             ;;
+                        doom)
+                            mv ~/.emacs.d/ ~/.emacs.d.backup
+                            line='export PATH="${HOME}/.emacs.d/bin:${PATH}"'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" || append "${line}" "${file}"
+                            ;;
                         *)
                             ;;
                     esac
@@ -140,6 +146,10 @@ dispatch() {
                             ;;
                         bash)
                             source "${HOME}/.bash_profile"
+                            ;;
+                        doom)
+                            git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+                            ~/.emacs.d/bin/doom install
                             ;;
                         *)
                             ;;
@@ -170,6 +180,11 @@ dispatch() {
                             grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
                             stow  --delete --verbose --dir="assets/" --target="${HOME}" ranger
                             ;;
+                        doom)
+                            line='export PATH="${HOME}/.emacs.d/bin:${PATH}"'
+                            file="${HOME}/.bash_profile"
+                            grep --quiet --fixed-strings -- "${line}" "${file}" && remove "${line}" "${file}"
+                            ;;
                         *)
                             ;;
                     esac
@@ -181,6 +196,9 @@ dispatch() {
                             ;;
                         bash)
                             source "${HOME}/.bash_profile"
+                            ;;
+                        doom)
+                            rm -rf ~/.emacs.d
                             ;;
                         *)
                             ;;

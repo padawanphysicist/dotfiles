@@ -677,6 +677,12 @@ I have chosen [[https://www.gnu.org/software/guile/][Guile]] as my main scheme i
   (setq python-shell-interpreter "ipython"))
 #+end_src
 
+**** Ruby
+
+#+begin_src emacs-lisp
+(use-package inf-ruby)
+#+end_src
+
 **** SageMath
 
 [[https://github.com/sagemath/sage-shell-mode][This package]] enable to run [[http://www.sagemath.org/][SageMath]] within Emacs.

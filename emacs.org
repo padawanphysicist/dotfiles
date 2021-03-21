@@ -819,8 +819,6 @@ To preserve this configuration after loading a theme, I put this setting within 
   '(
   ;; Error message
   "%e "
-  ;; Window numbering
-  (:eval (format winum-format (winum-get-number-string)))
   ;;(:eval (vct/modeline-get-evil-state))
   ;; value of current buffer name
   " %b | "

@@ -1,0 +1,2 @@
+R_HISTFILE="${HOME}/.Rhistory"
+R_LIBS_USER="${HOME}/Programs/r-packages"

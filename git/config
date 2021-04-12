@@ -1,0 +1,74 @@
+#
+# Git configuration
+#
+
+# Identity
+#
+# The first thing you should do when you install Git is to set your user name
+# and email address. This is important because every Git commit uses this
+# information, and it’s immutably baked into the commits you start creating:
+[user]
+  email = victor_santos@fisica.ufc.br
+  name = Victor Santos (vct)
+
+[color]
+  # Enable Colors in color-supporting terminals
+  ui = auto
+
+[core]
+  # Don't paginate output by default
+  pager = less --quit-if-one-screen
+  # Don't consider trailing space changes as a cause for merge conflicts
+  whitespace = -trailing-space
+
+[grep]
+  break = true
+  heading = true
+  lineNumber = true
+  extendedRegexp = true
+
+[log]
+  # Use abbreviate SHAs when possible
+  abbrevCommit = true
+  # Disable decorate for reflog (this is configured in another section)
+  decorate = false
+
+[push]
+  # When pushing, also push tags
+  followTags = true
+
+[status]
+  # Recursively transverse untracked directories to display all contents
+  showUntrackedFiles = all
+
+[color "branch"]
+  upstream = cyan
+
+[tag]
+  # Sort tags as version numbers when applicable
+  sort = version:refname
+
+# Aliases
+#
+# These are the core of my configuration
+#
+
+[alias]
+  # List available aliases
+  aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
+  # Command shortcuts
+  ci = commit
+  co = checkout
+  st = status
+  # Logging (https://git-scm.com/docs/git-log)
+  #
+  # Commit history shown via the default =git log= is space-inefficient, and
+  # doesn’t really focus on the most important information. This colorful,
+  # graphical display is easier to parse, especially when branching gets complex.
+  lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+  # Edit last commit message
+  reword = commit --amend
+  # Remove files from git but not from disk
+  untrack = rm --cache --
+  # Undo last commit but keep changed files in stage
+  uncommit = reset --soft HEAD~1

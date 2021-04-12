@@ -1,0 +1,90 @@
+! ~/.Xresources.d/xterm -*-mode:conf-xdefaults-*-
+!
+! XTerm configuration
+!
+
+! Enable color support
+XTerm*termName: xterm-256color
+
+! Disable audio bell
+!
+! I *HATE* the audio bell. I like the visual bell much more!
+XTerm*visualBell: true
+
+! Set locale
+!
+! Force xterm to more strictly follow your locale:
+XTerm.vt100.locale: true
+
+! Enable TrueType fonts
+XTerm*renderFont: true
+
+! Disable bold text
+!
+! I dislike bold faces, they look too visually noisy.
+XTerm*boldMode: false
+
+! Make XTerm recognize escape sequence to change colors
+xterm*dynamicColors: true
+
+! Make 'Alt' key behave as on other terminal emulators
+!
+! The default =Alt= key behavior in xterm is a modifier to send eight bit input
+! characters e.g. to insert =æ= by pressing =Alt+f=. To make =Alt= instead send
+! a =^[= (escape) key (as in gnome-terminal and konsole), set
+XTerm*metaSendsEscape: true
+
+! Set font face and size
+XTerm*faceName: xft:Monego
+XTerm*faceSize: 9
+
+! Font sizes
+!
+! The sizes defined here are used when resizing the font, either from the menu
+! or from the keyboard keybinding:
+! VT Font Menu: Unreadable
+XTerm*faceSize1: 9
+! VT Font Menu: Tiny
+XTerm*faceSize2: 11
+! VT Font Menu: Small
+XTerm*faceSize3: 13
+! VT Font Menu: Medium
+XTerm*faceSize4: 17
+! VT Font Menu: Large 
+XTerm*faceSize5: 19
+! VT Font Menu: Huge
+XTerm*faceSize6: 21
+
+! Hide scrollbar
+XTerm*scrollBar: false
+
+! Scroll when there is new input
+XTerm*scrollTtyOutput: true
+
+! Lines of output you can scroll back over
+! Default value is 1024.
+XTerm*scrollLines: 15000
+
+! Highlight selection
+XTerm*highlightSelection: true
+! Remove trailing spaces from selection
+XTerm*trimSelection: true
+! Selection copy to clipboard
+XTerm*selectToClipboard: true
+
+! Default xterm keybindings can overriden using =XTerm*VT100.translations=:
+XTerm*VT100.translations: #override \
+      Ctrl Shift <Key> minus: smaller-vt-font()       \n\
+      Ctrl Shift <Key> plus: larger-vt-font()         \n\
+      Ctrl Shift <Key> KP_Subtract: smaller-vt-font() \n\
+      Ctrl Shift <Key> KP_Add: larger-vt-font()       \n\
+      Ctrl <Key> 0: set-vt-font(d)                    \n\
+      <KeyPress> Home:  scroll-to(begin) \n\
+      <KeyPress> End:   scroll-to(end)   \n\
+      <KeyPress> Prior: scroll-back(1,page) \n\
+      <KeyPress> Next:  scroll-forw(1,page) \n\
+      Shift Ctrl <Key>C: copy-selection(CLIPBOARD) \n\
+      Shift Ctrl <Key>V: insert-selection(CLIPBOARD) \n\
+      Shift<Btn1Down>: select-start() \n\
+      Shift<Btn1Motion>: select-extend() \n\
+      Shift<Btn1Up>: select-end(CLIPBOARD)

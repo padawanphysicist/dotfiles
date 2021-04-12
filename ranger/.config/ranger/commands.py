@@ -1,19 +1,4 @@
-#+title: Ranger configuration
-#+property: header-args :mkdirp yes
-#+property: header-args+ :noweb yes
-#+property: header-args+ :tangle-mode (identity #o444)
-
-* Commands
-
-#+begin_src python :tangle "ranger/.config/ranger/commands.py"
 from ranger.api.commands import *
-
-<<cmd-archive-files>>
-#+end_src
-
-** Compress files (=:compress=)
-
-#+begin_src python :noweb-ref cmd-archive-files
 import os
 from ranger.core.loader import CommandLoader
 
@@ -46,25 +31,4 @@ class compress(Command):
 
         extension = ['.zip', '.tar.gz', '.rar', '.7z']
         return ['compress ' + os.path.basename(self.fm.thisdir.path) + ext for ext in extension]
-#+end_src
 
-* rc.conf
-
-#+begin_src conf :tangle "ranger/.config/ranger/rc.conf"
-<<image-preview>>
-<<move-to-trash>>
-#+end_src
-
-** Image preview 
-
-#+begin_src conf :noweb-ref image-preview
-set preview_images true
-set preview_images_method w3m
-set draw_borders true
-#+end_src
-
-** Move to trash
-
-#+begin_src conf :noweb-ref move-to-trash
-map DD shell mv %s /home/${USER}/.local/share/Trash/files/
-#+end_src

@@ -56,6 +56,8 @@ set mark-symlinked-directories On
 Tab: menu-complete
 "\e[Z": menu-complete-backward
 
+$if Bash
 set colored-stats On
+$endif
 set visible-stats On
 set menu-complete-display-prefix On

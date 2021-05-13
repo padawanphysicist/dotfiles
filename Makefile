@@ -2,19 +2,20 @@ SHELL = /bin/bash
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 XDG_CONFIG_HOME:=$(or $(XDG_CONFIG_HOME),$(HOME)/.config)
 
-.PHONY: shell clean terminal xresources-themes scripts git wm-xmonad nvim ranger programming tmux
+.PHONY: shell clean terminal xresources-themes scripts git wm-xmonad nvim ranger programming tmux redshift
 
-all: terminal shell xresources-themes scripts git wm-xmonad nvim ranger programming tmux
+all: terminal shell xresources-themes scripts git wm-xmonad nvim ranger programming tmux redshift
 
+redshift:
+	mkdir -p $(XDG_CONFIG_HOME)/redshift/
+	stow --target=$(XDG_CONFIG_HOME)/redshift/ redshift
 wm-xmonad:
 	mkdir -p $(XDG_CONFIG_HOME)/dunst/
 	mkdir -p $(XDG_CONFIG_HOME)/picom/
-	mkdir -p $(XDG_CONFIG_HOME)/redshift/
 	mkdir -p $(XDG_CONFIG_HOME)/rofi/
 	mkdir -p $(HOME)/.xmonad/
 	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/wm-xmonad/ dunst
 	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/wm-xmonad/ picom
-	stow --target=$(XDG_CONFIG_HOME)/redshift/ --dir=$(DOTFILES_DIR)/wm-xmonad/ redshift
 	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/wm-xmonad/ rofi
 	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/wm-xmonad/ xmonad
 nvim:
@@ -51,7 +52,7 @@ clean:
 	stow --target=$(XDG_CONFIG_HOME)/nvim/ --delete nvim
 	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete dunst
 	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete picom
-	stow --target=$(XDG_CONFIG_HOME)/redshift/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete redshift
+	stow --target=$(XDG_CONFIG_HOME)/redshift/ --delete redshift
 	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete rofi
 	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete xmonad
 	stow --target=$(HOME) --delete ranger

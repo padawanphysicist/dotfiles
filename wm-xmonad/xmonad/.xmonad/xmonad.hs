@@ -33,6 +33,7 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Run -- For spawn
 import XMonad.Util.EZConfig -- For custom keys
 import XMonad.Util.NamedActions
+import XMonad.Util.Cursor
 
 -- Actions
 import qualified XMonad.Actions.TreeSelect as TS
@@ -41,6 +42,7 @@ import XMonad.Actions.Promote
 import XMonad.Actions.RotSlaves (rotSlavesDown, rotAllDown)
 import XMonad.Actions.WithAll (sinkAll, killAll)
 import XMonad.Actions.GroupNavigation
+import XMonad.Actions.SpawnOn
 
 -- Layout
 import XMonad.Layout.Spacing -- Add spacing (gaps) between windows
@@ -98,7 +100,8 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 -- workspace I'm using. Therefore I always keep my terminal connected to a tmux
 -- session named =vct=.
 vctTerminal :: String
-vctTerminal = "xterm"
+vctTerminal = "xterm -e 'tmux attach-session -t vct'"
+--vctTerminal = "xterm"
 
 -- Screensaver
 vctScreenSaver :: String
@@ -111,6 +114,9 @@ vctEditor = "emacsclient --create-frame --alternate-editor=''"
 -- Web browser
 vctWebBrowser :: String
 vctWebBrowser = "firefox"
+
+vctFileManager :: String
+vctFileManager = "xterm -e ranger"
 
 -- Width of Windows border
 --
@@ -165,6 +171,7 @@ vctKeys home =
   , ("M-a", spawn vctEditor)
   , ("M-z", sendMessage (Toggle "Full"))
   , ("M-S-z", spawn vctScreenSaver)
+  , ("M-f", spawn vctFileManager)
   -- Increase/decrease spacing (gaps)
   , ("M-d", decWindowSpacing 4)           -- Decrease window spacing
   , ("M-i", incWindowSpacing 4)           -- Increase window spacing
@@ -184,12 +191,14 @@ vctKeys home =
   , ("M-S-<Tab>", rotSlavesDown)    -- Rotate all windows except master and keep focus in place
   , ("M-C-<Tab>", rotAllDown)       -- Rotate all the windows in the current stack
   , ("M1-<Tab>", spawn "rofi -modi window -show window")
-  -- Tree Select
-  --, ("C-M1-<Delete>", treeselectAction tsDefaultConfig)
   , ("C-M1-<Delete>", spawn "rofi -show powermenu -modi powermenu:rofi-power-menu")
   , ("M-S-<Space>", spawn "rofi -show kbd -modi kbd:rofi-switch-kbd-layout")
-  , ("<XF86MonBrightnessDown>", spawn "sudo xbacklight -dec 5")
-  , ("<XF86MonBrightnessUp>", spawn "sudo xbacklight -inc 5")
+  , ("<XF86MonBrightnessDown>", spawn "sudo xbacklight -dec 10")
+  , ("<XF86MonBrightnessUp>", spawn "sudo xbacklight -inc 10")
+  --, ("M-x", passPrompt vctXPromptConfig)
+  --, ((modMask x , xK_p)                              , passPrompt xpconfig)
+  --, ((modMask x .|. controlMask, xK_p)               , passGeneratePrompt xpconfig)
+  --, ((modMask x .|. controlMask  .|. shiftMask, xK_p), passRemovePrompt xpconfig)
   ]
 
 -- Log Hooks
@@ -248,7 +257,8 @@ vctLogHook h = vctTransparentInactive <+> (dynamicLogWithPP (myLogHook h)) <+> h
 -- Send applications to the right workspace
 vctManageHook :: ManageHook
 vctManageHook = composeAll
-    [ manageDocks --, className =? "Firefox" --> doShift "1:WWW"
+    [ --manageDocks 
+    className =? "Firefox" --> doShift "1:WWW"
     ]
 
 -- Layouts
@@ -279,34 +289,41 @@ vctLayoutHook = renamed [CutWordsLeft 1] $ spacingRaw True (Border 0 10 10 10) T
 vctStartupHook :: X()
 vctStartupHook = do
   -- Set wallpaper
-  spawnOnce "~/.fehbg &"
+  spawnOnce "~/.fehbg"
   -- Set cursor
-  spawnOnce "xsetroot -cursor_name left_ptr &"
+  -- spawnOnce "xsetroot -cursor_name left_ptr"
+  setDefaultCursor xC_left_ptr
   -- Use caps as an additional Ctrl (useful for emacs)
-  -- spawnOnce "setxkbmap -layout br -option -option altwin:meta_alt -option ctrl:nocaps &" -- ABNT2 Layout
-  spawnOnce "setxkbmap us -variant intl &" -- ABNT2 Layout
+  -- spawnOnce "setxkbmap -layout br -option altwin:meta_alt -option ctrl:nocaps &" -- ABNT2 Layout
+  spawnOnce "setxkbmap -layout br" -- ABNT2 Layout
+  -- spawnOnce "setxkbmap us -variant intl &" -- ABNT2 Layout
   -- Compositing
-  spawnOnce "picom --experimental-backend &"
+  spawnOnce "picom --experimental-backend"
   -- Notifications
-  spawnOnce "dunst &"
+  spawnOnce "dunst"
   -- Start tmux in server mode
-  spawnOnce "tmux new-session -d -s vct &"
+  spawnOnce "tmux new-session -d -s vct"
   -- Start Emacs in server mode
-  spawnOnce "emacs --daemon &"
-  -- Start systemtray
-  spawnOnce "stalonetray &"
+  spawnOnce "emacs --daemon"
   -- Start clipboard manager
   -- spawnOnce "klipper &"
   -- Start dropbox
-  spawnOnce "dropbox start &"
+  spawnOnce "dropbox start"
   -- Start screensaver daemon
   spawnOnce "xscreensaver -no-splash &"
+  -- Password Manager
+  spawnOnce "keepassxc"
+  -- Web browser
+  spawnOnce "firefox"
   -- Show notification in the end
   spawn "notify-send -i \"emblem-important-symbolic\" \"XMonad started\""
   -- Start Polybar
   spawn "~/.config/polybar/launch.sh"
+  -- Start systemtray after polybar
+  -- spawnOnce "stalonetray &"
   -- Start Redshift
-  spawnOnce "redshift &"
+  --spawnOnce "redshift"
+
 
 -- Run XMonad
 --
@@ -329,7 +346,7 @@ main = do
     , workspaces         = vctWorkspaces
     , normalBorderColor  = vctNormalBorderColor
     , focusedBorderColor = vctFocusedBorderColor
-    , manageHook         = vctManageHook <+> manageDocks <+> manageHook desktopConfig
+    , manageHook         = vctManageHook <+> manageDocks <+> manageSpawn <+> manageHook desktopConfig
     , layoutHook         = avoidStruts $ vctLayoutHook
     , handleEventHook    = fullscreenEventHook <+> handleEventHook desktopConfig
     , startupHook        = vctStartupHook

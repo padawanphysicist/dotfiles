@@ -8,7 +8,7 @@ configuration {
 	width: 50;
 	lines: 8;
 	columns: 1;
-	font: "SFNS Display 20";
+	font: "SF Pro Display Regular 14";
 	bw: 10;
 	location: 0;
 	padding: 20;

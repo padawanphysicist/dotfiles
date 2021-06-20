@@ -63,7 +63,7 @@ HISTFILESIZE=-1
 # The =HISTTIMEFORMAT= variable allows the inclusion of a timestamp on each
 # command entry in the history file. It uses the same format string method as
 # the strftime command.
-HISTTIMEFORMAT='%F %T '
+# HISTTIMEFORMAT='%F %T '
 
 ################################################################################
 # Other settings

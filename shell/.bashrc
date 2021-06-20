@@ -18,6 +18,12 @@ then
     source "${HOME}/.ranger_automatic_cd.sh"
 fi
 
+# Load dircolors
+if [[ -f "${HOME}/.dir_colors" ]]
+then
+    eval $(dircolors "${HOME}/.dir_colors")
+fi
+
 # Additional configuration can be done by adding them to =.bash.local=, which is
 # loaded at the very end of this file. This file is supposed to keep very
 # specific configuration which is not versioned.

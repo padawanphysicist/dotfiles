@@ -10,7 +10,7 @@
 #
 # Command history is stored both in memory and in a special file written to
 # disk, stored in =HISTFILE=:
-HISTFILE="${HOME}/.bash_history"
+export HISTFILE="${HOME}/.bash_history"
 
 ################################################################################
 # Save all commands within history
@@ -28,14 +28,16 @@ shopt -s cmdhist
 # =PROMPT_COMMAND= variable specifies commands to be executed prior issuing each
 # primary prompt. We use it to append and reload BASH history, so that we can
 # acess commands from different sessions (useful within tmux):
-export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$"\n"}history -a; history -c; history -r"
+#export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$"\n"}history -a; history -c; history -r"
+# export PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+export PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND} ;}history -a";
 
 ################################################################################
 # Commands to ignore in history
 #
 # I also ignore too short commands, like =ls= and =pwd=. This is only junk in
 # the history, as they are simple and fast to type.
-HISTIGNORE="?:??:???:${HISTIGNORE}"
+export HISTIGNORE="?:??:???:${HISTIGNORE}"
 # When saving command history in memory, I want to prevent two things from being
 # added:
 #
@@ -48,14 +50,14 @@ HISTIGNORE="?:??:???:${HISTIGNORE}"
 #
 # We don't want this environment variable to leak into subshells (especially
 # noninteractive subshells), so we don't =export= it.
-HISTCONTROL=ignorespace:ignoredups:erasedups
+export HISTCONTROL=ignorespace:ignoredups:erasedups
 
 ################################################################################
 # Unlimited history
 #
 # I also like to keep an unlimited history list (see =info bash=)
-HISTSIZE=-1
-HISTFILESIZE=-1
+export HISTSIZE=-1
+export HISTFILESIZE=-1
 
 ################################################################################
 # Set timestamp

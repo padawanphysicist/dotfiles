@@ -1,0 +1,4 @@
+#include ".Xresources.d/xterm.Xresources"
+#include ".Xresources.d/nord.Xresources"
+
+#include ".Xresources.local"

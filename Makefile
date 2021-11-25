@@ -1,59 +1,100 @@
 SHELL = /bin/bash
 DOTFILES_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 XDG_CONFIG_HOME:=$(or $(XDG_CONFIG_HOME),$(HOME)/.config)
+STOW=stow --verbose
 
-.PHONY: shell clean terminal xresources-themes scripts git wm-xmonad nvim ranger programming tmux redshift
+.PHONY: check \
+	bash \
+	git \
+	environment \
+	clean \
+	xterm \
+	xresources \
+	xmonad \
+	vim \
+	ranger \
+	tmux \
+	redshift
 
-all: terminal shell xresources-themes scripts git wm-xmonad nvim ranger programming tmux redshift
+all: \
+	bash \
+	git \
+	environment \
+	xresources \
+	xmonad \
+	vim \
+	ranger \
+	tmux \
+	redshift \
+	xterm
+
+check:
+	@echo "Checking dependencies:"
+	@for d in 'stow'; do	\
+		if ! command -v "$$d" &> /dev/null; then	\
+			echo -e "    - [MISSING] $$d could not be found";	\
+		else	\
+			echo -e "    - [Installed] $$d"; 			\
+		fi;	\
+	done;
+bash:
+	@$(STOW) --target=$(HOME) $@
+
+git:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/git/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ $@
+
+environment:
+	@mkdir --verbose --parents $(HOME)/.local/bin/
+	@$(STOW) --target=$(HOME) $@
+
+xterm:
+	@mkdir --verbose --parents $(HOME)/.Xresources.d/
+	@$(STOW) --target=$(HOME)/.Xresources.d/ $@
+
+xresources:
+	@mkdir --verbose --parents $(HOME)/.Xresources.d/
+	@mkdir --verbose --parents $(HOME)/.local/bin/
+	@$(STOW) --target=$(HOME) $@
+
+vim:
+	@$(STOW) --target=$(HOME) $@
+
 
 redshift:
-	mkdir -p $(XDG_CONFIG_HOME)/redshift/
-	stow --target=$(XDG_CONFIG_HOME)/redshift/ redshift
-wm-xmonad:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/redshift/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/redshift/ $@
+
+xmonad:
 	mkdir -p $(XDG_CONFIG_HOME)/dunst/
 	mkdir -p $(XDG_CONFIG_HOME)/picom/
 	mkdir -p $(XDG_CONFIG_HOME)/rofi/
 	mkdir -p $(HOME)/.xmonad/
-	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/wm-xmonad/ dunst
-	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/wm-xmonad/ picom
-	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/wm-xmonad/ rofi
-	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/wm-xmonad/ xmonad
-nvim:
-	mkdir -p $(XDG_CONFIG_HOME)/nvim/
-	stow --target=$(XDG_CONFIG_HOME)/nvim/ nvim
-git:
-	mkdir -p $(XDG_CONFIG_HOME)/git/
-	stow --target=$(XDG_CONFIG_HOME)/git/ git
-scripts:
-	mkdir -p $(HOME)/.local/bin/
-	stow --target=$(HOME)/.local/bin/ scripts
-terminal:
-	mkdir -p $(HOME)/.Xresources.d/
-	stow --target=$(HOME)/.Xresources.d/ terminal
-shell:
-	stow --target=$(HOME) shell
+	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/xmonad/ dunst
+	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/xmonad/ picom
+	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/xmonad/ rofi
+	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/xmonad/ $@
+
 tmux:
-	stow --target=$(HOME) tmux
-programming:
-	stow --target=$(HOME) programming
+	stow --target=$(HOME) $@
+
 ranger:
 	mkdir -p $(XDG_CONFIG_HOME)/ranger/
-	stow --target=$(HOME) ranger
-xresources-themes:
-	mkdir -p $(HOME)/.Xresources.d/
-	stow --target=$(HOME)/.Xresources.d/ xresources-themes
+	stow --target=$(HOME) $@
+
 clean:
-	stow --target=$(HOME) --delete shell
-	stow --target=$(HOME) --delete programming
-	stow --target=$(HOME) --delete tmux
-	stow --target=$(HOME)/.Xresources.d/ --delete terminal
-	stow --target=$(HOME)/.Xresources.d/ --delete xresources-themes
-	stow --target=$(XDG_CONFIG_HOME)/git/ --delete git
-	stow --target=$(XDG_CONFIG_HOME)/nvim/ --delete nvim
-	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete dunst
-	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete picom
-	stow --target=$(XDG_CONFIG_HOME)/redshift/ --delete redshift
-	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete rofi
-	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/wm-xmonad/ --delete xmonad
-	stow --target=$(HOME) --delete ranger
-	stow --target=$(HOME)/.local/bin/ --delete scripts
+	@$(STOW) --target=$(HOME) --delete bash
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ --delete git
+	@$(STOW) --target=$(HOME) --delete environment
+	@$(STOW) --target=$(HOME)/.Xresources.d/ --delete xterm
+	@$(STOW) --target=$(HOME) --delete xresources
+	@$(STOW) --target=$(HOME) --delete vim
+	@$(STOW) --target=$(HOME) --delete tmux
+	@$(STOW) --target=$(HOME) --delete ranger
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/redshift/ --delete redshift
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/xmonad/ --delete dunst
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/xmonad/ --delete picom
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/xmonad/ --delete rofi
+	@$(STOW) --target=$(HOME) --dir=$(DOTFILES_DIR)/xmonad/ --delete xmonad
+
+

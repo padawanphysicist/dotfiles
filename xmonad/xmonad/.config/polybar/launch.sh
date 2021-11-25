@@ -10,7 +10,7 @@ while pgrep -u $UID -x stalonetray >/dev/null; do sleep 1; done
 
 # Launch Polybar, using default config location ~/.config/polybar/config
 polybar panel &
-sleep 5
+sleep 60
 stalonetray &
 
-echo "Polybar launched..."
+## echo "Polybar launched..."

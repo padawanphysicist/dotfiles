@@ -33,42 +33,43 @@ tree -a */
 
 #+RESULTS:
 #+begin_example
-git/
-└── config
-nvim/
-└── init.vim
-programming/
-├── .guile
-├── .psqlrc
-├── .Renviron
-└── .Rprofile
-ranger/
-├── .config
-│   └── ranger
-│       ├── commands.py
-│       └── rc.conf
-└── .ranger_automatic_cd.sh
-scripts/
-└── terminal
-shell/
+bash/
 ├── .bash_profile
 ├── .bashrc
 ├── .config
 │   └── bash
 │       ├── 00-history.bash
+│       ├── 00-pager.bash
 │       └── 00-prompt.bash
+├── .dir_colors
 └── .inputrc
-terminal/
-└── xterm
+environment/
+├── .guile
+├── .psqlrc
+├── .Renviron
+└── .Rprofile
+git/
+└── config
+ranger/
+├── .config
+│   └── ranger
+│       ├── commands_full.py
+│       ├── commands.py
+│       ├── rc.conf
+│       ├── rifle.conf
+│       └── scope.sh
+└── .ranger_automatic_cd.sh
+redshift/
+└── redshift.conf
 tmux/
 └── .tmux.conf
-wm-xmonad/
+vim/
+└── .vimrc
+xmonad/
 ├── dunst
 │   └── dunstrc
 ├── picom
 │   └── picom.conf
-├── redshift
-│   └── redshift.conf
 ├── rofi
 │   └── config.rasi
 └── xmonad
@@ -79,12 +80,20 @@ wm-xmonad/
     ├── .stalonetrayrc
     └── .xmonad
         └── xmonad.hs
-xresources-themes/
-├── base16-solarized-light.Xresources
-└── nord.Xresources
+xresources/
+├── .local
+│   └── bin
+│       └── vctterminal
+├── .Xresources
+└── .Xresources.d
+    ├── base16-solarized-light.Xresources
+    └── nord.Xresources
+xterm/
+└── xterm.Xresources
 
-12 directories, 27 files
+14 directories, 33 files
 #+end_example
+
 * Instructions
 
 *Warning*: If you want to give these dotfiles a try, you should first fork this repository, review the code, and remove things you don’t want or need. Don’t blindly use my settings unless you know what that entails. Use at your own risk!
@@ -101,7 +110,7 @@ cd ~/.dotfiles
 
 and create the symlinks to your =$HOME= directory:
 #+begin_src sh
-make
+make all
 #+end_src
 
 You can also install each package separately: to install configuration files for git for example:

@@ -100,8 +100,8 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 -- workspace I'm using. Therefore I always keep my terminal connected to a tmux
 -- session named =vct=.
 vctTerminal :: String
-vctTerminal = "xterm -e 'tmux attach-session -t vct'"
---vctTerminal = "xterm"
+--vctTerminal = "xterm -e 'tmux attach-session -t vct'"
+vctTerminal = "xterm"
 
 -- Screensaver
 vctScreenSaver :: String
@@ -191,10 +191,14 @@ vctKeys home =
   , ("M-S-<Tab>", rotSlavesDown)    -- Rotate all windows except master and keep focus in place
   , ("M-C-<Tab>", rotAllDown)       -- Rotate all the windows in the current stack
   , ("M1-<Tab>", spawn "rofi -modi window -show window")
-  , ("C-M1-<Delete>", spawn "rofi -show powermenu -modi powermenu:rofi-power-menu")
-  , ("M-S-<Space>", spawn "rofi -show kbd -modi kbd:rofi-switch-kbd-layout")
   , ("<XF86MonBrightnessDown>", spawn "sudo xbacklight -dec 10")
   , ("<XF86MonBrightnessUp>", spawn "sudo xbacklight -inc 10")
+  -- Extra
+  , ("C-M1-<Delete>", spawn "rofi -show powermenu -modi powermenu:rofi-power-menu")
+  , ("M-S-<Space>", spawn "rofi -show kbd -modi kbd:rofi-switch-kbd-layout")
+  , ("M-c", spawn "rofi -show calc -modi calc -no-show-match -no-sort")
+  , ("M-x", spawn "rofi-keepassxc -d ~/Dropbox/Documents/caderno.kdbx")
+
   --, ("M-x", passPrompt vctXPromptConfig)
   --, ((modMask x , xK_p)                              , passPrompt xpconfig)
   --, ((modMask x .|. controlMask, xK_p)               , passGeneratePrompt xpconfig)
@@ -306,7 +310,7 @@ vctStartupHook = do
   -- Start Emacs in server mode
   spawnOnce "emacs --daemon"
   -- Start clipboard manager
-  -- spawnOnce "klipper &"
+  spawnOnce "klipper"
   -- Start dropbox
   spawnOnce "dropbox start"
   -- Start screensaver daemon
@@ -317,10 +321,8 @@ vctStartupHook = do
   spawnOnce "firefox"
   -- Show notification in the end
   spawn "notify-send -i \"emblem-important-symbolic\" \"XMonad started\""
-  -- Start Polybar
+  -- Start Polybar & stalonetray
   spawn "~/.config/polybar/launch.sh"
-  -- Start systemtray after polybar
-  -- spawnOnce "stalonetray &"
   -- Start Redshift
   --spawnOnce "redshift"
 

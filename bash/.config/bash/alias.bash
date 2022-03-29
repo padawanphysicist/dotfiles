@@ -1,1 +1,1 @@
-alias ls="ls --classify"
+alias ls="ls --classify --color=auto"

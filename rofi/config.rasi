@@ -5,13 +5,13 @@
 
 configuration {
 //	modi: "run,ssh";
-	width: 50;
-	lines: 8;
-	columns: 1;
+//	width: 50;
+//	lines: 8;
+//	columns: 1;
 	font: "SF Pro Display Regular 14";
-	bw: 10;
+//	bw: 10;
 	location: 0;
-	padding: 20;
+// 	padding: 20;
 //	yoffset: 0;
 //	xoffset: 0;
 //	fixed-num-lines: true;
@@ -43,26 +43,26 @@ configuration {
 //	matching: "normal";
 //	tokenize: true;
 //	m: "-5";
-	line-margin: 2;
+//	line-margin: 2;
 //	line-padding: 1;
 //	filter: ;
-	separator-style: "solid";
-	hide-scrollbar: true;
+//	separator-style: "solid";
+//	hide-scrollbar: true;
 //	fullscreen: false;
 //	fake-transparency: false;
 //	dpi: -1;
 //	threads: 0;
-	scrollbar-width: 8;
+//	scrollbar-width: 8;
 //	scroll-method: 0;
 //	fake-background: "screenshot";
 	window-format: "{c}   {t}";
 //	click-to-exit: true;*/
 //	show-match: true;*/
 //	theme: ;*/
-	color-normal: "#353944, #FFFFFF, #353944, #5294E2, #FFFFFF";
+//	color-normal: "#353944, #FFFFFF, #353944, #5294E2, #FFFFFF";
 //	color-urgent: ;
 //	color-active: ;
-	color-window: "#353944, #404552";
+//	color-window: "#353944, #404552";
 //	max-history-size: 25;
 //	combi-hide-mode-prefix: false;
 //	matching-negate-char: '-' /* unsupported */;
@@ -146,3 +146,5 @@ configuration {
 //	me-accept-entry: "MouseDPrimary";
 //	me-accept-custom: "Control+MouseDPrimary";
 }
+//@theme "/usr/share/rofi/themes/docu.rasi"
+@theme "/usr/share/rofi/themes/Arc-Dark.rasi"

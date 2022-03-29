@@ -6,7 +6,6 @@ STOW=stow --verbose
 .PHONY: check \
 	bash \
 	git \
-	environment \
 	clean \
 	xterm \
 	xresources \
@@ -14,19 +13,30 @@ STOW=stow --verbose
 	vim \
 	ranger \
 	tmux \
-	redshift
+	redshift \
+	rofi \
+	polybar \
+	picom \
+	stumpwm \
+	dunst \
+	lf
 
 all: \
 	bash \
 	git \
-	environment \
 	xresources \
 	xmonad \
 	vim \
 	ranger \
 	tmux \
 	redshift \
-	xterm
+	xterm \
+	rofi \
+	polybar \
+	picom \
+	stumpwm \
+	dunst \
+	lf
 
 check:
 	@echo "Checking dependencies:"
@@ -38,11 +48,17 @@ check:
 		fi;	\
 	done;
 bash:
+	@mkdir --verbose --parents $(HOME)/Programs/
+	@git clone https://github.com/funcoeszz/funcoeszz.git $(HOME)/Programs/funcoeszz
 	@$(STOW) --target=$(HOME) $@
 
 git:
 	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/git/
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ $@
+
+lf:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/lf/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/lf/ $@
 
 environment:
 	@mkdir --verbose --parents $(HOME)/.local/bin/
@@ -60,19 +76,32 @@ xresources:
 vim:
 	@$(STOW) --target=$(HOME) $@
 
-
 redshift:
 	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/redshift/
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/redshift/ $@
 
-xmonad:
-	mkdir -p $(XDG_CONFIG_HOME)/dunst/
-	mkdir -p $(XDG_CONFIG_HOME)/picom/
-	mkdir -p $(XDG_CONFIG_HOME)/rofi/
+rofi:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/rofi/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/rofi/ $@
+
+stumpwm:
+	@mkdir --verbose --parents $(HOME)/.stumpwm.d/
+	@$(STOW) --target=$(HOME)/.stumpwm.d/ $@
+
+polybar:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/polybar/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/polybar/ $@
+
+picom:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/picom/
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/picom/ $@
+
+dunst:
+	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/dunst/
+	stow --target=$(XDG_CONFIG_HOME)/dunst/ $@
+
+xmonad: rofi polybar picom dunst
 	mkdir -p $(HOME)/.xmonad/
-	stow --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/xmonad/ dunst
-	stow --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/xmonad/ picom
-	stow --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/xmonad/ rofi
 	stow --target=$(HOME) --dir=$(DOTFILES_DIR)/xmonad/ $@
 
 tmux:
@@ -84,17 +113,20 @@ ranger:
 
 clean:
 	@$(STOW) --target=$(HOME) --delete bash
+	@$(STOW) --target=$(HOME) --delete zsh
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ --delete git
-	@$(STOW) --target=$(HOME) --delete environment
 	@$(STOW) --target=$(HOME)/.Xresources.d/ --delete xterm
 	@$(STOW) --target=$(HOME) --delete xresources
 	@$(STOW) --target=$(HOME) --delete vim
 	@$(STOW) --target=$(HOME) --delete tmux
 	@$(STOW) --target=$(HOME) --delete ranger
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/redshift/ --delete redshift
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/dunst/ --dir=$(DOTFILES_DIR)/xmonad/ --delete dunst
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/picom/ --dir=$(DOTFILES_DIR)/xmonad/ --delete picom
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/rofi/ --dir=$(DOTFILES_DIR)/xmonad/ --delete rofi
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/picom/ --delete picom
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/rofi/ --delete rofi
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/dunst/ --delete dunst
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/polybar/ --delete polybar
 	@$(STOW) --target=$(HOME) --dir=$(DOTFILES_DIR)/xmonad/ --delete xmonad
+	@$(STOW) --target=$(HOME)/stumpwm.d/ --delete stumpwm
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/lf/ --delete lf
 
 

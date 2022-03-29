@@ -92,7 +92,9 @@ vctModMask = mod4Mask
 
 -- Application launcher
 vctLauncher :: String
-vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
+-- vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'drun'"
+vctLauncher = "rofi -modi 'run,drun,ssh' -show 'run'"
+
 
 -- Terminal
 --
@@ -101,7 +103,8 @@ vctLauncher = "rofi -sidebar-mode -modi 'run,drun,ssh' -show 'run'"
 -- session named =vct=.
 vctTerminal :: String
 --vctTerminal = "xterm -e 'tmux attach-session -t vct'"
-vctTerminal = "xterm"
+--vctTerminal = "st -e 'tmux'"
+vctTerminal = "xterm -e 'tmux'"
 
 -- Screensaver
 vctScreenSaver :: String
@@ -122,7 +125,7 @@ vctFileManager = "xterm -e ranger"
 --
 -- Change this to a value > 0 to have border:
 vctBorderWidth :: Dimension
-vctBorderWidth = 4
+vctBorderWidth = 0 -- Issues with touchpad right click
 
 -- Colors
 -- Colorscheme
@@ -302,11 +305,11 @@ vctStartupHook = do
   spawnOnce "setxkbmap -layout br" -- ABNT2 Layout
   -- spawnOnce "setxkbmap us -variant intl &" -- ABNT2 Layout
   -- Compositing
-  spawnOnce "picom --experimental-backend"
+  --  spawnOnce "picom --experimental-backend"
   -- Notifications
   spawnOnce "dunst"
   -- Start tmux in server mode
-  spawnOnce "tmux new-session -d -s vct"
+  -- spawnOnce "tmux new-session -d -s vct"
   -- Start Emacs in server mode
   spawnOnce "emacs --daemon"
   -- Start clipboard manager

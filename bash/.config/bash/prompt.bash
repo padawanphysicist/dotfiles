@@ -42,10 +42,6 @@
 #    | bright magenta |         95 |        105 |
 #    | bright cyan    |         96 |        106 |
 #
-# When using colors within bash, don't forget to restore to the default color:
-GREEN="\[$(tput setaf 2)\]"
-BLUE="\[$(tput setaf 2)\]"
-RESET="\[$(tput sgr0)\]" #0m restores to the terminal's default colour
 
 ################################################################################
 # Set git info: keep it at GIT_PS1_INFO
@@ -68,15 +64,6 @@ else
     export GIT_PS1_INFO=''
 fi
 
-__vct_status() {
-    if [[ $? = "0" ]]
-    then
-	echo "*"
-    else
-	echo "!"
-    fi
-}
-
 # This variable controls the number of trailing directory components to retain when expanding \w. The removed characters are replaced with ellipsis.
-PROMPT_DIRTRIM=3
-PS1="\$(__vct_status) \w ${GIT_PS1_INFO}>> "
+PROMPT_DIRTRIM=2
+PS1="\`if [ \$? = 0 ]; then echo \[\e[32m\]*\[\e[0m\]; else echo \[\e[31m\]!\[\e[0m\]; fi\` \t \u@\h:\[\e[34m\]\w\[\e[0m\] \[\e[33m\]${GIT_PS1_INFO}\[\e[0m\]\$ "

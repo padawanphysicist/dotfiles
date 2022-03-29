@@ -8,15 +8,8 @@ BASH_CONFIG_DIR="${CONFIG_DIR}/bash"
 # Load configuration files
 for file in ${BASH_CONFIG_DIR}/*
 do 
-    source "$file"
+    source "${file}"
 done
-
-# Load specific ranger configuration (take a look at the package =ranger= within
-# the dotfiles
-if [[ -f "${HOME}/.ranger_automatic_cd.sh" ]]
-then
-    source "${HOME}/.ranger_automatic_cd.sh"
-fi
 
 # Load dircolors
 if [[ -f "${HOME}/.dir_colors" ]]

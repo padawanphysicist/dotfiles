@@ -1,26 +1,23 @@
+# ${HOME}/.bashrc
 #
-# Configuration for non-login shell
-#
+# This file is sourced by all *interactive* bash shells on startup,
+# including some apparently interactive shells such as scp and rcp
+# that can't tolerate any output.  So make sure this doesn't display
+# anything or bad things will happen !
 
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-BASH_CONFIG_DIR="${CONFIG_DIR}/bash"
 
-# Load configuration files
-for file in ${BASH_CONFIG_DIR}/*
-do 
-    source "${file}"
-done
-
-# Load dircolors
-if [[ -f "${HOME}/.dir_colors" ]]
-then
-    eval $(dircolors "${HOME}/.dir_colors")
+# Test for an interactive shell.  There is no need to set anything
+# past this point for scp and rcp, and it's important to refrain from
+# outputting anything in those cases.
+if [[ $- != *i* ]] ; then
+	# Shell is non-interactive.  Be done now!
+	return
 fi
 
-# Additional configuration can be done by adding them to =.bash.local=, which is
-# loaded at the very end of this file. This file is supposed to keep very
-# specific configuration which is not versioned.
-if [[ -f "${HOME}/.bash.local" ]]
-then
-    source "${HOME}/.bash.local"
+# Load the remaining configuration from separate files. This helps me 
+# keep some organization.
+if [ -d "${HOME}/.bashrc.d" ]; then
+    for file in ${HOME}/.bashrc.d/* ; do
+    	[[ -r "${file}" ]] && source "${file}"
+    done
 fi

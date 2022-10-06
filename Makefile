@@ -10,7 +10,6 @@ STOW=stow --verbose
 	xterm \
 	xresources \
 	xmonad \
-	vim \
 	ranger \
 	tmux \
 	redshift \
@@ -26,7 +25,6 @@ all: \
 	git \
 	xresources \
 	xmonad \
-	vim \
 	ranger \
 	tmux \
 	redshift \
@@ -48,13 +46,10 @@ check:
 		fi;	\
 	done;
 bash:
-	@mkdir --verbose --parents $(HOME)/Programs/
-	@git clone https://github.com/funcoeszz/funcoeszz.git $(HOME)/Programs/funcoeszz
 	@$(STOW) --target=$(HOME) $@
 
 git:
-	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/git/
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ $@
+	@$(STOW) --target=$(HOME) $@
 
 lf:
 	@mkdir --verbose --parents $(XDG_CONFIG_HOME)/lf/
@@ -71,9 +66,6 @@ xterm:
 xresources:
 	@mkdir --verbose --parents $(HOME)/.Xresources.d/
 	@mkdir --verbose --parents $(HOME)/.local/bin/
-	@$(STOW) --target=$(HOME) $@
-
-vim:
 	@$(STOW) --target=$(HOME) $@
 
 redshift:
@@ -113,11 +105,10 @@ ranger:
 
 clean:
 	@$(STOW) --target=$(HOME) --delete bash
-	@$(STOW) --target=$(HOME) --delete zsh
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/git/ --delete git
+	@$(STOW) --target=$(HOME) --delete git
+	@$(STOW) --target=$(XDG_CONFIG_HOME)/lf/ --delete lf
 	@$(STOW) --target=$(HOME)/.Xresources.d/ --delete xterm
 	@$(STOW) --target=$(HOME) --delete xresources
-	@$(STOW) --target=$(HOME) --delete vim
 	@$(STOW) --target=$(HOME) --delete tmux
 	@$(STOW) --target=$(HOME) --delete ranger
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/redshift/ --delete redshift
@@ -127,6 +118,5 @@ clean:
 	@$(STOW) --target=$(XDG_CONFIG_HOME)/polybar/ --delete polybar
 	@$(STOW) --target=$(HOME) --dir=$(DOTFILES_DIR)/xmonad/ --delete xmonad
 	@$(STOW) --target=$(HOME)/stumpwm.d/ --delete stumpwm
-	@$(STOW) --target=$(XDG_CONFIG_HOME)/lf/ --delete lf
 
 

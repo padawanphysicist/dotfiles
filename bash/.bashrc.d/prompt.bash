@@ -40,9 +40,11 @@ if ${use_color} ; then
 		if [[ -r "${HOME}/.git-prompt.sh" ]]; then
 		    source "${HOME}/.git-prompt.sh"
 		    export GIT_PS1_SHOWDIRTYSTATE=1
-                    PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
+                    #PS1='[\u@\h \W$(__git_ps1 " (%s)")]\$ '
+                    #PS1='$(__git_ps1 "(%s) ")\$ '
+	            PS1="\n\t \[\033[32m\]\w\[\033[33m\]\$(GIT_PS1_SHOWUNTRACKEDFILES=1 GIT_PS1_SHOWDIRTYSTATE=1 __git_ps1)\[\033[00m\] $ "
 		else
-		    PS1+='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+		    PS1+='\$ '
 		fi
 	fi
 

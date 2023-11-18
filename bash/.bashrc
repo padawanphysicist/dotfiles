@@ -21,3 +21,7 @@ if [ -d "${HOME}/.bashrc.d" ]; then
     	[[ -r "${file}" ]] && source "${file}"
     done
 fi
+
+if [ -r "${HOME}/.bashrc.local" ]; then
+    source "${HOME}/.bashrc.local" 
+fi

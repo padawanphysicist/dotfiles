@@ -118,3 +118,8 @@ You can also install each package separately: to install configuration files for
 make git
 #+end_src
 
+* Disclaimer
+
+This is a laboratory for experimenting my computing environment. Ultimately, this is only meant to work for me. So, probably there won't be any support to anyone tracking this repository.
+
+So, although I really you find something useful here, use this at your own risk! 

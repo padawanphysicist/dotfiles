@@ -1,0 +1,27 @@
+! ~/.Xresources.d/st-dark.Xresources -*-mode:conf-xdefaults-*-
+!
+! ST dark colorscheme
+!
+#include "nord.Xresources"
+
+st.foreground:   nord4
+st.background:   nord0
+st.cursorColor:  nord4
+st.fading: 35
+st.fadeColor: nord3
+st.color0: nord1
+st.color1: nord11
+st.color2: nord14
+st.color3: nord13
+st.color4: nord9
+st.color5: nord15
+st.color6: nord8
+st.color7: nord5
+st.color8: nord3
+st.color9: nord11
+st.color10: nord14
+st.color11: nord13
+st.color12: nord9
+st.color13: nord15
+st.color14: nord7
+st.color15: nord6

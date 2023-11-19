@@ -1,0 +1,24 @@
+#include "nord.Xresources"
+
+dwm.foreground:   nord4
+dwm.background:   nord0
+dwm.cursorColor:  nord4
+dwmfading: 35
+dwmfadeColor: nord3
+
+dwm.color0: nord1
+dwm.color1: nord11
+dwm.color2: nord14
+dwm.color3: nord13
+dwm.color4: nord9
+dwm.color5: nord15
+dwm.color6: nord8
+dwm.color7: nord5
+dwm.color8: nord3
+dwm.color9: nord11
+dwm.color10: nord14
+dwm.color11: nord13
+dwm.color12: nord9
+dwm.color13: nord15
+dwm.color14: nord7
+dwm.color15: nord6

@@ -1,0 +1,30 @@
+! ~/.Xresources.d/st-light.Xresources -*-mode:conf-xdefaults-*-
+!
+! ST light colorscheme
+!
+#include "base16-solarized-light.Xresources"
+
+st.foreground:   base05
+#ifdef background_opacity
+st.background:   [background_opacity]base00
+#else
+st.background:   base00
+#endif
+st.cursorColor:  base05
+
+st.color0:       base00
+st.color1:       base08
+st.color2:       base0B
+st.color3:       base0A
+st.color4:       base0D
+st.color5:       base0E
+st.color6:       base0C
+st.color7:       base05
+st.color8:       base03
+st.color9:       base09
+st.color10:      base01
+st.color11:      base02
+st.color12:      base04
+st.color13:      base06
+st.color14:      base0F
+st.color15:      base07

@@ -1,5 +1,7 @@
 #+title: vct's dotfiles
 
+[[https://img.shields.io/badge/powered%20by-dotbot-blue?style=flat][Powered by dotbot]]
+
 This is my dotfiles repo. I hope you find something useful here!
 
 * Dependencies

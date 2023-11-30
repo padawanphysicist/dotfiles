@@ -10,6 +10,12 @@
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
+    -
+      command: read var && echo Your variable is $var
+      stdin: true
+      stdout: true
+      description: Reading and printing variable
+      quiet: true
 
 - create:
     - ~/.config/ranger

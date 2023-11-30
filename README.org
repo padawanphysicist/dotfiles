@@ -1,6 +1,6 @@
 #+title: vct's dotfiles
 
-#+html: <a href="https://img.shields.io/badge/powered%20by-dotbot-blue?style=flat">Powered by dotbot</a>
+#+html: <img src="https://img.shields.io/badge/powered%20by-dotbot-blue?style=flat" alt="Powered by dotbot">
 
 This is my dotfiles repo. I hope you find something useful here!
 

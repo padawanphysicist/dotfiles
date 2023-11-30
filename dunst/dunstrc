@@ -3,7 +3,7 @@
     foreground = "#eceff4" 
     timeout = 10 
 [global] 
-    font = "SF Pro Display Regular 14" 
+    font = "SF Pro Display 15" 
     transparency = 30 
     alignment = center 
     word_wrap = yes 

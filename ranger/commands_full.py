@@ -987,6 +987,7 @@ class eval_(Command):
         quantifier = self.quantifier
         try:
             try:
+                print(f"akjshdkjasdh {code}")
                 result = eval(code)  # pylint: disable=eval-used
             except SyntaxError:
                 exec(code)  # pylint: disable=exec-used

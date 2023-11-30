@@ -1,0 +1,20 @@
+[urgency_normal] 
+    background = "#2e3440" 
+    foreground = "#eceff4" 
+    timeout = 10 
+[global] 
+    font = "SF Pro Display Regular 14" 
+    transparency = 30 
+    alignment = center 
+    word_wrap = yes 
+    frame_width = 0 
+    markup = full 
+    format = "%s %p
+%b" 
+    show_age_threshold = 60 
+    idle_threshold = 120 
+    sticky_history = yes 
+    corner_radius = 6 
+    icon_position = left 
+    icon_theme = breeze 
+    enable_recursive_icon_lookup = true

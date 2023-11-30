@@ -8,7 +8,30 @@
     ~/.config:
       recursive: true
 
+- shell:
+    - [git submodule update --init --recursive, Installing submodules]
+
+- create:
+    - ~/.config/ranger
+    - ~/.config/ranger/plugins
+    - ~/.config/rofi
+    - ~/.config/xmonad
+    - ~/.config/polybar
+    - ~/.config/dunst
+
 - link:
+    ~/.config/ranger/commands_full.py: ranger/commands_full.py
+    ~/.config/ranger/commands.py: ranger/commands.py
+    ~/.config/ranger/rc.conf: ranger/rc.conf
+    ~/.config/ranger/rifle.conf: ranger/rifle.conf
+    ~/.config/ranger/scope.sh: ranger/scope.sh
+    ~/.config/ranger/plugins/quit_cd_wd.py: ranger/plugins/quit_cd_wd.py
+    ~/.config/rofi/config.rasi: rofi/config.rasi
+    ~/.config/rofi/nord.rasi: rofi/nord.rasi
+    ~/.config/xmonad/xmonad.hs: xmonad/xmonad.hs
+    ~/.config/xmonad/lib: 
+        path: xmonad/lib
+        use_glob: true
     ~/.tmux.conf: tmux.conf
     ~/.bashrc: bashrc
     ~/.bashrc.d: bashrc.d
@@ -17,5 +40,7 @@
     ~/.Xresources.d: Xresources.d
     ~/.config/picom/picom.conf: picom.conf
     ~/.gitconfig: gitconfig
+    ~/.config/polybar/config.ini: polybar/config.ini
+    ~/.config/dunst/dunstrc: dunst/dunstrc
     ~/.git-prompt.sh: git-prompt.sh
     ~/.config/redshift/redshift.conf: redshift.conf

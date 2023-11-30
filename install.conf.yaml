@@ -32,15 +32,15 @@
     ~/.config/xmonad/lib: 
         path: xmonad/lib
         use_glob: true
-    ~/.tmux.conf: tmux.conf
-    ~/.bashrc: bashrc
-    ~/.bashrc.d: bashrc.d
-    ~/.inputrc: inputrc
-    ~/.Xresources: Xresources
-    ~/.Xresources.d: Xresources.d
-    ~/.config/picom/picom.conf: picom.conf
-    ~/.gitconfig: gitconfig
+    ~/.tmux.conf: tmux/tmux.conf
+    ~/.bashrc: bash/bashrc
+    ~/.bashrc.d: bash/bashrc.d
+    ~/.inputrc: readline/inputrc
+    ~/.Xresources: X/Xresources
+    ~/.Xresources.d: X/Xresources.d
+    ~/.config/picom/picom.conf: picom/picom.conf
+    ~/.gitconfig: git/gitconfig
     ~/.config/polybar/config.ini: polybar/config.ini
     ~/.config/dunst/dunstrc: dunst/dunstrc
-    ~/.git-prompt.sh: git-prompt.sh
-    ~/.config/redshift/redshift.conf: redshift.conf
+    ~/.git-prompt.sh: git/git-prompt.sh
+    ~/.config/redshift/redshift.conf: redshift/redshift.conf

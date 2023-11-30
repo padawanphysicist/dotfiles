@@ -1,0 +1,21 @@
+- defaults:
+    link:
+      relink: true
+
+- clean:
+    ~/:
+      force: true
+    ~/.config:
+      recursive: true
+
+- link:
+    ~/.tmux.conf: tmux.conf
+    ~/.bashrc: bashrc
+    ~/.bashrc.d: bashrc.d
+    ~/.inputrc: inputrc
+    ~/.Xresources: Xresources
+    ~/.Xresources.d: Xresources.d
+    ~/.config/picom/picom.conf: picom.conf
+    ~/.gitconfig: gitconfig
+    ~/.git-prompt.sh: git-prompt.sh
+    ~/.config/redshift/redshift.conf: redshift.conf

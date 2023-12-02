@@ -85,7 +85,7 @@ vctTerminalKonsole :: String
 vctTerminalKonsole = "konsole -e tmux"
 
 vctTerminalXterm :: String
-vctTerminalXterm = "xterm -e tmux"
+vctTerminalXterm = "if [[ $(date +%H%M) -gt 0600 ]] && [[ $(date +%H%M) -lt 1800 ]]; then xrdb -merge $HOME/.Xresources.d/xterm-light.Xresources; else xrdb -merge $HOME/.Xresources.d/xterm-dark.Xresources; fi; xterm -e tmux"
 
 vctTerminal :: String
 vctTerminal = vctTerminalXterm
@@ -138,11 +138,11 @@ vctStartupHook = do
   spawnOnce "picom"
   -- Sound
   spawn "gentoo-pipewire-launcher restart"
-  -- Redshift
-  spawnOnce "redshift"
   -- Show notification in the end
   spawn "notify-send -i \"emblem-important-symbolic\" \"XMonad started\""
   spawn "mpv /usr/share/sounds/Oxygen-Sys-Log-In-Short.ogg"
+  -- Redshift
+  spawn "killall redshift; sleep 5; redshift"
 
 -- Keybindings
 vctKeys :: String -> [([Char], X ())]

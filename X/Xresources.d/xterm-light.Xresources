@@ -1,0 +1,21 @@
+#include "base16-solarized-light.Xresources"
+
+XTerm.vt100.foreground:   base05
+XTerm.vt100.background:   base00
+XTerm.vt100.cursorColor:  base05
+XTerm.vt100.color0:       base00
+XTerm.vt100.color1:       base08
+XTerm.vt100.color2:       base0B
+XTerm.vt100.color3:       base0A
+XTerm.vt100.color4:       base0D
+XTerm.vt100.color5:       base0E
+XTerm.vt100.color6:       base0C
+XTerm.vt100.color7:       base05
+XTerm.vt100.color8:       base03
+XTerm.vt100.color9:       base09
+XTerm.vt100.color10:      base01
+XTerm.vt100.color11:      base02
+XTerm.vt100.color12:      base04
+XTerm.vt100.color13:      base06
+XTerm.vt100.color14:      base0F
+XTerm.vt100.color15:      base07

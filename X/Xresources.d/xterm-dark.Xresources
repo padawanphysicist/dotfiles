@@ -1,27 +1,21 @@
-! ~/.Xresources.d/st-dark.Xresources -*-mode:conf-xdefaults-*-
-!
-! ST dark colorscheme
-!
 #include "nord.Xresources"
 
-xterm.foreground:   nord4
-xterm.background:   nord0
-xterm.cursorColor:  nord4
-xterm.fading: 35
-xterm.fadeColor: nord3
-xterm.color0: nord1
-xterm.color1: nord11
-xterm.color2: nord14
-xterm.color3: nord13
-xterm.color4: nord9
-xterm.color5: nord15
-xterm.color6: nord8
-xterm.color7: nord5
-xterm.color8: nord3
-xterm.color9: nord11
-xterm.color10: nord14
-xterm.color11: nord13
-xterm.color12: nord9
-xterm.color13: nord15
-xterm.color14: nord7
-xterm.color15: nord6
+XTerm.vt100.foreground:   nord4
+XTerm.vt100.background:   nord0
+XTerm.vt100.cursorColor:  nord4
+XTerm.vt100.color0:       nord1
+XTerm.vt100.color1:       nord11
+XTerm.vt100.color2:       nord14
+XTerm.vt100.color3:       nord13
+XTerm.vt100.color4:       nord9
+XTerm.vt100.color5:       nord15
+XTerm.vt100.color6:       nord8
+XTerm.vt100.color7:       nord5
+XTerm.vt100.color8:       nord3
+XTerm.vt100.color9:       nord11
+XTerm.vt100.color10:      nord14
+XTerm.vt100.color11:      nord13
+XTerm.vt100.color12:      nord9
+XTerm.vt100.color13:      nord15
+XTerm.vt100.color14:      nord7
+XTerm.vt100.color15:      nord6

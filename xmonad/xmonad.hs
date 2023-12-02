@@ -143,6 +143,9 @@ vctStartupHook = do
   spawn "mpv /usr/share/sounds/Oxygen-Sys-Log-In-Short.ogg"
   -- Redshift
   spawn "killall redshift; sleep 5; redshift"
+  spawn "killall stalonetray; sleep 5; stalonetray"
+  -- Start Dropbox
+  spawn "dropbox stop; sleep 5; dropbox start"
 
 -- Keybindings
 vctKeys :: String -> [([Char], X ())]

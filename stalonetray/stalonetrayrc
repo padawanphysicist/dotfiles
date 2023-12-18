@@ -102,7 +102,7 @@ icon_size 32
 #                             # icon_size NEW in @VERSION_STR@.
 #
 ## skip_taskbar [<bool>]      # hide tray`s window from the taskbar
-#skip_taskbar true
+skip_taskbar true
 #
 ## sticky [<bool>]            # make a tray`s window sticky across the
 #                             # desktops/pages
@@ -139,4 +139,4 @@ window_strut auto
 window_type dock
 #
 ## xsync [<bool>]             # whether to operate on X server synchronously (SLOOOOW)
-#xsync false
+xsync false

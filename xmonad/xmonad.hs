@@ -96,6 +96,9 @@ vctEditorEmacs = "emacsclient -c"
 vctEditor :: String
 vctEditor = vctEditorEmacs
 
+vctScreenSaver :: String
+vctScreenSaver = "xscreensaver-command -activate"
+
 -- Workspaces
 vctWorkspaces :: [String]
 vctWorkspaces = ["1:WWW", "2:DEV", "3:READ", "4:AUX", "5:EXTRA"]
@@ -125,6 +128,7 @@ vctLayoutHook = renamed [CutWordsLeft 1] $ spacingRaw True (Border 0 10 10 10) T
 -- =mod-q=.
 vctStartupHook :: X()
 vctStartupHook = do
+  spawn "killall stalonetray; stalonetray"
   -- Enable Notifications
   spawnOnce "dunst"
   -- Enable emacs
@@ -133,6 +137,7 @@ vctStartupHook = do
   spawn "setxkbmap br -variant abnt2"
   -- Set wallpaper
   spawn "~/.fehbg"
+  
   spawn "pkill polybar; polybar"
   -- Compositing
   spawnOnce "picom"
@@ -143,7 +148,8 @@ vctStartupHook = do
   spawn "mpv /usr/share/sounds/Oxygen-Sys-Log-In-Short.ogg"
   -- Redshift
   spawn "killall redshift; sleep 5; redshift"
-  spawn "killall stalonetray; sleep 5; stalonetray"
+
+  spawn "pkill xscreensaver; sleep 2; xscreensaver -no-splash"
   -- Start Dropbox
   spawn "dropbox stop; sleep 5; dropbox start"
 
@@ -157,7 +163,7 @@ vctKeys home =
   , ("M-p", spawn vctLauncher)
   , ("M-e", spawn vctEditor)
   --, ("M-z", sendMessage (Toggle "Full"))
-  --, ("M-S-z", spawn vctScreenSaver)
+  , ("M-S-l", spawn vctScreenSaver)
   --, ("M-f", spawn vctFileManager)
   ---- Increase/decrease spacing (gaps)
   --, ("M-d", decWindowSpacing 4)           -- Decrease window spacing
